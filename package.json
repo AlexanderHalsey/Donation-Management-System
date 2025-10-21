@@ -10,10 +10,10 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev": "concurrently \"cd dms-api && npm run start:dev\" \"cd dms-frontend && npm run dev\"",
-    "build": "cd dms-api && npm run build && cd ../dms-frontend && npm run build",
-    "lint": "cd dms-api && npm run lint && cd ../dms-frontend && npm run lint",
-    "test": "cd dms-api && npm test && cd ../dms-frontend && npm run test:unit"
+    "dev": "concurrently \"npm run -w dms-api start:dev\" \"npm run -w dms-frontend dev\"",
+    "build": "npm run -w dms-api build && npm run -w dms-frontend build",
+    "lint": "npm run -w dms-api lint && npm run -w dms-frontend lint",
+    "test": "npm run -w dms-api test && npm run -w dms-frontend test:unit"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
