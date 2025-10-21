@@ -24,4 +24,4 @@ async function main() {
   app.mount('#app')
 }
 
-main()
+void main()

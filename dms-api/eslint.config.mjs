@@ -1,23 +1,23 @@
 // @ts-check
 import eslint from '@eslint/js'
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import { baseRules, baseTypeScriptRules, baseConfigs, baseIgnores } from '../eslint.base.config.mjs'
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: [...baseIgnores],
   },
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
+  ...tseslint.configs.recommended, // Less strict than recommendedTypeChecked
+  ...baseConfigs,
   {
     languageOptions: {
       globals: {
         ...globals.node,
         ...globals.jest,
       },
-      ecmaVersion: 5,
+      ecmaVersion: 2023,
       sourceType: 'module',
       parserOptions: {
         projectService: true,
@@ -27,9 +27,10 @@ export default tseslint.config(
   },
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
+      ...baseRules,
+      ...baseTypeScriptRules,
+      // API-specific overrides
+      'no-console': 'off', // Allow console in backend
     },
   },
 )

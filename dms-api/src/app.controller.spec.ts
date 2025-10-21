@@ -15,8 +15,8 @@ describe('AppController', () => {
   })
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!')
+    it('should return a random color', () => {
+      expect(appController.getRandomColor()).toMatch(/^#[0-9A-F]{6}$/i)
     })
   })
 })

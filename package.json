@@ -10,16 +10,14 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev:api": "npm run start:dev -w dms-api",
-    "dev:frontend": "npm run dev -w dms-frontend",
-    "build:api": "npm run build -w dms-api",
-    "build:frontend": "npm run build -w dms-frontend",
-    "build": "npm run build:api && npm run build:frontend",
-    "lint:api": "npm run lint -w dms-api",
-    "lint:frontend": "npm run lint -w dms-frontend",
-    "lint": "npm run lint:api && npm run lint:frontend"
+    "dev": "concurrently \"cd dms-api && npm run start:dev\" \"cd dms-frontend && npm run dev\"",
+    "build": "cd dms-api && npm run build && cd ../dms-frontend && npm run build",
+    "lint": "cd dms-api && npm run lint && cd ../dms-frontend && npm run lint",
+    "test": "cd dms-api && npm test && cd ../dms-frontend && npm run test:unit"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
+    "jiti": "^2.6.1",
     "prettier": "^3.5.3"
   },
   "engines": {
