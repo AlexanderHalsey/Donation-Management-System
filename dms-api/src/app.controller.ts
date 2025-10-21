@@ -1,8 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common'
+import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
-import { AppService } from './app.service';
-import { ColorResponseDto } from './color.dto';
+import { AppService } from './app.service'
+import { ColorResponseDto } from './color.dto'
 
 @Controller()
 export class AppController {
@@ -28,6 +28,6 @@ export class AppController {
   getRandomColor(): ColorResponseDto {
     return {
       color: this.appService.getRandomColor(),
-    };
+    }
   }
 }

@@ -1,0 +1,29 @@
+{
+  "name": "dms-ivy-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DMS IVY Monorepo Workspace",
+  "workspaces": [
+    "dms-api",
+    "dms-frontend"
+  ],
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev:api": "npm run start:dev -w dms-api",
+    "dev:frontend": "npm run dev -w dms-frontend",
+    "build:api": "npm run build -w dms-api",
+    "build:frontend": "npm run build -w dms-frontend",
+    "build": "npm run build:api && npm run build:frontend",
+    "lint:api": "npm run lint -w dms-api",
+    "lint:frontend": "npm run lint -w dms-frontend",
+    "lint": "npm run lint:api && npm run lint:frontend"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
