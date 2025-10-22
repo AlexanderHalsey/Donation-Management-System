@@ -7,6 +7,8 @@ dist-ssrss
 *.local
 *.tsbuildinfo
 
+TODO.md
+
 # Tests
 coverage
 .nyc_output
