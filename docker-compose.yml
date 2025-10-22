@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  dms-api:
+    build:
+      context: ./dms-api
+      dockerfile: Dockerfile
+    container_name: dms-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    networks:
+      - dms-network
+    restart: unless-stopped
+
+  dms-frontend:
+    build:
+      context: ./dms-frontend
+      dockerfile: Dockerfile
+    container_name: dms-frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - dms-api
+    networks:
+      - dms-network
+    restart: unless-stopped
+
+networks:
+  dms-network:
+    driver: bridge
+    name: dms-network
+
+# Future: Add database service here
+# volumes:
+#   postgres_data:
+#     name: dms_postgres_data

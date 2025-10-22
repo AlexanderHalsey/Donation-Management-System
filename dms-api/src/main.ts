@@ -7,7 +7,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
   app.use(json())
-  app.enableCors()
+
+  if (process.env.NODE_ENV !== 'production') {
+    app.enableCors()
+  }
 
   const config = new DocumentBuilder().setTitle('DMS API').setVersion('1.0').build()
   const documentFactory = () => SwaggerModule.createDocument(app, config)

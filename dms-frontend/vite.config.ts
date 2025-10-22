@@ -7,14 +7,13 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig(async ({ command }) => {
   const plugins: PluginOption[] = [vue()]
 
-  // Only add devtools in development (not during build)
   if (command !== 'build') {
     const { default: vueDevTools } = await import('vite-plugin-vue-devtools')
     plugins.push(vueDevTools())
   }
 
   return {
-    plugins, // Use the plugins array we built above
+    plugins,
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
