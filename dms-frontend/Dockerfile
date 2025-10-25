@@ -2,24 +2,30 @@ FROM node:25-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY dms-frontend/package*.json ./dms-frontend/
+
+WORKDIR /app/dms-frontend
+
 RUN npm install
 
-COPY src/ ./src/
-COPY public/ ./public/
-COPY *config* ./
-COPY .env* ./
-COPY env.d.ts ./
-COPY index.html ./
+COPY dms-frontend/src/ ./src/
+COPY dms-frontend/public/ ./public/
+COPY dms-frontend/*config* ./
+COPY dms-frontend/.env* ./
+COPY dms-frontend/env.d.ts ./
+COPY dms-frontend/index.html ./
+COPY shared/ ../shared/
 
 RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:alpine AS production
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app/dms-frontend
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY dms-frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 8080
+COPY --from=builder /app/dms-frontend/dist /usr/share/nginx/html
+
+EXPOSE 5173
 
 CMD ["nginx", "-g", "daemon off;"]

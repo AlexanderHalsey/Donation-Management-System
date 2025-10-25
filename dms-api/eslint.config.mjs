@@ -29,7 +29,6 @@ export default tseslint.config(
     rules: {
       ...baseRules,
       ...baseTypeScriptRules,
-      // API-specific overrides
       'no-console': 'off', // Allow console in backend
     },
   },

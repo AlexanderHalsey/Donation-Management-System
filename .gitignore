@@ -3,7 +3,7 @@ dist
 node_modules
 build
 dist-ssrss
-
+dms-api/src/generated
 *.local
 *.tsbuildinfo
 
@@ -37,6 +37,7 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+*.github
 
 *.launch
 .settings/
@@ -52,6 +53,7 @@ lerna-debug.log*
 # dotenv environment variable files (commit base configs, ignore local overrides)
 .env.local
 .env.*.local
+dms-api/.env
 
 # temp directory
 .temp

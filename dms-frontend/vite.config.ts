@@ -16,11 +16,12 @@ export default defineConfig(async ({ command }) => {
     plugins,
     resolve: {
       alias: {
+        '@shared': fileURLToPath(new URL('../shared', import.meta.url)),
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
     server: {
-      port: 8080,
+      port: 5173,
     },
   }
 })

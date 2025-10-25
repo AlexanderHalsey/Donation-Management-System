@@ -10,7 +10,7 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev": "concurrently \"npm run -w dms-api start:dev\" \"npm run -w dms-frontend dev\"",
+    "dev": "concurrently \"npm run -w dms-api start:dev\" \"wait-on http://localhost:3000/api && npm run -w dms-frontend dev\"",
     "build": "npm run -w dms-api build && npm run -w dms-frontend build",
     "lint": "npm run -w dms-api lint && npm run -w dms-frontend lint",
     "test": "npm run -w dms-api test && npm run -w dms-frontend test:unit"
@@ -18,7 +18,8 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "jiti": "^2.6.1",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "wait-on": "^9.0.1"
   },
   "engines": {
     "node": ">=18.0.0",

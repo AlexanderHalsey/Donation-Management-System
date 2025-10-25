@@ -1,0 +1,22 @@
+name: dms-db-only
+
+services:
+  db:
+    image: postgres:17
+    environment:
+    - POSTGRES_DB=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    ports:
+    - 5432:5432
+  migrate:
+    image: node:20
+    working_dir: /app
+    volumes:
+    - .:/app
+    command: >
+      sh -c "npm install && npx prisma migrate deploy"
+    depends_on:
+    - db
+    environment:
+    - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres

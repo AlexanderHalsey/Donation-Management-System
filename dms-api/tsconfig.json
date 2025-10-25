@@ -1,4 +1,8 @@
 {
+  "include": [
+    "src/**/*",
+    "../shared/**/*"
+  ],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
@@ -16,6 +20,14 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@shared/*": [
+        "../shared/*"
+      ],
+    }
+  },
 }
