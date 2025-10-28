@@ -29,6 +29,7 @@ export default tseslint.config(
     rules: {
       ...baseRules,
       ...baseTypeScriptRules,
+      'prettier/prettier': 'warn',
       'no-console': 'off', // Allow console in backend
     },
   },

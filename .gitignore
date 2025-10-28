@@ -3,7 +3,7 @@ dist
 node_modules
 build
 dist-ssrss
-dms-api/src/generated
+dms-api/prisma/generated
 *.local
 *.tsbuildinfo
 

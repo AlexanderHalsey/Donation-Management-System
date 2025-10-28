@@ -1,7 +1,9 @@
 {
   "include": [
     "src/**/*",
-    "../shared/**/*"
+    "prisma/**/*",
+    "../shared/**/*",
+    "test/**/*"
   ],
   "compilerOptions": {
     "module": "commonjs",
@@ -27,6 +29,9 @@
       ],
       "@shared/*": [
         "../shared/*"
+      ],
+      "@generated/*": [
+        "prisma/generated/*"
       ],
     }
   },

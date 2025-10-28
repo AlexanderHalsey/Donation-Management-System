@@ -1,0 +1,58 @@
+model Donation {
+  id                  String            @id @default(uuid()) @db.Uuid
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  amount              Float
+  paymentMode         PaymentMode       @relation(fields: [paymentModeId], references: [id])
+  paymentModeId       String            @db.Uuid
+  organisation        Organisation      @relation(fields: [organisationId], references: [id])
+  organisationId      String            @db.Uuid
+  donationType        DonationType      @relation(fields: [donationTypeId], references: [id])
+  donationTypeId      String            @db.Uuid
+  donationMethod      DonationMethod    @relation(fields: [donationMethodId], references: [id])
+  donationMethodId    String            @db.Uuid
+  donationAssetType   DonationAssetType @relation(fields: [donationAssetTypeId], references: [id])
+  donationAssetTypeId String            @db.Uuid
+  isDisabled          Boolean           @default(false)
+  // isEligibleForTaxBenefit Boolean           @default(false)
+  // contact Contact @relation(fields: [contactId], references: [id])
+  contactId           String            @db.Uuid
+  // receipt Receipt? @relation(fields: [receiptId], references: [id])
+  receiptId           String?           @db.Uuid
+}
+
+model PaymentMode {
+  id        String     @id @default(uuid()) @db.Uuid
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String
+  donations Donation[]
+}
+
+model DonationType {
+  id             String       @id @default(uuid()) @db.Uuid
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  name           String
+  donations      Donation[]
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisationId String       @db.Uuid
+}
+
+model DonationMethod {
+  id        String     @id @default(uuid()) @db.Uuid
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String
+  isDefault Boolean    @default(false)
+  donations Donation[]
+}
+
+model DonationAssetType {
+  id        String     @id @default(uuid()) @db.Uuid
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String
+  isDefault Boolean    @default(false)
+  donations Donation[]
+}

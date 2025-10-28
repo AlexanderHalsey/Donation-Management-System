@@ -27,6 +27,7 @@ export const baseRules = Object.freeze({
 export const baseTypeScriptRules = Object.freeze({
   '@typescript-eslint/no-explicit-any': 'warn',
   '@typescript-eslint/no-unused-vars': 'warn',
+  '@typescript-eslint/no-unused-expressions': 'warn',
 
   // Make strict rules warnings instead of errors
   '@typescript-eslint/no-floating-promises': 'off',

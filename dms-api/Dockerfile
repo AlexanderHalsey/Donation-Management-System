@@ -36,7 +36,6 @@ FROM base AS runtime
 WORKDIR /app/dms-api/
 
 COPY --from=builder --chown=dms:dms /app/dms-api/dist ./dist
-COPY --from=builder --chown=dms:dms /app/dms-api/src/generated/prisma ./src/generated/prisma
 COPY --from=builder --chown=dms:dms /app/dms-api/prisma ./prisma
 
 EXPOSE 3000

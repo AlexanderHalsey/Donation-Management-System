@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import { ColorController } from '@/api/controllers'
+import { DonationController } from '@/api/controllers'
 
-import { ColorService } from '@/domain'
+import { DonationService } from '@/domain'
 import { PrismaService } from '@/infrastructure'
 
 @Module({
   imports: [ConfigModule.forRoot()],
-  controllers: [ColorController],
-  providers: [ColorService, PrismaService],
+  controllers: [DonationController],
+  providers: [DonationService, PrismaService],
 })
 export class AppModule {}
