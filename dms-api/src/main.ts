@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core'
+import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 
 import { json } from 'express'
@@ -9,6 +10,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
   app.use(json())
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
 
   if (process.env.NODE_ENV !== 'production') {
     app.enableCors()

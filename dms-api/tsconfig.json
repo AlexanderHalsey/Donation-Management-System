@@ -2,8 +2,7 @@
   "include": [
     "src/**/*",
     "prisma/**/*",
-    "../shared/**/*",
-    "test/**/*"
+    "../shared/**/*"
   ],
   "compilerOptions": {
     "module": "commonjs",

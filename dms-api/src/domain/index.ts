@@ -1,1 +1,6 @@
-export * from './donation.service'
+export * from './services/donation.service'
+export * from './services/donationAssetType.service'
+export * from './services/donationType.service'
+export * from './services/donationMethod.service'
+export * from './services/organisation.service'
+export * from './services/paymentMode.service'

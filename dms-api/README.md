@@ -35,6 +35,7 @@ $ npm run test:cov
 Schema compilation: `npx prisma generate`
 
 Migration: `npx prisma migrate`
+For seeding making sure to build dms-api first, then run a `npx prisma migrate reset --force` (this will include seeding)
 
 DB connection: `psql "$DATABASE_URL"`
 

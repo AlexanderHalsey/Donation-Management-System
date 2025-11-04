@@ -2,11 +2,12 @@ FROM node:25-alpine AS builder
 
 WORKDIR /app
 
-COPY dms-frontend/package*.json ./dms-frontend/
-
-WORKDIR /app/dms-frontend
+COPY package*.json ./
+COPY dms-frontend/package.json ./dms-frontend/
 
 RUN npm install
+
+WORKDIR /app/dms-frontend
 
 COPY dms-frontend/src/ ./src/
 COPY dms-frontend/public/ ./public/

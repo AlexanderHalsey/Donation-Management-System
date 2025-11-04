@@ -3,12 +3,30 @@ import { ConfigModule } from '@nestjs/config'
 
 import { DonationController } from '@/api/controllers'
 
+import {
+  DonationAssetTypeConverter,
+  DonationConverter,
+  DonationMethodConverter,
+  DonationTypeConverter,
+  OrganisationConverter,
+  PaymentModeConverter,
+} from '@/api/converters'
+
 import { DonationService } from '@/domain'
 import { PrismaService } from '@/infrastructure'
 
 @Module({
   imports: [ConfigModule.forRoot()],
   controllers: [DonationController],
-  providers: [DonationService, PrismaService],
+  providers: [
+    DonationAssetTypeConverter,
+    DonationConverter,
+    DonationMethodConverter,
+    DonationService,
+    DonationTypeConverter,
+    OrganisationConverter,
+    PaymentModeConverter,
+    PrismaService,
+  ],
 })
 export class AppModule {}

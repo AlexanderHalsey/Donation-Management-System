@@ -24,5 +24,9 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "es-toolkit": "^1.41.0"
   }
 }
