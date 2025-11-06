@@ -20,7 +20,7 @@ export default defineConfigWithVueTs(
 
   {
     name: 'app/files-to-ignore',
-    ignores: [...baseIgnores, '**/dist-ssr/**'], // Use shared ignores + frontend-specific
+    ignores: [...baseIgnores, '**/dist-ssr/**'],
   },
 
   pluginVue.configs['flat/essential'],
@@ -37,7 +37,6 @@ export default defineConfigWithVueTs(
   ...oxlint.configs['flat/recommended'],
   skipFormatting,
 
-  // Apply shared workspace rules
   {
     name: 'workspace/shared-rules',
     languageOptions: {
@@ -50,7 +49,8 @@ export default defineConfigWithVueTs(
       ...baseRules,
       ...baseTypeScriptRules,
       // Frontend-specific overrides
-      'no-console': 'warn', // Keep console as warning in frontend
+      'no-console': 'warn',
+      'vue/multi-word-component-names': 'off',
     },
   },
 )

@@ -1,11 +1,17 @@
-import './assets/main.css'
-
 import { createApp } from 'vue'
+
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
+import { Quasar } from 'quasar'
+
 import App from './App.vue'
 import router from './router'
+
+import '@quasar/extras/roboto-font/roboto-font.css'
+import '@quasar/extras/material-icons/material-icons.css'
+import 'quasar/src/css/index.sass'
+import './assets/main.scss'
 
 async function main() {
   const app = createApp(App)
@@ -15,6 +21,7 @@ async function main() {
 
   app.use(pinia)
   app.use(router)
+  app.use(Quasar)
 
   app.mount('#app')
 }

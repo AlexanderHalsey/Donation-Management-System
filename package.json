@@ -1,8 +1,8 @@
 {
-  "name": "dms-ivy-workspace",
+  "name": "dms-workspace",
   "version": "1.0.0",
   "private": true,
-  "description": "DMS IVY Monorepo Workspace",
+  "description": "DMS Monorepo Workspace",
   "workspaces": [
     "dms-api",
     "dms-frontend"

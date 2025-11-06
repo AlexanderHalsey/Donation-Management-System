@@ -2,7 +2,7 @@
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 /**
- * Base ESLint base configuration for DMS IVY workspace
+ * Base ESLint base configuration for DMS workspace
  * Contains common rules for code consistency across API and frontend
  */
 
