@@ -13,7 +13,6 @@ const prisma = new PrismaClient()
 
 async function main() {
   const organisations = await prisma.organisation.createManyAndReturn({
-    select: { id: true },
     data: new Array(3).fill(null).map((_, index) => buildMockOrganisationCreateManyInput(index)),
   })
 
@@ -27,7 +26,7 @@ async function main() {
     data: new Array(9).fill(null).map((_, index) =>
       buildMockDonationTypeCreateManyInput({
         index,
-        organisationId: organisations[index % organisations.length].id,
+        organisation: organisations[index % organisations.length],
       }),
     ),
   })
@@ -45,7 +44,7 @@ async function main() {
   })
 
   await prisma.donation.createMany({
-    data: new Array(100).fill(null).map((_, index) =>
+    data: new Array(1000).fill(null).map((_, index) =>
       buildMockDonationCreateManyInput({
         index,
         donationAssetTypeId: donationAssetTypes[index % donationAssetTypes.length].id,

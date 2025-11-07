@@ -2,6 +2,7 @@ model Donation {
   id                  String            @id @default(uuid()) @db.Uuid
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
+  donatedAt           DateTime
   amount              Float
   paymentMode         PaymentMode       @relation(fields: [paymentModeId], references: [id])
   paymentModeId       String            @db.Uuid

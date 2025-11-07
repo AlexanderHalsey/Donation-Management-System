@@ -26,6 +26,7 @@ export class DonationConverter {
       ...omit(donation, [
         'createdAt',
         'updatedAt',
+        'donatedAt',
         'donationAssetType',
         'donationMethod',
         'donationType',
@@ -34,6 +35,7 @@ export class DonationConverter {
       ]),
       createdAt: formatISO(donation.createdAt),
       updatedAt: formatISO(donation.updatedAt),
+      donatedAt: formatISO(donation.donatedAt),
       donationAssetType: this.donationAssetTypeConverter.convertDonationAssetTypeToDto(
         donation.donationAssetType,
       ),

@@ -115,6 +115,7 @@ function buildMockDonations(): Donation[] {
     id: v4(),
     createdAt: addDays(new Date(2024, 0, 1), index),
     updatedAt: addDays(new Date(2024, 1, 1), index),
+    donatedAt: addDays(new Date(2024, 0, 1), index),
     amount: ((index % 10) + 1) * 10,
     paymentMode: paymentModes[index % paymentModes.length],
     organisation: organisations[index % organisations.length],
@@ -129,6 +130,7 @@ function buildMockDonations(): Donation[] {
 function getDonationSubsetObject(donation: Donation) {
   return {
     createdAt: donation.createdAt,
+    donatedAt: donation.donatedAt,
     amount: donation.amount,
     organisation: {
       name: donation.organisation.name,

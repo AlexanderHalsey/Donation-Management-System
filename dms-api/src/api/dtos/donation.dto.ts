@@ -8,6 +8,7 @@ export class DonationDto {
   id: string
   createdAt: string
   updatedAt: string
+  donatedAt: string
   amount: number
   paymentMode: PaymentModeDto
   organisation: OrganisationSummaryDto

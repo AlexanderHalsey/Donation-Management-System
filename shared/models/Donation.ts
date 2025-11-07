@@ -8,6 +8,7 @@ export type Donation = {
   id: string
   createdAt: Date
   updatedAt: Date
+  donatedAt: Date
   amount: number
   paymentMode: PaymentMode
   organisation: OrganisationSummary
