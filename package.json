@@ -19,6 +19,7 @@
     "concurrently": "^9.2.1",
     "jiti": "^2.6.1",
     "prettier": "^3.5.3",
+    "uuid": "^13.0.0",
     "wait-on": "^9.0.1"
   },
   "engines": {

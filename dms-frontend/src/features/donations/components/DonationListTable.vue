@@ -143,7 +143,7 @@ const updatePagination = ({
 }: QTablePagination) => {
   emit('update:pagination', {
     page,
-    pageSize: rowsPerPage,
+    pageSize: rowsPerPage || rowsNumber || 0,
     totalCount: rowsNumber || 0,
     orderBy: sortBy
       ? ({

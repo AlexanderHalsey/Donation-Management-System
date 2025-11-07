@@ -4,6 +4,10 @@
   "exclude": ["./support/component.*"],
   "compilerOptions": {
     "isolatedModules": false,
-    "types": ["cypress"]
+    "types": ["cypress"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../shared/*"]
+    }
   }
 }

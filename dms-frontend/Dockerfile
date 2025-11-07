@@ -19,6 +19,12 @@ COPY shared/ ../shared/
 
 RUN npm run build
 
+FROM builder AS testrunner
+
+WORKDIR /app/dms-frontend
+
+CMD ["npm", "run", "test"]
+
 FROM nginxinc/nginx-unprivileged:alpine AS production
 
 WORKDIR /app/dms-frontend

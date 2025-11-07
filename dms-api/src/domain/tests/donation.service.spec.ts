@@ -2,20 +2,14 @@ import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { mockDeep, mockReset } from 'jest-mock-extended'
-import { v4 } from 'uuid'
-import { addDays } from 'date-fns'
-
-import { buildMockDonationAssetTypes } from './donationAssetType.service.spec'
-import { buildMockDonationMethods } from './donationMethod.service.spec'
-import { buildMockDonationTypes } from './donationType.service.spec'
-import { buildMockOrganisations } from './organisation.service.spec'
-import { buildMockPaymentModes } from './paymentMode.service.spec'
 
 import { DonationService } from '../services/donation.service'
 import { PrismaService } from '@/infrastructure'
 
-import { Donation } from '@shared/models'
-import { DonationOrderByWithRelationInput } from '@generated/prisma/models'
+import { buildMockDonations } from '@shared/mocks'
+
+import type { Donation } from '@shared/models'
+import type { DonationOrderByWithRelationInput } from '@generated/prisma/models'
 
 describe('DonationService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -103,29 +97,6 @@ describe('DonationService', () => {
     })
   })
 })
-
-function buildMockDonations(): Donation[] {
-  const paymentModes = buildMockPaymentModes()
-  const organisations = buildMockOrganisations()
-  const donationTypes = buildMockDonationTypes(organisations)
-  const donationMethods = buildMockDonationMethods()
-  const donationAssetTypes = buildMockDonationAssetTypes()
-
-  return Array.from({ length: 100 }).map((_, index) => ({
-    id: v4(),
-    createdAt: addDays(new Date(2024, 0, 1), index),
-    updatedAt: addDays(new Date(2024, 1, 1), index),
-    donatedAt: addDays(new Date(2024, 0, 1), index),
-    amount: ((index % 10) + 1) * 10,
-    paymentMode: paymentModes[index % paymentModes.length],
-    organisation: organisations[index % organisations.length],
-    donationType: donationTypes[index % donationTypes.length],
-    donationMethod: donationMethods[index % donationMethods.length],
-    donationAssetType: donationAssetTypes[index % donationAssetTypes.length],
-    isDisabled: false,
-    contactId: v4(),
-  }))
-}
 
 function getDonationSubsetObject(donation: Donation) {
   return {

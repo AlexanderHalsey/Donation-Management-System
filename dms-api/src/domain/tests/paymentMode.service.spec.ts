@@ -2,12 +2,11 @@ import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { mockDeep, mockReset } from 'jest-mock-extended'
-import { v4 } from 'uuid'
 
 import { PaymentModeService } from '../services/paymentMode.service'
 import { PrismaService } from '@/infrastructure'
 
-import { PaymentMode } from '@shared/models'
+import { buildMockPaymentModes } from '@shared/mocks'
 
 describe('PaymentModeService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -44,12 +43,3 @@ describe('PaymentModeService', () => {
     })
   })
 })
-
-export function buildMockPaymentModes(): PaymentMode[] {
-  return Array.from({ length: 4 }).map((_, index) => ({
-    id: v4(),
-    createdAt: new Date(2024, 0, index + 1),
-    updatedAt: new Date(2024, 1, index + 1),
-    name: `Payment Mode ${index + 1}`,
-  }))
-}

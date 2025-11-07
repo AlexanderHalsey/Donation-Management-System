@@ -2,12 +2,11 @@ import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { mockDeep, mockReset } from 'jest-mock-extended'
-import { v4 } from 'uuid'
 
 import { DonationMethodService } from '../services/donationMethod.service'
 import { PrismaService } from '@/infrastructure'
 
-import { DonationMethod } from '@shared/models'
+import { buildMockDonationMethods } from '@shared/mocks'
 
 describe('DonationMethod', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -45,13 +44,3 @@ describe('DonationMethod', () => {
     })
   })
 })
-
-export function buildMockDonationMethods(): DonationMethod[] {
-  return Array.from({ length: 4 }).map((_, index) => ({
-    id: v4(),
-    createdAt: new Date(2024, 0, index + 1),
-    updatedAt: new Date(2024, 1, index + 1),
-    name: `Donation Method ${index + 1}`,
-    isDefault: index === 0,
-  }))
-}

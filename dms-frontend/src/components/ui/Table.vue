@@ -1,10 +1,11 @@
 <template>
   <QTable
-    v-bind="omit(props, ['pagination'])"
+    v-bind="omit(props, ['pagination', 'rowsPerPageOptions'])"
     flat
     bordered
     class="dms-table"
     v-model:pagination="qTablePagination"
+    :rows-per-page-options="qTableRowsPerPageOptions"
     @request="$emit('update:pagination', $event.pagination)"
   >
     <template v-for="(_, slot) of $slots" #[slot]="scope">
@@ -15,7 +16,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { omit } from 'es-toolkit'
+import { omit, uniq } from 'es-toolkit'
 
 import type { QTableProps } from 'quasar'
 
@@ -24,13 +25,26 @@ export type QTablePagination = Omit<
   'rowsNumber'
 > & { rowsNumber?: number }
 
-const props = defineProps<Omit<QTableProps, 'pagination'> & { pagination: QTablePagination }>()
+const props = defineProps<
+  Omit<QTableProps, 'pagination'> & {
+    pagination: QTablePagination
+  }
+>()
 
 defineEmits<{
   'update:pagination': [pagination: QTablePagination]
 }>()
 
 const qTablePagination = ref<QTablePagination>(props.pagination)
+const qTableRowsPerPageOptions = ref<number[]>(
+  (() => {
+    const initialOptions = [5, 10, 25, 50, 100]
+    return uniq(initialOptions.concat(props.pagination.rowsPerPage))
+      .sort((a, b) => a - b)
+      .filter((option) => option <= (props.pagination.rowsNumber ?? props.rows?.length ?? 0))
+      .concat(0) // 0 means 'All'
+  })(),
+)
 
 watch(
   () => props.pagination,
