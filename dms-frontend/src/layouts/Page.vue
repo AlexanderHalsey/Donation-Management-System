@@ -9,8 +9,15 @@
       </QToolbar>
     </QPageSticky>
 
-    <div style="margin-top: 80px">
+    <div v-if="!loading" style="margin-top: 80px">
       <slot />
+    </div>
+    <div
+      v-else
+      class="row items-center justify-center"
+      style="width: 100%; height: calc(100vh - 150px)"
+    >
+      <QSpinnerPie color="primary" size="70" />
     </div>
   </QPage>
 </template>
@@ -30,6 +37,10 @@ const props = defineProps({
     type: Array as PropType<Breadcrumb[]>,
     default: () => [],
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const setBreadcrumbs = inject(setBreadcrumbsInjectionKey)
@@ -42,5 +53,11 @@ if (setBreadcrumbs) {
 .page {
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(9px);
+  z-index: 1;
+}
+
+.q-toolbar__title {
+  font-weight: 600;
+  font-size: 22px;
 }
 </style>

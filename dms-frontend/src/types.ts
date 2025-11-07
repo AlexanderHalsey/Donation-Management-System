@@ -10,3 +10,8 @@ export type MenuItem = {
   icon: string
   to: string
 }
+
+export type Tag = {
+  backgroundColor: string
+  color: string
+}

@@ -2,8 +2,11 @@
   <QLayout view="lHh LpR lFr">
     <QHeader reveal bordered class="bg-white text-primary">
       <QToolbar>
-        <QBtn dense flat round icon="menu" @click="toggleLeftDrawer" />
-        <QBreadcrumbs active-color="primary breadcrumbs" class="text-grey q-pl-md">
+        <QBtn dense flat round icon="menu" color="secondary" @click="toggleLeftDrawer" />
+        <QBreadcrumbs active-color="primary breadcrumbs" gutter="md" class="text-grey q-pl-md">
+          <template #separator>
+            <QIcon size="1.5em" name="chevron_right" color="primary" />
+          </template>
           <QBreadcrumbsEl
             v-for="breadcrumb in breadcrumbs"
             :key="breadcrumb.id"
@@ -45,18 +48,21 @@
         style="height: calc(100% - 51px)"
         @scroll="setMenuScrollVisible"
       >
-        <QList padding class="menu-list">
+        <QList padding class="menu-list q-pt-md">
           <QItem
             v-for="(menuItem, index) of menuItems"
             :key="index"
-            :active="menuItem.to === $route.path"
             clickable
             v-ripple
             :to="menuItem.to"
+            :active="$route.path.startsWith(menuItem.to)"
+            class="q-my-sm q-mx-md"
+            active-class="bg-primary text-white shadow-2"
           >
             <QItemSection avatar>
               <QIcon :name="menuItem.icon" />
             </QItemSection>
+
             <QItemSection>
               {{ menuItem.label }}
             </QItemSection>
@@ -83,7 +89,7 @@ const $q = useQuasar()
 
 const menuItems: MenuItem[] = [
   { label: 'Tableau de bord', icon: 'speed', to: '/dashboard' },
-  { label: 'Liste des dons', icon: 'volunteer_activism', to: '/donations' },
+  { label: 'Dons', icon: 'volunteer_activism', to: '/donations' },
 ]
 
 const breadcrumbs = ref<Breadcrumb[]>([])
@@ -118,6 +124,7 @@ const setMenuScrollVisible = ({ verticalPosition }: { verticalPosition: number }
 .dms-title {
   position: sticky;
   top: 0;
+  color: $secondary;
   background: inherit;
   z-index: 1;
   height: 51px;
@@ -130,19 +137,12 @@ const setMenuScrollVisible = ({ verticalPosition }: { verticalPosition: number }
   justify-content: start;
   gap: 14px;
   font-size: 21px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.01em;
 }
 
-.menu-list {
-  &.q-list--padding {
-    padding: 18px 0;
-  }
-  .q-item {
-    margin: 0 16px;
-    padding: 4px 16px;
-    min-height: 48px;
-    border-radius: 8px;
-  }
+.menu-list > .q-item {
+  min-height: 42px;
+  border-radius: 10px;
 }
 </style>
