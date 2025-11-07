@@ -65,64 +65,51 @@ export interface DonationDto {
   receiptId?: string
 }
 
-export interface PaginationRequest {
+/**
+ * Generic pagination DTO
+ * @template T - The type of the orderBy property
+ */
+export interface PaginationRequest<T> {
   page: number
   pageSize: number
+  orderBy?: T
 }
 
-export interface PaginationDto {
+/**
+ * Generic pagination DTO
+ * @template T - The type of the orderBy property
+ */
+export interface PaginationDto<T> extends PaginationRequest<T> {
   totalCount: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
 }
-
-export interface DonationPaginationRequest extends PaginationRequest {
-  orderBy?: DonationSortOrderRequest
-}
-
-export interface DonationSortOrderRequest {
+export interface DonationSortOrder {
   createdAt?: SortOrder
+  donatedAt?: SortOrder
   amount?: SortOrder
-  paymentMode?: PaymentModeSortOrderRequest
-  organisation?: OrganisationSortOrderRequest
-  donationType?: DonationTypeSortOrderRequest
-  donationMethod?: DonationMethodSortOrderRequest
-  donationAssetType?: DonationAssetTypeSortOrderRequest
+  paymentMode?: PaymentModeSortOrder
+  organisation?: OrganisationSortOrder
+  donationType?: DonationTypeSortOrder
+  donationMethod?: DonationMethodSortOrder
+  donationAssetType?: DonationAssetTypeSortOrder
 }
 
-export interface PaymentModeSortOrderRequest {
-  createdAt?: SortOrder
-  name?: SortOrder
-}
-
-export interface OrganisationSortOrderRequest {
-  createdAt?: SortOrder
-  name?: SortOrder
-}
-
-export interface DonationTypeSortOrderRequest {
-  createdAt?: SortOrder
-  name?: SortOrder
-}
-
-export interface DonationMethodSortOrderRequest {
-  createdAt?: SortOrder
-  name?: SortOrder
-}
-
-export interface DonationAssetTypeSortOrderRequest {
-  createdAt?: SortOrder
-  name?: SortOrder
-}
+export interface PaymentModeSortOrder extends NameSortOrder {}
+export interface OrganisationSortOrder extends NameSortOrder {}
+export interface DonationTypeSortOrder extends NameSortOrder {}
+export interface DonationMethodSortOrder extends NameSortOrder {}
+export interface DonationAssetTypeSortOrder extends NameSortOrder {}
 
 export type SortOrder = 'asc' | 'desc'
 
+interface NameSortOrder {
+  name?: SortOrder
+}
+
 export interface GetDonationListRequest {
-  pagination: DonationPaginationRequest
+  pagination: PaginationRequest<DonationSortOrder>
 }
 
 export interface GetDonationListResponse {
   donations: DonationDto[]
-  pagination: PaginationDto
+  pagination: PaginationDto<DonationSortOrder>
 }

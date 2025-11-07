@@ -3,13 +3,13 @@ import { IsNotEmptyObject, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 
 import { PaginationRequest } from './pagination.dto'
-import { DonationSortOrderRequest } from './sort-order.dto'
+import { DonationSortOrder } from './sort-order.dto'
 
 export class DonationPaginationRequest extends PaginationRequest {
-  @ApiProperty({ type: DonationSortOrderRequest, required: false })
+  @ApiProperty({ type: DonationSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationSortOrderRequest)
-  orderBy?: DonationSortOrderRequest
+  @Type(() => DonationSortOrder)
+  orderBy?: DonationSortOrder
 }
 
 export class GetDonationListRequest {

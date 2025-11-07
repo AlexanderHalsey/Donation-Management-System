@@ -11,9 +11,13 @@ export class PaginationRequest {
   pageSize: number
 }
 
-export class PaginationDto {
+/**
+ * Generic pagination DTO
+ * @template T - The type of the orderBy property
+ */
+export class PaginationDto<T> {
   totalCount: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
+  page: number
+  pageSize: number
+  orderBy?: T
 }

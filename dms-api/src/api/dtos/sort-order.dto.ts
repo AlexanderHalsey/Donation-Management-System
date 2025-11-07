@@ -8,19 +8,20 @@ enum SortOrderEnum {
 }
 type SortOrder = 'asc' | 'desc'
 
-export class PaymentModeSortOrderRequest {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  createdAt?: SortOrder
-
+export class NameSortOrder {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)
   name?: SortOrder
 }
 
-export class OrganisationSortOrderRequest {
+export class PaymentModeSortOrder extends NameSortOrder {}
+export class OrganisationSortOrder extends NameSortOrder {}
+export class DonationTypeSortOrder extends NameSortOrder {}
+export class DonationMethodSortOrder extends NameSortOrder {}
+export class DonationAssetTypeSortOrder extends NameSortOrder {}
+
+export class DonationSortOrder {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)
@@ -29,80 +30,37 @@ export class OrganisationSortOrderRequest {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)
-  name?: SortOrder
-}
-
-export class DonationTypeSortOrderRequest {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  createdAt?: SortOrder
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  name?: SortOrder
-}
-
-export class DonationMethodSortOrderRequest {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  createdAt?: SortOrder
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  name?: SortOrder
-}
-
-export class DonationAssetTypeSortOrderRequest {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  createdAt?: SortOrder
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  name?: SortOrder
-}
-
-export class DonationSortOrderRequest {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEnum(SortOrderEnum)
-  createdAt?: SortOrder
+  donatedAt?: SortOrder
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)
   amount?: SortOrder
 
-  @ApiProperty({ type: PaymentModeSortOrderRequest, required: false })
+  @ApiProperty({ type: PaymentModeSortOrder, required: false })
   @ValidateNested()
-  @Type(() => PaymentModeSortOrderRequest)
-  paymentMode?: PaymentModeSortOrderRequest
+  @Type(() => PaymentModeSortOrder)
+  paymentMode?: PaymentModeSortOrder
 
-  @ApiProperty({ type: OrganisationSortOrderRequest, required: false })
+  @ApiProperty({ type: OrganisationSortOrder, required: false })
   @ValidateNested()
-  @Type(() => OrganisationSortOrderRequest)
-  organisation?: OrganisationSortOrderRequest
+  @Type(() => OrganisationSortOrder)
+  organisation?: OrganisationSortOrder
 
-  @ApiProperty({ type: DonationTypeSortOrderRequest, required: false })
+  @ApiProperty({ type: DonationTypeSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationTypeSortOrderRequest)
-  donationType?: DonationTypeSortOrderRequest
+  @Type(() => DonationTypeSortOrder)
+  donationType?: DonationTypeSortOrder
 
-  @ApiProperty({ type: DonationMethodSortOrderRequest, required: false })
+  @ApiProperty({ type: DonationMethodSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationMethodSortOrderRequest)
-  donationMethod?: DonationMethodSortOrderRequest
+  @Type(() => DonationMethodSortOrder)
+  donationMethod?: DonationMethodSortOrder
 
-  @ApiProperty({ type: DonationAssetTypeSortOrderRequest, required: false })
+  @ApiProperty({ type: DonationAssetTypeSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationAssetTypeSortOrderRequest)
-  donationAssetType?: DonationAssetTypeSortOrderRequest
+  @Type(() => DonationAssetTypeSortOrder)
+  donationAssetType?: DonationAssetTypeSortOrder
 
   // contact name
   // receipt reference number

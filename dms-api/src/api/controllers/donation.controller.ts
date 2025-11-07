@@ -26,17 +26,16 @@ export class DonationController {
       this.donationService.getFilteredList(pagination),
       this.donationService.getTotalCount(),
     ])
-    const totalPages = Math.ceil(totalCount / pagination.pageSize)
 
     return {
-      donationList: donationList.map((donation) =>
+      donations: donationList.map((donation) =>
         this.donationConverter.convertDonationToDto(donation),
       ),
       pagination: {
         totalCount,
-        totalPages,
-        hasNextPage: pagination.page < totalPages,
-        hasPreviousPage: pagination.page > 1,
+        page: pagination.page,
+        pageSize: pagination.pageSize,
+        orderBy: pagination.orderBy,
       },
     }
   }

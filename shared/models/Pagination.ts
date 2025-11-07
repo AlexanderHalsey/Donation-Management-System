@@ -1,12 +1,17 @@
+/**
+ * Generic pagination DTO
+ * @template T - The type of the orderBy property
+ */
 export type PaginationRequest<T> = {
   page: number
   pageSize: number
-  orderBy?: Record<keyof T, 'asc' | 'desc'>
+  orderBy?: T
 }
 
-export type Pagination = {
+/**
+ * Generic pagination DTO
+ * @template T - The type of the orderBy property
+ */
+export type Pagination<T> = PaginationRequest<T> & {
   totalCount: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
 }
