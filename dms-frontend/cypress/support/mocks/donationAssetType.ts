@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 
-import type { DonationAssetType } from '../models'
+import type { DonationAssetType } from '@shared/models'
 
 export function buildMockDonationAssetTypes(): DonationAssetType[] {
   return Array.from({ length: 4 }).map((_, index) => ({

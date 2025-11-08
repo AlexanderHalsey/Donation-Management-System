@@ -1,3 +1,5 @@
+import { NameSortOrder } from './sort-order.dto'
+
 export class OrganisationSummaryDto {
   id: string
   createdAt: string
@@ -16,3 +18,5 @@ export class OrganisationDto extends OrganisationSummaryDto {
   signatoryPosition?: string
   signatureUrl?: string
 }
+
+export class OrganisationListSortOrder extends NameSortOrder {}

@@ -3,13 +3,17 @@ import { withClient } from './client'
 import { convertDtoToDonation } from './converters'
 
 import type { GetDonationListRequest, GetDonationListResponse } from '@shared/dtos'
-import type { Donation, DonationSortOrder, Pagination, PaginationRequest } from '@shared/models'
+import type {
+  Donation,
+  DonationListPagination,
+  DonationListPaginationRequest,
+} from '@shared/models'
 
 export const getDonations = async (
-  pagination?: PaginationRequest<DonationSortOrder>,
+  pagination?: DonationListPaginationRequest,
 ): Promise<{
   donations: Donation[]
-  pagination: Pagination<DonationSortOrder>
+  pagination: DonationListPagination
 }> => {
   const request: GetDonationListRequest = {
     pagination: {

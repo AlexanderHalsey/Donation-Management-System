@@ -3,13 +3,17 @@ import { defineStore } from 'pinia'
 
 import { getDonation, getDonations } from '@/apis/dms-api'
 
-import type { Pagination, Donation, DonationSortOrder, PaginationRequest } from '@shared/models'
+import type {
+  Donation,
+  DonationListPagination,
+  DonationListPaginationRequest,
+} from '@shared/models'
 
 export const useDonationStore = defineStore('donation', () => {
   const donationList = ref<Donation[]>([])
-  const pagination = ref<Pagination<DonationSortOrder>>()
+  const pagination = ref<DonationListPagination>()
 
-  const fetchDonations = async (paginationRequest?: PaginationRequest<DonationSortOrder>) => {
+  const fetchDonations = async (paginationRequest?: DonationListPaginationRequest) => {
     const response = await getDonations(paginationRequest)
     donationList.value = response.donations
     pagination.value = response.pagination

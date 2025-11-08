@@ -1,3 +1,5 @@
+import { NameSortOrder } from './sort-order.dto'
+
 export class DonationTypeDto {
   id: string
   createdAt: string
@@ -5,3 +7,5 @@ export class DonationTypeDto {
   name: string
   organisationId: string
 }
+
+export class DonationTypeListSortOrder extends NameSortOrder {}

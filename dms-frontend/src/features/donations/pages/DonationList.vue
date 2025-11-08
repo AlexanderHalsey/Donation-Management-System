@@ -22,7 +22,7 @@ import DonationListTable from '../components/DonationListTable.vue'
 import { useDonationStore } from '@/stores'
 
 import type { Breadcrumb } from '@/types'
-import type { Pagination, DonationSortOrder } from '@shared/models'
+import type { DonationListPaginationRequest } from '@shared/models'
 
 const breadcrumbs: Breadcrumb[] = [
   { id: 'donation-list', label: 'Liste des dons', icon: 'volunteer_activism' },
@@ -36,7 +36,7 @@ const pagination = computed(() => donationStore.pagination)
 const loading = ref(true)
 const tableLoading = ref(false)
 
-const onPaginationUpdate = async (pagination: Pagination<DonationSortOrder>) => {
+const onPaginationUpdate = async (pagination: DonationListPaginationRequest) => {
   tableLoading.value = true
   await donationStore.fetchDonations(pagination)
   tableLoading.value = false

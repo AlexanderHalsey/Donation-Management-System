@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 
-import type { Organisation, OrganisationSummary } from '../models'
+import type { Organisation, OrganisationSummary } from '@shared/models'
 
 export function buildMockOrganisations(): Organisation[] {
   const summaries = buildMockOrganisationSummaries()

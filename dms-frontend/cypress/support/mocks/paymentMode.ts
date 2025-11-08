@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 
-import type { PaymentMode } from '../models'
+import type { PaymentMode } from '@shared/models'
 
 export function buildMockPaymentModes(): PaymentMode[] {
   return Array.from({ length: 4 }).map((_, index) => ({

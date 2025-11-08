@@ -1,18 +1,19 @@
 /// <reference types="cypress" />
 
-import { buildMockDonations } from '@shared/mocks'
-import type { DonationSortOrder, PaginationRequest } from '@shared/models'
+import { buildMockDonations } from './mocks'
+
+import type { DonationListPaginationRequest } from '@shared/models'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable<Subject> {
-      mockDonationList(pagination?: PaginationRequest<DonationSortOrder>): Chainable<Subject>
+      mockDonationList(pagination?: DonationListPaginationRequest): Chainable<Subject>
     }
   }
 }
 
-Cypress.Commands.add('mockDonationList', (pagination?: PaginationRequest<DonationSortOrder>) => {
+Cypress.Commands.add('mockDonationList', (pagination?: DonationListPaginationRequest) => {
   if (!pagination) {
     pagination = {
       page: 1,

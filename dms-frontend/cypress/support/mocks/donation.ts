@@ -8,9 +8,14 @@ import { buildMockDonationTypes } from './donationType'
 import { buildMockDonationMethods } from './donationMethod'
 import { buildMockDonationAssetTypes } from './donationAssetType'
 
-import type { Donation, DonationSortOrder, PaginationRequest } from '../models'
+import type {
+  Donation,
+  DonationListFilter,
+  DonationListPaginationRequest,
+  DonationListSortOrder,
+} from '@shared/models'
 
-export function buildMockDonations(pagination?: PaginationRequest<DonationSortOrder>): Donation[] {
+export function buildMockDonations(pagination?: DonationListPaginationRequest): Donation[] {
   const paymentModes = buildMockPaymentModes()
   const organisations = buildMockOrganisations()
   const donationTypes = buildMockDonationTypes(organisations)
@@ -19,7 +24,7 @@ export function buildMockDonations(pagination?: PaginationRequest<DonationSortOr
 
   const totalCount = 100 as const
 
-  let donations = Array.from({ length: 100 }).map((_, index) => ({
+  let donations = Array.from({ length: totalCount }).map((_, index) => ({
     id: v4(),
     createdAt: addDays(new Date(2024, 0, 1), index),
     updatedAt: addDays(new Date(2024, 1, 1), index),
@@ -38,11 +43,11 @@ export function buildMockDonations(pagination?: PaginationRequest<DonationSortOr
 
   if (pagination.orderBy) {
     let order: 'asc' | 'desc' | { name: string } = Object.values(pagination.orderBy!)[0]
-    let key: keyof DonationSortOrder = Object.keys(
+    let key: keyof DonationListSortOrder = Object.keys(
       pagination.orderBy!,
-    )[0] as keyof DonationSortOrder
+    )[0] as keyof DonationListSortOrder
     if (typeof order === 'object') {
-      key = (key + '.name') as keyof DonationSortOrder
+      key = (key + '.name') as keyof DonationListSortOrder
       order = order.name as 'asc' | 'desc'
     }
     donations = sortBy(donations, [key])
@@ -54,3 +59,4 @@ export function buildMockDonations(pagination?: PaginationRequest<DonationSortOr
     pagination.page * pagination.pageSize,
   )
 }
+

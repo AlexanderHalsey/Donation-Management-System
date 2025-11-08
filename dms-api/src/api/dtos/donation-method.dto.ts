@@ -1,3 +1,5 @@
+import { NameSortOrder } from './sort-order.dto'
+
 export class DonationMethodDto {
   id: string
   createdAt: string
@@ -5,3 +7,5 @@ export class DonationMethodDto {
   name: string
   isDefault: boolean
 }
+
+export class DonationMethodListSortOrder extends NameSortOrder {}

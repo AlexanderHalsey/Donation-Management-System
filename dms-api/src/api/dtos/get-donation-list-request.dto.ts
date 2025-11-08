@@ -2,20 +2,25 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmptyObject, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 
-import { PaginationRequest } from './pagination.dto'
-import { DonationSortOrder } from './sort-order.dto'
+import { DonationListSortOrder } from './donation.dto'
 
-export class DonationPaginationRequest extends PaginationRequest {
-  @ApiProperty({ type: DonationSortOrder, required: false })
+import { PaginationRequest } from './pagination.dto'
+
+export class DonationListPaginationRequest extends PaginationRequest {
+  @ApiProperty({ type: DonationListSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationSortOrder)
-  orderBy?: DonationSortOrder
+  @Type(() => DonationListSortOrder)
+  orderBy?: DonationListSortOrder
+}
+
+
+  @ValidateNested()
 }
 
 export class GetDonationListRequest {
-  @ApiProperty({ type: DonationPaginationRequest })
+  @ApiProperty({ type: DonationListPaginationRequest })
   @ValidateNested()
   @IsNotEmptyObject()
-  @Type(() => DonationPaginationRequest)
-  pagination: DonationPaginationRequest
+  @Type(() => DonationListPaginationRequest)
+  pagination: DonationListPaginationRequest
 }

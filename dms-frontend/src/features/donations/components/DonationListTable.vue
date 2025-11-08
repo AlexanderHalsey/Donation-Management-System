@@ -47,7 +47,13 @@ import OrganisationTag from '@/components/OrganisationTag.vue'
 import DonationListActions from './DonationListActions.vue'
 
 import type { QTableProps } from 'quasar'
-import type { OrganisationSummary, Donation, DonationSortOrder, Pagination } from '@shared/models'
+import type {
+  OrganisationSummary,
+  Donation,
+  DonationListSortOrder,
+  DonationListPagination,
+  DonationListPaginationRequest,
+} from '@shared/models'
 
 const props = defineProps({
   donationList: {
@@ -55,7 +61,7 @@ const props = defineProps({
     required: true,
   },
   pagination: {
-    type: Object as PropType<Pagination<DonationSortOrder>>,
+    type: Object as PropType<DonationListPagination>,
     default: undefined,
   },
   loading: {
@@ -65,7 +71,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  'update:pagination': [pagination: Pagination<DonationSortOrder>]
+  'update:pagination': [pagination: DonationListPaginationRequest]
 }>()
 
 const headers: QTableProps['columns'] = [
@@ -144,7 +150,6 @@ const updatePagination = ({
   emit('update:pagination', {
     page,
     pageSize: rowsPerPage || rowsNumber || 0,
-    totalCount: rowsNumber || 0,
     orderBy: sortBy
       ? ({
           [sortBy]: ['paymentMode', 'organisation', 'donationType'].includes(sortBy)
@@ -152,7 +157,7 @@ const updatePagination = ({
             : descending
               ? 'desc'
               : 'asc',
-        } as DonationSortOrder)
+        } as DonationListSortOrder)
       : undefined,
   })
 }

@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 
-import type { DonationType, Organisation } from '../models'
+import type { DonationType, Organisation } from '@shared/models'
 
 export function buildMockDonationTypes(organisations: Organisation[]): DonationType[] {
   return Array.from({ length: 10 }).map((_, index) => ({
