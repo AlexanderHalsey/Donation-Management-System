@@ -4,14 +4,16 @@ import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService } from '@/infrastructure'
 
-import { DonationPaginationRequest } from '@/api/dtos'
-import { Donation } from '@shared/models'
+import { Donation, DonationListPaginationRequest, DonationListFilter } from '@shared/models'
 
 @Injectable()
 export class DonationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getFilteredList(pagination: DonationPaginationRequest): Promise<Donation[]> {
+  async getFilteredList(
+    pagination: DonationListPaginationRequest,
+    filter?: DonationListFilter,
+  ): Promise<Donation[]> {
     return (
       await this.prisma.donation.findMany({
         include: {
@@ -35,6 +37,7 @@ export class DonationService {
           organisationId: true,
           paymentModeId: true,
         },
+        where: filter,
         orderBy: pagination.orderBy,
         skip: (pagination.page - 1) * pagination.pageSize,
         take: pagination.pageSize,
@@ -42,8 +45,10 @@ export class DonationService {
     ).map(nullsToUndefined)
   }
 
-  async getTotalCount(): Promise<number> {
-    return this.prisma.donation.count()
+  async getCount(filter?: DonationListFilter): Promise<number> {
+    return this.prisma.donation.count({
+      where: filter,
+    })
   }
 
   // for create and update ensure donationType and organisation are correctly linked

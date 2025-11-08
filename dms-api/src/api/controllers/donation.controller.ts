@@ -20,11 +20,11 @@ export class DonationController {
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
   @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
   async getFilteredList(
-    @Body() { pagination }: GetDonationListRequest,
+    @Body() { pagination, filter }: GetDonationListRequest,
   ): Promise<GetDonationListResponse> {
     const [donationList, totalCount] = await Promise.all([
-      this.donationService.getFilteredList(pagination),
-      this.donationService.getTotalCount(),
+      this.donationService.getFilteredList(pagination, filter),
+      this.donationService.getCount(filter),
     ])
 
     return {

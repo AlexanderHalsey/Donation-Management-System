@@ -109,6 +109,35 @@ interface NameSortOrder {
   name?: SortOrder
 }
 
+export interface DonationListFilterRequest {
+  contactId?: UuidFilter
+  donatedAt?: DateTimeFilter
+  amount?: FloatFilter
+  paymentModeId?: UuidFilter
+  organisationId?: UuidFilter
+  donationTypeId?: UuidFilter
+  isDisabled?: BoolFilter
+}
+
+export interface UuidFilter {
+  equals?: string
+}
+
+export interface DateTimeFilter {
+  lte?: Date
+  gte?: Date
+}
+
+export interface FloatFilter {
+  equals?: number
+  lte?: number
+  gte?: number
+}
+
+export interface BoolFilter {
+  equals?: boolean
+}
+
 export interface GetDonationListRequest {
   pagination: DonationListPaginationRequest
   filter?: DonationListFilterRequest
