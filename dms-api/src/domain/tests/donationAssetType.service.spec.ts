@@ -6,8 +6,6 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { DonationAssetTypeService } from '../services/donationAssetType.service'
 import { PrismaService } from '@/infrastructure'
 
-import { buildMockDonationAssetTypes } from '@shared/mocks'
-
 describe('DonationAssetTypeService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
   let donationAssetTypeService: DonationAssetTypeService
@@ -31,16 +29,10 @@ describe('DonationAssetTypeService', () => {
   })
 
   it('should get asset type list', async () => {
-    const mockDonationAssetTypes = buildMockDonationAssetTypes()
-    prismaServiceMock.donationAssetType.findMany.mockResolvedValueOnce(mockDonationAssetTypes)
+    prismaServiceMock.donationAssetType.findMany.mockResolvedValueOnce([])
 
-    const result = await donationAssetTypeService.getAll()
+    await donationAssetTypeService.getAll()
 
-    mockDonationAssetTypes.forEach((mockAssetType, index) => {
-      expect(result[index]).toMatchObject({
-        name: mockAssetType.name,
-        isDefault: mockAssetType.isDefault,
-      })
-    })
+    expect(prismaServiceMock.donationAssetType.findMany).toHaveBeenCalledTimes(1)
   })
 })

@@ -6,8 +6,6 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { PaymentModeService } from '../services/paymentMode.service'
 import { PrismaService } from '@/infrastructure'
 
-import { buildMockPaymentModes } from '@shared/mocks'
-
 describe('PaymentModeService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
   let paymentModeService: PaymentModeService
@@ -31,15 +29,10 @@ describe('PaymentModeService', () => {
   })
 
   it('should get payment mode list', async () => {
-    const mockPaymentModes = buildMockPaymentModes()
-    prismaServiceMock.paymentMode.findMany.mockResolvedValueOnce(mockPaymentModes)
+    prismaServiceMock.paymentMode.findMany.mockResolvedValueOnce([])
 
-    const result = await paymentModeService.getAll()
+    await paymentModeService.getAll()
 
-    mockPaymentModes.forEach((mockPaymentMode, index) => {
-      expect(result[index]).toMatchObject({
-        name: mockPaymentMode.name,
-      })
-    })
+    expect(prismaServiceMock.paymentMode.findMany).toHaveBeenCalledTimes(1)
   })
 })

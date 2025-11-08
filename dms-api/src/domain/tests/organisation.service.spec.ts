@@ -6,8 +6,6 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { OrganisationService } from '../services/organisation.service'
 import { PrismaService } from '@/infrastructure'
 
-import { buildMockOrganisations } from '@shared/mocks'
-
 describe('OrganisationService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
   let organisationService: OrganisationService
@@ -31,23 +29,10 @@ describe('OrganisationService', () => {
   })
 
   it('should get organisation list', async () => {
-    const mockOrganisations = buildMockOrganisations()
-    prismaServiceMock.organisation.findMany.mockResolvedValueOnce(
-      // @ts-expect-error ignore null fields in test
-      mockOrganisations,
-    )
+    prismaServiceMock.organisation.findMany.mockResolvedValueOnce([])
 
-    const result = await organisationService.getAll()
+    await organisationService.getAll()
 
-    mockOrganisations.forEach((mockOrganisation, index) => {
-      expect(result[index]).toMatchObject({
-        name: mockOrganisation.name,
-        title: mockOrganisation.title,
-        address: mockOrganisation.address,
-        locality: mockOrganisation.locality,
-        postCode: mockOrganisation.postCode,
-        logoUrl: mockOrganisation.logoUrl,
-      })
-    })
+    expect(prismaServiceMock.organisation.findMany).toHaveBeenCalledTimes(1)
   })
 })

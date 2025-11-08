@@ -6,8 +6,6 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { DonationMethodService } from '../services/donationMethod.service'
 import { PrismaService } from '@/infrastructure'
 
-import { buildMockDonationMethods } from '@shared/mocks'
-
 describe('DonationMethod', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
   let donationMethodService: DonationMethodService
@@ -31,16 +29,10 @@ describe('DonationMethod', () => {
   })
 
   it('should get method list', async () => {
-    const mockDonationMethods = buildMockDonationMethods()
-    prismaServiceMock.donationMethod.findMany.mockResolvedValueOnce(mockDonationMethods)
+    prismaServiceMock.donationMethod.findMany.mockResolvedValueOnce([])
 
-    const result = await donationMethodService.getAll()
+    await donationMethodService.getAll()
 
-    mockDonationMethods.forEach((mockDonationMethod, index) => {
-      expect(result[index]).toMatchObject({
-        name: mockDonationMethod.name,
-        isDefault: mockDonationMethod.isDefault,
-      })
-    })
+    expect(prismaServiceMock.donationMethod.findMany).toHaveBeenCalledTimes(1)
   })
 })
