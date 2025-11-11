@@ -43,4 +43,16 @@ describe('DonationService', () => {
 
     expect(prismaServiceMock.donation.count).toHaveBeenCalledTimes(1)
   })
+
+  it('should get donation by id', async () => {
+    const donationId = 'donation-id-123'
+    prismaServiceMock.donation.findUniqueOrThrow.mockResolvedValueOnce({
+      id: donationId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+
+    await donationService.getById(donationId)
+
+    expect(prismaServiceMock.donation.findUniqueOrThrow).toHaveBeenCalledTimes(1)
+  })
 })

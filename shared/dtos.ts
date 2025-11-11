@@ -109,7 +109,7 @@ interface NameSortOrder {
   name?: SortOrder
 }
 
-export interface DonationListFilterRequest {
+export interface DonationListFilter {
   contactId?: UuidFilter
   donatedAt?: DateTimeFilter
   amount?: FloatFilter
@@ -120,7 +120,7 @@ export interface DonationListFilterRequest {
 }
 
 export interface UuidFilter {
-  equals?: string
+  in?: string[]
 }
 
 export interface DateTimeFilter {
@@ -140,10 +140,20 @@ export interface BoolFilter {
 
 export interface GetDonationListRequest {
   pagination: DonationListPaginationRequest
-  filter?: DonationListFilterRequest
+  filter?: DonationListFilter
 }
 
 export interface GetDonationListResponse {
   donations: DonationDto[]
   pagination: DonationListPagination
+}
+
+export interface GetDonationListContextResponse {
+  paymentModes: PaymentModeDto[]
+  organisations: OrganisationSummaryDto[]
+  donationTypes: DonationTypeDto[]
+}
+
+export interface GetDonationResponse {
+  donation: DonationDto
 }

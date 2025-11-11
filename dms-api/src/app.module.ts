@@ -12,7 +12,13 @@ import {
   PaymentModeConverter,
 } from '@/api/converters'
 
-import { DonationService } from '@/domain'
+import {
+  DonationService,
+  DonationTypeService,
+  OrganisationService,
+  PaymentModeService,
+} from '@/domain'
+
 import { PrismaService } from '@/infrastructure'
 
 @Module({
@@ -24,8 +30,11 @@ import { PrismaService } from '@/infrastructure'
     DonationMethodConverter,
     DonationService,
     DonationTypeConverter,
+    DonationTypeService,
     OrganisationConverter,
+    OrganisationService,
     PaymentModeConverter,
+    PaymentModeService,
     PrismaService,
   ],
 })

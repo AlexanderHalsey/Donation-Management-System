@@ -14,7 +14,7 @@ export class DonationListPaginationRequest extends PaginationRequest {
   orderBy?: DonationListSortOrder
 }
 
-export class DonationListFilterRequest {
+export class DonationListFilter {
   @ApiProperty({ type: UuidFilter, required: false })
   @ValidateNested()
   @Type(() => UuidFilter)
@@ -58,8 +58,8 @@ export class GetDonationListRequest {
   @Type(() => DonationListPaginationRequest)
   pagination: DonationListPaginationRequest
 
-  @ApiProperty({ type: DonationListFilterRequest, required: false })
+  @ApiProperty({ type: DonationListFilter, required: false })
   @ValidateNested()
-  @Type(() => DonationListFilterRequest)
-  filter?: DonationListFilterRequest
+  @Type(() => DonationListFilter)
+  filter?: DonationListFilter
 }

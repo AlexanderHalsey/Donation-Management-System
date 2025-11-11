@@ -1,5 +1,6 @@
 export interface DonationListSortOrder {
   createdAt?: SortOrder
+  donatedAt?: SortOrder
   amount?: SortOrder
   paymentMode?: PaymentModeListSortOrder
   organisation?: OrganisationListSortOrder

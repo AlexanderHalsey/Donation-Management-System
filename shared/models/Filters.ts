@@ -1,5 +1,5 @@
 export interface UuidFilter {
-  equals?: string
+  in?: string[]
 }
 
 export interface DateTimeFilter {

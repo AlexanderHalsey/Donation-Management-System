@@ -1,17 +1,38 @@
-import { Body, Controller, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
-import { DonationService } from '@/domain'
+import {
+  DonationService,
+  DonationTypeService,
+  OrganisationService,
+  PaymentModeService,
+} from '@/domain'
 
-import { DonationConverter } from '../converters'
+import {
+  DonationConverter,
+  DonationTypeConverter,
+  OrganisationConverter,
+  PaymentModeConverter,
+} from '../converters'
 
-import { GetDonationListRequest, GetDonationListResponse } from '../dtos'
+import {
+  GetDonationListContextResponse,
+  GetDonationListRequest,
+  GetDonationListResponse,
+  GetDonationResponse,
+} from '../dtos'
 
 @Controller('donations')
 export class DonationController {
   constructor(
     private readonly donationService: DonationService,
     private readonly donationConverter: DonationConverter,
+    private readonly donationTypeService: DonationTypeService,
+    private readonly donationTypeConverter: DonationTypeConverter,
+    private readonly organisationService: OrganisationService,
+    private readonly organisationConverter: OrganisationConverter,
+    private readonly paymentModeService: PaymentModeService,
+    private readonly paymentModeConverter: PaymentModeConverter,
   ) {}
 
   @Post('filtered-list')
@@ -37,6 +58,42 @@ export class DonationController {
         pageSize: pagination.pageSize,
         orderBy: pagination.orderBy,
       },
+    }
+  }
+
+  @Get('context')
+  @ApiOperation({ summary: 'Get context for donation filters' })
+  @ApiResponse({ status: 200, type: [GetDonationListContextResponse] })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async getContext(): Promise<GetDonationListContextResponse> {
+    const [paymentModes, organisations, donationTypes] = await Promise.all([
+      this.paymentModeService.getAll(),
+      this.organisationService.getAllSummaries(),
+      this.donationTypeService.getAll(),
+    ])
+    return {
+      paymentModes: paymentModes.map((paymentMode) =>
+        this.paymentModeConverter.convertPaymentModeToDto(paymentMode),
+      ),
+      organisations: organisations.map((organisation) =>
+        this.organisationConverter.convertOrganisationSummaryToDto(organisation),
+      ),
+      donationTypes: donationTypes.map((donationType) =>
+        this.donationTypeConverter.convertDonationTypeToDto(donationType),
+      ),
+    }
+  }
+
+  @Get(':donationId')
+  @ApiOperation({ summary: 'Get donation by ID' })
+  @ApiResponse({ status: 200, type: GetDonationResponse })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async getDonationById(@Param('donationId') donationId: string): Promise<GetDonationResponse> {
+    const donation = await this.donationService.getById(donationId)
+    return {
+      donation: this.donationConverter.convertDonationToDto(donation),
     }
   }
 }

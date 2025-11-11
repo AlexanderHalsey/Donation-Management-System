@@ -6,6 +6,30 @@ import { PrismaService } from '@/infrastructure'
 
 import { Donation, DonationListPaginationRequest, DonationListFilter } from '@shared/models'
 
+const DONATION_QUERY_OPTIONS = {
+  include: {
+    donationAssetType: true,
+    donationMethod: true,
+    donationType: true,
+    organisation: {
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+      },
+    },
+    paymentMode: true,
+  },
+  omit: {
+    donationAssetTypeId: true,
+    donationMethodId: true,
+    donationTypeId: true,
+    organisationId: true,
+    paymentModeId: true,
+  },
+} as const
+
 @Injectable()
 export class DonationService {
   constructor(private readonly prisma: PrismaService) {}
@@ -16,27 +40,7 @@ export class DonationService {
   ): Promise<Donation[]> {
     return (
       await this.prisma.donation.findMany({
-        include: {
-          donationAssetType: true,
-          donationMethod: true,
-          donationType: true,
-          organisation: {
-            select: {
-              id: true,
-              createdAt: true,
-              updatedAt: true,
-              name: true,
-            },
-          },
-          paymentMode: true,
-        },
-        omit: {
-          donationAssetTypeId: true,
-          donationMethodId: true,
-          donationTypeId: true,
-          organisationId: true,
-          paymentModeId: true,
-        },
+        ...DONATION_QUERY_OPTIONS,
         where: filter,
         orderBy: pagination.orderBy,
         skip: (pagination.page - 1) * pagination.pageSize,
@@ -49,6 +53,15 @@ export class DonationService {
     return this.prisma.donation.count({
       where: filter,
     })
+  }
+
+  async getById(donationId: string): Promise<Donation> {
+    return nullsToUndefined(
+      await this.prisma.donation.findUniqueOrThrow({
+        where: { id: donationId },
+        ...DONATION_QUERY_OPTIONS,
+      }),
+    )
   }
 
   // for create and update ensure donationType and organisation are correctly linked

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-import { IsBoolean, IsDate, IsNumber, IsOptional } from 'class-validator'
+import { IsArray, IsBoolean, IsDate, IsNumber, IsOptional, IsUUID } from 'class-validator'
 import { Type } from 'class-transformer'
 
 export class DateTimeFilter {
@@ -19,8 +19,10 @@ export class DateTimeFilter {
 
 export class UuidFilter {
   @ApiProperty({ required: false })
+  @IsArray()
   @IsOptional()
-  equals?: string
+  @IsUUID('4', { each: true })
+  in?: string[]
 }
 
 export class FloatFilter {
