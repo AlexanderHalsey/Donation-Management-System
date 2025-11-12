@@ -5,6 +5,7 @@
     :pagination="computedPagination"
     :loading="loading"
     row-key="id"
+    :table-row-class-fn="rowClassFn"
     class="donation-list-table"
     @update:pagination="updatePagination"
   >
@@ -27,7 +28,7 @@
     </template>
     <template #body-cell-actions="{ row }">
       <td>
-        <DonationListActions :donation="row" />
+        <DonationListItemActions v-if="!row.isDisabled || row.receiptId" :donation="row" />
       </td>
     </template>
   </Table>
@@ -41,7 +42,9 @@ import { isEqual, omit } from 'es-toolkit'
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 import FormattedDate from '@/components/FormattedDate.vue'
 import OrganisationTag from '@/components/OrganisationTag.vue'
-import DonationListActions from './DonationListActions.vue'
+import DonationListItemActions from './DonationListItemActions.vue'
+
+import { DONATION_STATUS_OPTIONS } from '../helpers'
 
 import type { QTableProps } from 'quasar'
 import type {
@@ -125,6 +128,15 @@ const headers: QTableProps['columns'] = [
   },
 ]
 
+const rowClassFn = (row: Donation) => {
+  for (const option of DONATION_STATUS_OPTIONS) {
+    if (option.predicate(row)) {
+      return option.className
+    }
+  }
+  return 'bg-white'
+}
+
 const computedPagination = computed<QTablePagination>(() => {
   const sortBy = Object.keys(props.pagination?.orderBy || {})[0]
   let orderByValue = Object.values(props.pagination?.orderBy || {})[0]
@@ -176,7 +188,6 @@ const updatePagination = ({
     }
     td:first-child {
       z-index: 1;
-      background-color: white;
     }
     td:first-child,
     th:first-child {

@@ -18,6 +18,7 @@
         </QBreadcrumbs>
         <QSpace />
 
+        <HelpBtn />
         <!-- language -->
         <!-- user disconnect -->
       </QToolbar>
@@ -48,7 +49,7 @@
         style="height: calc(100% - 51px)"
         @scroll="setMenuScrollVisible"
       >
-        <QList padding class="menu-list q-pt-md">
+        <QList padding class="menu-list q-pt-md q-mx-md">
           <QItem
             v-for="(menuItem, index) of menuItems"
             :key="index"
@@ -56,7 +57,7 @@
             v-ripple
             :to="menuItem.to"
             :active="$route.path.startsWith(menuItem.to)"
-            class="q-my-sm q-mx-md"
+            class="q-my-sm"
             active-class="bg-primary text-white shadow-2"
           >
             <QItemSection avatar>
@@ -81,6 +82,8 @@
 import { computed, provide, ref } from 'vue'
 
 import { useQuasar } from 'quasar'
+
+import HelpBtn from './components/HelpBtn.vue'
 
 import { setBreadcrumbsInjectionKey } from '@/symbols'
 import type { Breadcrumb, MenuItem } from '@/types'
