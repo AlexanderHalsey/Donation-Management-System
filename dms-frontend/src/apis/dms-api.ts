@@ -1,26 +1,35 @@
 import { withClient } from './client'
 
-import { convertDtoToDonation } from './converters'
+import {
+  convertDtoToDonation,
+  convertDtoToDonationType,
+  convertDtoToOrganisationSummary,
+  convertDtoToPaymentMode,
+} from './converters'
 
-import type { GetDonationListRequest, GetDonationListResponse } from '@shared/dtos'
+import type {
+  GetDonationListContextResponse,
+  GetDonationListRequest,
+  GetDonationListResponse,
+  GetDonationResponse,
+} from '@shared/dtos'
 import type {
   Donation,
   DonationListPagination,
   DonationListPaginationRequest,
+  DonationType,
+  OrganisationSummary,
+  PaymentMode,
 } from '@shared/models'
 
 export const getDonations = async (
-  pagination?: DonationListPaginationRequest,
+  pagination: DonationListPaginationRequest,
 ): Promise<{
   donations: Donation[]
   pagination: DonationListPagination
 }> => {
   const request: GetDonationListRequest = {
-    pagination: {
-      page: pagination?.page || 1,
-      pageSize: pagination?.pageSize || 10,
-      orderBy: pagination?.orderBy ?? { createdAt: 'desc' },
-    },
+    pagination,
   }
   const response = await withClient((client) =>
     client.post<GetDonationListResponse>('/donations/filtered-list', request),
@@ -31,12 +40,24 @@ export const getDonations = async (
   }
 }
 
+export const getDonationsContext = async (): Promise<{
+  paymentModes: PaymentMode[]
+  organisations: OrganisationSummary[]
+  donationTypes: DonationType[]
+}> => {
+  const response = await withClient((client) =>
+    client.get<GetDonationListContextResponse>('/donations/context'),
+  )
+  return {
+    paymentModes: response.paymentModes.map(convertDtoToPaymentMode),
+    organisations: response.organisations.map(convertDtoToOrganisationSummary),
+    donationTypes: response.donationTypes.map(convertDtoToDonationType),
+  }
+}
+
 export const getDonation = async (donationId: string): Promise<Donation> => {
-  // TODO replace with proper API call
-  const { donations } = await getDonations({
-    page: 1,
-    pageSize: 1000,
-    orderBy: { createdAt: 'desc' },
-  })
-  return donations.find((donation) => donation.id === donationId)!
+  const response = await withClient((client) =>
+    client.get<GetDonationResponse>(`/donations/${donationId}`),
+  )
+  return convertDtoToDonation(response.donation)
 }

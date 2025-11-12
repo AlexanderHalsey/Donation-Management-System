@@ -19,10 +19,7 @@
     </template>
     <template #body-cell-organisation="{ row }">
       <td>
-        <OrganisationTag
-          :organisation="row.organisation"
-          :organisationOptions="organisationOptions"
-        />
+        <OrganisationTag :organisation="row.organisation" :organisationOptions="organisations" />
       </td>
     </template>
     <template #body-cell-donationType="{ row }">
@@ -39,7 +36,7 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
 
-import { uniqBy } from 'es-toolkit'
+import { isEqual, omit } from 'es-toolkit'
 
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 import FormattedDate from '@/components/FormattedDate.vue'
@@ -62,7 +59,11 @@ const props = defineProps({
   },
   pagination: {
     type: Object as PropType<DonationListPagination>,
-    default: undefined,
+    required: true,
+  },
+  organisations: {
+    type: Array as PropType<OrganisationSummary[]>,
+    default: () => [],
   },
   loading: {
     type: Boolean,
@@ -134,9 +135,9 @@ const computedPagination = computed<QTablePagination>(() => {
   return {
     sortBy,
     descending: orderByValue === 'desc',
-    page: props.pagination?.page || 1,
-    rowsPerPage: props.pagination?.pageSize || 10,
-    rowsNumber: props.pagination?.totalCount || 0,
+    page: props.pagination.page,
+    rowsPerPage: props.pagination.pageSize,
+    rowsNumber: props.pagination.totalCount,
   }
 })
 
@@ -147,7 +148,7 @@ const updatePagination = ({
   descending,
   rowsNumber,
 }: QTablePagination) => {
-  emit('update:pagination', {
+  const paginationRequest: DonationListPaginationRequest = {
     page,
     pageSize: rowsPerPage || rowsNumber || 0,
     orderBy: sortBy
@@ -159,17 +160,12 @@ const updatePagination = ({
               : 'asc',
         } as DonationListSortOrder)
       : undefined,
-  })
-}
+  }
 
-const organisationOptions = computed<OrganisationSummary[]>(() =>
-  uniqBy(
-    props.donationList
-      .map((donation) => donation.organisation)
-      .sort((a, b) => a.name.localeCompare(b.name)),
-    (org) => org.id,
-  ),
-)
+  if (!isEqual(paginationRequest, omit(props.pagination, ['totalCount']))) {
+    emit('update:pagination', paginationRequest)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
