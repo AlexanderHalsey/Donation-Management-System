@@ -2,7 +2,7 @@
   <QLayout view="lHh LpR lFr">
     <QHeader reveal bordered class="bg-white text-primary">
       <QToolbar>
-        <QBtn dense flat round icon="menu" color="secondary" @click="toggleLeftDrawer" />
+        <QBtn dense flat round icon="menu" color="primary" @click="toggleLeftDrawer" />
         <QBreadcrumbs active-color="primary breadcrumbs" gutter="md" class="text-grey q-pl-md">
           <template #separator>
             <QIcon size="1.5em" name="chevron_right" color="primary" />
@@ -124,7 +124,7 @@ const setMenuScrollVisible = ({ verticalPosition }: { verticalPosition: number }
 .dms-title {
   position: sticky;
   top: 0;
-  color: $secondary;
+  color: $primary;
   background: inherit;
   z-index: 1;
   height: 51px;
@@ -143,6 +143,6 @@ const setMenuScrollVisible = ({ verticalPosition }: { verticalPosition: number }
 
 .menu-list > .q-item {
   min-height: 42px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 </style>

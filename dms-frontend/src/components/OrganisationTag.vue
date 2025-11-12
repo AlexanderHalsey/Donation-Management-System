@@ -20,9 +20,9 @@ const props = defineProps({
 })
 
 const options: Tag[] = [
-  { backgroundColor: '#E0F7FA', color: '#006064' },
-  { backgroundColor: '#E8F5E9', color: '#1B5E20' },
   { backgroundColor: '#EDE7F6', color: '#311B92' },
+  { backgroundColor: '#E8F5E9', color: '#1B5E20' },
+  { backgroundColor: '#E0F7FA', color: '#006064' },
   { backgroundColor: '#FFF3E0', color: '#E65100' },
   // add more options as needed
 ]
