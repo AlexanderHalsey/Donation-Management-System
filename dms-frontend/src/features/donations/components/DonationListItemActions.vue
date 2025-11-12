@@ -13,7 +13,12 @@
         </QItemSection>
         <QItemSection> Editer </QItemSection>
       </QItem>
-      <QItem clickable v-close-popup class="text-red" style="padding: 8px 12px; border-radius: 6px">
+      <QItem
+        clickable
+        v-close-popup
+        class="text-red-8"
+        style="padding: 8px 12px; border-radius: 6px"
+      >
         <QItemSection style="flex: unset">
           <QIcon name="delete" />
         </QItemSection>
