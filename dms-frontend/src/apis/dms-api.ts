@@ -15,6 +15,7 @@ import type {
 } from '@shared/dtos'
 import type {
   Donation,
+  DonationListFilter,
   DonationListPagination,
   DonationListPaginationRequest,
   DonationType,
@@ -24,12 +25,14 @@ import type {
 
 export const getDonations = async (
   pagination: DonationListPaginationRequest,
+  filter?: DonationListFilter,
 ): Promise<{
   donations: Donation[]
   pagination: DonationListPagination
 }> => {
   const request: GetDonationListRequest = {
     pagination,
+    filter,
   }
   const response = await withClient((client) =>
     client.post<GetDonationListResponse>('/donations/filtered-list', request),

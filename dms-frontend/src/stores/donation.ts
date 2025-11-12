@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { getDonation, getDonations, getDonationsContext } from '@/apis/dms-api'
 
 import type {
+  DonationListFilter,
   Donation,
   DonationListPagination,
   DonationListPaginationRequest,
@@ -29,9 +30,12 @@ export const useDonationStore = defineStore('donation', () => {
     organisations: [],
     donationTypes: [],
   })
+  const filter = ref<DonationListFilter | undefined>({
+    isDisabled: { equals: false },
+  })
 
   const fetchDonations = async (paginationRequest: DonationListPaginationRequest) => {
-    const response = await getDonations(paginationRequest)
+    const response = await getDonations(paginationRequest, filter.value)
     donationList.value = response.donations
     pagination.value = response.pagination
   }
@@ -48,12 +52,18 @@ export const useDonationStore = defineStore('donation', () => {
     }
   }
 
+  const updateFilter = (newFilter?: DonationListFilter) => {
+    filter.value = newFilter
+  }
+
   return {
     context,
     donationList,
     fetchContext,
     fetchDonation,
     fetchDonations,
+    filter,
     pagination,
+    updateFilter,
   }
 })

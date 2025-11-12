@@ -1,6 +1,7 @@
 import { addDays } from 'date-fns'
 import { v4 } from 'uuid'
 import { sortBy } from 'es-toolkit'
+import { get } from 'es-toolkit/compat'
 
 import { buildMockPaymentModes } from './paymentMode'
 import { buildMockOrganisations } from './organisation'
@@ -15,7 +16,19 @@ import type {
   DonationListSortOrder,
 } from '@shared/models'
 
-export function buildMockDonations(pagination?: DonationListPaginationRequest): Donation[] {
+export type DonationListFilterMock = Omit<
+  DonationListFilter,
+  'paymentModeId' | 'organisationId' | 'donationTypeId'
+> & {
+  paymentModeId?: { in?: number[] }
+  organisationId?: { in?: number[] }
+  donationTypeId?: { in?: number[] }
+}
+
+export function buildMockDonations(
+  pagination?: DonationListPaginationRequest,
+  filter?: DonationListFilterMock,
+): Donation[] {
   const paymentModes = buildMockPaymentModes()
   const organisations = buildMockOrganisations()
   const donationTypes = buildMockDonationTypes(organisations)
@@ -35,9 +48,31 @@ export function buildMockDonations(pagination?: DonationListPaginationRequest): 
     donationType: donationTypes[index % donationTypes.length],
     donationMethod: donationMethods[index % donationMethods.length],
     donationAssetType: donationAssetTypes[index % donationAssetTypes.length],
-    isDisabled: false,
+    isDisabled: index % 25 === 0,
     contactId: v4(),
   }))
+
+  donations = donations.filter((donation) => {
+    if (
+      (typeof filter?.amount?.gte === 'number' && donation.amount < filter.amount.gte) ||
+      (typeof filter?.amount?.lte === 'number' && donation.amount > filter.amount.lte) ||
+      (filter?.amount?.equals !== undefined && donation.amount !== filter.amount.equals) ||
+      (typeof filter?.donatedAt?.gte === 'object' && donation.donatedAt < filter.donatedAt.gte) ||
+      (typeof filter?.donatedAt?.lte === 'object' && donation.donatedAt > filter.donatedAt.lte) ||
+      (filter?.isDisabled?.equals !== undefined &&
+        donation.isDisabled !== filter.isDisabled.equals) ||
+      (filter?.organisationId?.in !== undefined &&
+        !filter.organisationId.in.includes(organisations.indexOf(donation.organisation))) ||
+      (filter?.donationTypeId?.in !== undefined &&
+        !filter.donationTypeId.in.includes(donationTypes.indexOf(donation.donationType))) ||
+      (filter?.paymentModeId?.in !== undefined &&
+        !filter.paymentModeId.in.includes(paymentModes.indexOf(donation.paymentMode)))
+    ) {
+      return false
+    }
+
+    return true
+  })
 
   if (!pagination) return donations
 
@@ -50,13 +85,9 @@ export function buildMockDonations(pagination?: DonationListPaginationRequest): 
       key = (key + '.name') as keyof DonationListSortOrder
       order = order.name as 'asc' | 'desc'
     }
-    donations = sortBy(donations, [key])
+    donations = sortBy(donations, [(item) => get(item, key)])
     if (order === 'desc') donations.reverse()
   }
 
-  return donations.slice(
-    (pagination.page - 1) * pagination.pageSize,
-    pagination.page * pagination.pageSize,
-  )
+  return donations
 }
-
