@@ -8,6 +8,7 @@ export const buildMockDonationCreateManyInput = ({
   donationTypeId,
   organisationId,
   paymentModeId,
+  donorId,
 }: {
   index: number
   donationAssetTypeId: string
@@ -15,6 +16,7 @@ export const buildMockDonationCreateManyInput = ({
   donationTypeId: string
   organisationId: string
   paymentModeId: string
+  donorId: string
 }): DonationCreateManyInput => {
   return {
     amount: ((index % 10) + 1) * 10,
@@ -24,7 +26,7 @@ export const buildMockDonationCreateManyInput = ({
     donationTypeId,
     organisationId,
     paymentModeId,
-    isDisabled: index % 25 === 0,
-    contactId: '757fd8bc-417b-4815-be6f-d6a52bd50fe9',
+    isDisabled: index % 25 === 24,
+    donorId,
   }
 }

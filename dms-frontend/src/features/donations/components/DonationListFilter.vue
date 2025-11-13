@@ -18,25 +18,40 @@
           Réinitialiser
         </Btn>
       </div>
-      <!-- TODO add contact filter -->
-      <div>
-        <div class="text-bold q-mb-sm">Date du don</div>
-        <DateTimeFilterComponent
-          :model-value="filter?.donatedAt"
-          @update:model-value="updateFilter({ ...filter, donatedAt: $event })"
-        />
-      </div>
-      <QSeparator class="q-mt-xs q-mb-sm" />
-      <div>
-        <div class="text-bold q-mb-sm">Montant</div>
-        <FloatFilterComponent
-          :model-value="filter?.amount"
-          @update:model-value="updateFilter({ ...filter, amount: $event })"
-        />
-      </div>
-      <QSeparator class="q-mt-xs q-mb-sm" />
+
       <div class="row">
-        <div class="col">
+        <div class="col-4">
+          <div>
+            <div class="text-bold q-mb-sm">Donateur</div>
+            <UuidFilterComponent
+              :model-value="filter?.donorId"
+              @update:model-value="updateFilter({ ...filter, donorId: $event })"
+              :options="
+                context.donors.map((donor) => ({
+                  id: donor.id,
+                  name: getDonorFullName(donor),
+                }))
+              "
+            />
+          </div>
+          <QSeparator class="q-mt-xs q-mb-sm" />
+          <div>
+            <div class="text-bold q-mb-sm">Mode de paiement</div>
+            <UuidFilterComponent
+              :model-value="filter?.paymentModeId"
+              @update:model-value="updateFilter({ ...filter, paymentModeId: $event })"
+              :options="context.paymentModes"
+            >
+              <template #option="scope">
+                <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
+                  <QItemSection>
+                    <QItemLabel>{{ scope.opt.label }}</QItemLabel>
+                  </QItemSection>
+                </QItem>
+              </template>
+            </UuidFilterComponent>
+          </div>
+          <QSeparator class="q-mt-xs q-mb-sm" />
           <div>
             <div class="text-bold q-mb-sm">Organisation</div>
             <UuidFilterComponent
@@ -56,59 +71,60 @@
               </template>
             </UuidFilterComponent>
           </div>
-          <QSeparator class="q-mt-xs q-mb-sm" />
-          <div>
-            <div class="text-bold q-mb-sm">Mode de paiement</div>
-            <UuidFilterComponent
-              :model-value="filter?.paymentModeId"
-              @update:model-value="updateFilter({ ...filter, paymentModeId: $event })"
-              :options="context.paymentModes"
-            >
-              <template #option="scope">
-                <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
-                  <QItemSection>
-                    <QItemLabel>{{ scope.opt.label }}</QItemLabel>
-                  </QItemSection>
-                </QItem>
-              </template>
-            </UuidFilterComponent>
-          </div>
         </div>
         <QSeparator vertical class="q-mx-md" />
         <div class="col">
           <div>
-            <div class="text-bold q-mb-sm">Type de don</div>
-            <UuidFilterComponent
-              :model-value="filter?.donationTypeId"
-              @update:model-value="updateFilter({ ...filter, donationTypeId: $event })"
-              :options="context.donationTypes"
-            >
-              <template #option="scope">
-                <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
-                  <QItemSection>
-                    <QItemLabel>{{ scope.opt.label }}</QItemLabel>
-                    <QItemLabel caption class="flex items-center">
-                      Organisation :
-                      <OrganisationTag
-                        :organisation="getOrganisationByDonationTypeId(scope.opt.value)"
-                        :organisation-options="context.organisations"
-                        class="q-ml-xs"
-                      />
-                    </QItemLabel>
-                  </QItemSection>
-                </QItem>
-              </template>
-            </UuidFilterComponent>
+            <div class="text-bold q-mb-sm">Date du don</div>
+            <DateTimeFilterComponent
+              :model-value="filter?.donatedAt"
+              @update:model-value="updateFilter({ ...filter, donatedAt: $event })"
+            />
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div>
-            <div class="text-bold q-mb-sm">Inclure les dons supprimés</div>
-            <QToggle
-              :model-value="filter?.isDisabled?.equals === false ? false : true"
-              @update:model-value="
-                updateFilter({ ...filter, isDisabled: { equals: $event ? undefined : false } })
-              "
+            <div class="text-bold q-mb-sm">Montant</div>
+            <FloatFilterComponent
+              :model-value="filter?.amount"
+              @update:model-value="updateFilter({ ...filter, amount: $event })"
             />
+          </div>
+          <QSeparator class="q-mt-xs q-mb-sm" />
+          <div class="row">
+            <div class="col">
+              <div class="text-bold q-mb-sm">Type de don</div>
+              <UuidFilterComponent
+                :model-value="filter?.donationTypeId"
+                @update:model-value="updateFilter({ ...filter, donationTypeId: $event })"
+                :options="context.donationTypes"
+              >
+                <template #option="scope">
+                  <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
+                    <QItemSection>
+                      <QItemLabel>{{ scope.opt.label }}</QItemLabel>
+                      <QItemLabel caption class="flex items-center">
+                        Organisation :
+                        <OrganisationTag
+                          :organisation="getOrganisationByDonationTypeId(scope.opt.value)"
+                          :organisation-options="context.organisations"
+                          class="q-ml-xs"
+                        />
+                      </QItemLabel>
+                    </QItemSection>
+                  </QItem>
+                </template>
+              </UuidFilterComponent>
+            </div>
+            <QSeparator vertical class="q-mx-md" />
+            <div>
+              <div class="text-bold q-mb-sm">Inclure les dons supprimés</div>
+              <QToggle
+                :model-value="filter?.isDisabled?.equals === false ? false : true"
+                @update:model-value="
+                  updateFilter({ ...filter, isDisabled: { equals: $event ? undefined : false } })
+                "
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -122,6 +138,7 @@ import { computed, type PropType } from 'vue'
 import { debounce, isEqual } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { isDate } from 'date-fns'
+import { getDonorFullName } from '@/features/donors'
 
 import BtnDropdown from '@/components/ui/BtnDropdown.vue'
 import Btn from '@/components/ui/Btn.vue'
@@ -134,6 +151,7 @@ import UuidFilterComponent from '@/components/UuidFilter.vue'
 import type {
   DonationListFilter,
   DonationType,
+  DonorSummary,
   OrganisationSummary,
   PaymentMode,
 } from '@shared/models'
@@ -144,6 +162,7 @@ const props = defineProps({
       paymentModes: PaymentMode[]
       organisations: OrganisationSummary[]
       donationTypes: DonationType[]
+      donors: DonorSummary[]
     }>,
     required: true,
   },
@@ -190,6 +209,7 @@ const getOrganisationByDonationTypeId = (id: string): OrganisationSummary => {
 const filterCount = computed(
   () =>
     [
+      !!props.filter?.donorId?.in,
       !!props.filter?.donatedAt?.lte,
       !!props.filter?.donatedAt?.gte,
       !!props.filter?.amount?.lte,

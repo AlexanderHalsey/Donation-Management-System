@@ -7,6 +7,7 @@ import { DonationTypeDto, DonationTypeListSortOrder } from './donation-type.dto'
 import { DonationMethodDto, DonationMethodListSortOrder } from './donation-method.dto'
 import { DonationAssetTypeDto, DonationAssetTypeListSortOrder } from './donation-asset-type.dto'
 import { PaymentModeDto, PaymentModeListSortOrder } from './payment-mode.dto'
+import { DonorSummaryDto, DonorSummaryListSortOrder } from './donor.dto'
 
 import { SortOrderEnum, SortOrder } from './sort-order.dto'
 
@@ -22,8 +23,8 @@ export class DonationDto {
   donationMethod: DonationMethodDto
   donationAssetType: DonationAssetTypeDto
   isDisabled: boolean
-  contactId: string
-  receiptId?: string
+  donor: DonorSummaryDto
+  taxReceiptId?: string
 }
 
 export class DonationListSortOrder {
@@ -67,6 +68,8 @@ export class DonationListSortOrder {
   @Type(() => DonationAssetTypeListSortOrder)
   donationAssetType?: DonationAssetTypeListSortOrder
 
-  // contact name
-  // receipt reference number
+  @ApiProperty({ type: DonorSummaryListSortOrder, required: false })
+  @ValidateNested()
+  @Type(() => DonorSummaryListSortOrder)
+  donor?: DonorSummaryListSortOrder
 }

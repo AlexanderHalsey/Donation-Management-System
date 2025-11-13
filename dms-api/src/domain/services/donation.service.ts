@@ -20,6 +20,15 @@ const DONATION_QUERY_OPTIONS = {
       },
     },
     paymentMode: true,
+    donor: {
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        firstName: true,
+        lastName: true,
+      },
+    },
   },
   omit: {
     donationAssetTypeId: true,

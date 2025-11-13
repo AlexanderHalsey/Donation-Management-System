@@ -3,6 +3,7 @@ import { withClient } from './client'
 import {
   convertDtoToDonation,
   convertDtoToDonationType,
+  convertDtoToDonorSummary,
   convertDtoToOrganisationSummary,
   convertDtoToPaymentMode,
 } from './converters'
@@ -19,6 +20,7 @@ import type {
   DonationListPagination,
   DonationListPaginationRequest,
   DonationType,
+  DonorSummary,
   OrganisationSummary,
   PaymentMode,
 } from '@shared/models'
@@ -47,6 +49,7 @@ export const getDonationsContext = async (): Promise<{
   paymentModes: PaymentMode[]
   organisations: OrganisationSummary[]
   donationTypes: DonationType[]
+  donors: DonorSummary[]
 }> => {
   const response = await withClient((client) =>
     client.get<GetDonationListContextResponse>('/donations/context'),
@@ -55,6 +58,7 @@ export const getDonationsContext = async (): Promise<{
     paymentModes: response.paymentModes.map(convertDtoToPaymentMode),
     organisations: response.organisations.map(convertDtoToOrganisationSummary),
     donationTypes: response.donationTypes.map(convertDtoToDonationType),
+    donors: response.donors.map(convertDtoToDonorSummary),
   }
 }
 

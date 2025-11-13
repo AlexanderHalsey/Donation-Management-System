@@ -11,31 +11,21 @@ CREATE TABLE "Donation" (
     "donationMethodId" UUID NOT NULL,
     "donationAssetTypeId" UUID NOT NULL,
     "isDisabled" BOOLEAN NOT NULL DEFAULT false,
-    "contactId" UUID NOT NULL,
-    "receiptId" UUID,
+    "donorId" UUID NOT NULL,
+    "taxReceiptId" UUID,
 
     CONSTRAINT "Donation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "PaymentMode" (
+CREATE TABLE "DonationAssetType" (
     "id" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "PaymentMode_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "DonationType" (
-    "id" UUID NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "name" TEXT NOT NULL,
-    "organisationId" UUID NOT NULL,
-
-    CONSTRAINT "DonationType_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "DonationAssetType_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -50,14 +40,38 @@ CREATE TABLE "DonationMethod" (
 );
 
 -- CreateTable
-CREATE TABLE "DonationAssetType" (
+CREATE TABLE "DonationType" (
     "id" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
-    "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    "organisationId" UUID NOT NULL,
 
-    CONSTRAINT "DonationAssetType_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "DonationType_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Donor" (
+    "id" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "externalId" INTEGER NOT NULL,
+    "civility" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
+    "firstName" TEXT,
+    "email" TEXT,
+    "phoneNumber" TEXT,
+    "careOf" TEXT,
+    "streetAddress1" TEXT,
+    "streetAddress2" TEXT,
+    "postalCode" TEXT,
+    "city" TEXT,
+    "state" TEXT,
+    "country" TEXT,
+    "isFacilitator" BOOLEAN NOT NULL DEFAULT false,
+    "isDisabled" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "Donor_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -80,6 +94,16 @@ CREATE TABLE "Organisation" (
     CONSTRAINT "Organisation_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "PaymentMode" (
+    "id" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "PaymentMode_pkey" PRIMARY KEY ("id")
+);
+
 -- AddForeignKey
 ALTER TABLE "Donation" ADD CONSTRAINT "Donation_paymentModeId_fkey" FOREIGN KEY ("paymentModeId") REFERENCES "PaymentMode"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -94,6 +118,9 @@ ALTER TABLE "Donation" ADD CONSTRAINT "Donation_donationMethodId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "Donation" ADD CONSTRAINT "Donation_donationAssetTypeId_fkey" FOREIGN KEY ("donationAssetTypeId") REFERENCES "DonationAssetType"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Donation" ADD CONSTRAINT "Donation_donorId_fkey" FOREIGN KEY ("donorId") REFERENCES "Donor"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "DonationType" ADD CONSTRAINT "DonationType_organisationId_fkey" FOREIGN KEY ("organisationId") REFERENCES "Organisation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

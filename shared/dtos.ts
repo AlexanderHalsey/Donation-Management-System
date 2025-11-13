@@ -48,6 +48,29 @@ export interface DonationAssetTypeDto {
   name: string
   isDefault: boolean
 }
+export interface DonorSummaryDto {
+  id: string
+  createdAt: string
+  updatedAt: string
+  firstName: string
+  lastName: string
+}
+
+export interface DonorDto extends DonorSummaryDto {
+  email?: string
+  phoneNumber?: string
+  civility?: string
+  streetAddress1?: string
+  streetAddress2?: string
+  postalCode?: string
+  city?: string
+  state?: string
+  country?: string
+  isFacilitator: boolean
+  isDisabled: boolean
+  donationCount: number
+  donationTotalAmount: number
+}
 
 export interface DonationDto {
   id: string
@@ -61,8 +84,8 @@ export interface DonationDto {
   donationMethod: DonationMethodDto
   donationAssetType: DonationAssetTypeDto
   isDisabled: boolean
-  contactId: string
-  receiptId?: string
+  donor: DonorSummaryDto
+  taxReceiptId?: string
 }
 
 /**
@@ -95,6 +118,13 @@ export interface DonationListSortOrder {
   donationType?: DonationTypeListSortOrder
   donationMethod?: DonationMethodListSortOrder
   donationAssetType?: DonationAssetTypeListSortOrder
+  donor?: DonorSummaryListSortOrder
+}
+
+export interface DonorListSortOrder extends DonorSummaryListSortOrder {
+  donationCount?: SortOrder
+  donationTotalAmount?: SortOrder
+  email?: SortOrder
 }
 
 export interface PaymentModeListSortOrder extends NameSortOrder {}
@@ -102,6 +132,9 @@ export interface OrganisationListSortOrder extends NameSortOrder {}
 export interface DonationTypeListSortOrder extends NameSortOrder {}
 export interface DonationMethodListSortOrder extends NameSortOrder {}
 export interface DonationAssetTypeListSortOrder extends NameSortOrder {}
+export interface DonorSummaryListSortOrder {
+  lastName?: SortOrder
+}
 
 export type SortOrder = 'asc' | 'desc'
 
@@ -110,7 +143,7 @@ interface NameSortOrder {
 }
 
 export interface DonationListFilter {
-  contactId?: UuidFilter
+  donorId?: UuidFilter
   donatedAt?: DateTimeFilter
   amount?: FloatFilter
   paymentModeId?: UuidFilter
@@ -152,6 +185,7 @@ export interface GetDonationListContextResponse {
   paymentModes: PaymentModeDto[]
   organisations: OrganisationSummaryDto[]
   donationTypes: DonationTypeDto[]
+  donors: DonorSummaryDto[]
 }
 
 export interface GetDonationResponse {

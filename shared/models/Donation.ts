@@ -1,6 +1,7 @@
 import type { DonationAssetType } from './DonationAssetType'
 import type { DonationMethod } from './DonationMethod'
 import type { DonationType } from './DonationType'
+import type { DonorSummary } from './Donor'
 import type { BoolFilter, DateTimeFilter, FloatFilter, UuidFilter } from './Filters'
 import type { OrganisationSummary } from './Organisation'
 import type { Pagination, PaginationRequest } from './Pagination'
@@ -19,15 +20,15 @@ export type Donation = {
   donationMethod: DonationMethod
   donationAssetType: DonationAssetType
   isDisabled: boolean
-  contactId: string
-  receiptId?: string
+  donor: DonorSummary
+  taxReceiptId?: string
 }
 
 export type DonationListPaginationRequest = PaginationRequest<DonationListSortOrder>
 export type DonationListPagination = Pagination<DonationListSortOrder>
 
 export type DonationListFilter = {
-  contactId?: UuidFilter
+  donorId?: UuidFilter
   donatedAt?: DateTimeFilter
   amount?: FloatFilter
   paymentModeId?: UuidFilter

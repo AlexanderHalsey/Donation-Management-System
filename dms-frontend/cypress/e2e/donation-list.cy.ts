@@ -19,7 +19,7 @@ describe('Donation List', () => {
     cy.get(donationListItem)
       .first()
       .within(() => {
-        // TODO - add test for contact column
+        cy.get('td').eq(0).should('contain.text', 'LASTNAME10 FirstName10')
         cy.get('td').eq(1).should('contain.text', '09/04/2024')
         cy.get('td').eq(2).should('contain.text', '100.00 €')
         cy.get('td').eq(3).should('contain.text', 'Payment Mode 4')
@@ -29,7 +29,7 @@ describe('Donation List', () => {
     cy.get(donationListItem)
       .eq(3)
       .within(() => {
-        // TODO - add test for contact column
+        cy.get('td').eq(0).should('contain.text', 'LASTNAME7 FirstName7')
         cy.get('td').eq(1).should('contain.text', '06/04/2024')
         cy.get('td').eq(2).should('contain.text', '70.00 €')
         cy.get('td').eq(3).should('contain.text', 'Payment Mode 1')
@@ -39,7 +39,7 @@ describe('Donation List', () => {
     cy.get(donationListItem)
       .eq(7)
       .within(() => {
-        // TODO - add test for contact column
+        cy.get('td').eq(0).should('contain.text', 'LASTNAME3 FirstName3')
         cy.get('td').eq(1).should('contain.text', '02/04/2024')
         cy.get('td').eq(2).should('contain.text', '30.00 €')
         cy.get('td').eq(3).should('contain.text', 'Payment Mode 1')
@@ -150,7 +150,8 @@ describe('Donation List', () => {
     cy.url().should('match', /\/donations\/[a-f0-9\-]{36}$/)
   })
   describe('Filters', () => {
-    const getFilterMenu = () => cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children()
+    const getFilterMenu = () =>
+      cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children().eq(1).children()
     // TODO add test for donor uuidfilter when implemented
     it('should allow filtering by a date range', () => {
       cy.visit('/donations')
@@ -162,7 +163,9 @@ describe('Donation List', () => {
       )
       // add start date filter
       getFilterMenu()
-        .eq(1)
+        .eq(2)
+        .children()
+        .eq(0)
         .within(() => {
           cy.get('input').eq(0).type('01022024')
         })
@@ -174,7 +177,9 @@ describe('Donation List', () => {
       )
       // add end date filter
       getFilterMenu()
-        .eq(1)
+        .eq(2)
+        .children()
+        .eq(0)
         .within(() => {
           cy.get('input').eq(1).type('05032024')
         })
@@ -188,9 +193,11 @@ describe('Donation List', () => {
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
         { amount: { gte: 40 } },
       )
-      // add start date filter
+      // add minimum amount filter
       getFilterMenu()
-        .eq(3)
+        .eq(2)
+        .children()
+        .eq(2)
         .within(() => {
           cy.get('input').eq(0).type('40')
         })
@@ -200,16 +207,18 @@ describe('Donation List', () => {
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
         { amount: { gte: 40, lte: 70 } },
       )
-      // add end date filter
+      // add maximum amount filter
       getFilterMenu()
-        .eq(3)
+        .eq(2)
+        .children()
+        .eq(2)
         .within(() => {
           cy.get('input').eq(1).type('70')
         })
       cy.get(paginationInfo).should('contain.text', '1-10 of 40')
     })
     it('should allow filtering by payment mode', () => {
-      const getPaymentModeFilter = () => getFilterMenu().eq(5).children().eq(0).children().eq(2)
+      const getPaymentModeFilter = () => getFilterMenu().eq(0).children().eq(2)
       cy.visit('/donations')
       cy.wait(['@getDonationList', '@getDonationListContext'])
       cy.get(filter).click()
@@ -221,7 +230,7 @@ describe('Donation List', () => {
       getPaymentModeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
-      cy.get('#q-portal--menu--2 .q-item').eq(0).click()
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
       getPaymentModeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
@@ -234,14 +243,14 @@ describe('Donation List', () => {
       getPaymentModeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
-      cy.get('#q-portal--menu--2 .q-item').eq(1).click()
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(1).click()
       getPaymentModeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 50')
     })
     it('should allow filtering by organisation', () => {
-      const getOrganisationFilter = () => getFilterMenu().eq(5).children().eq(0).children().eq(0)
+      const getOrganisationFilter = () => getFilterMenu().eq(0).children().eq(4)
       cy.visit('/donations')
       cy.wait(['@getDonationList', '@getDonationListContext'])
       cy.get(filter).click()
@@ -253,14 +262,14 @@ describe('Donation List', () => {
       getOrganisationFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
-      cy.get('#q-portal--menu--2 .q-item').eq(0).click()
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
       getOrganisationFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 50')
     })
     it('should allow filtering by donation type', () => {
-      const getDonationTypeFilter = () => getFilterMenu().eq(5).children().eq(2).children().eq(0)
+      const getDonationTypeFilter = () => getFilterMenu().eq(2).children().eq(4).children().eq(0)
       cy.visit('/donations')
       cy.wait(['@getDonationList', '@getDonationListContext'])
       cy.get(filter).click()
@@ -272,7 +281,7 @@ describe('Donation List', () => {
       getDonationTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
-      cy.get('#q-portal--menu--2 .q-item').eq(0).click()
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
       getDonationTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
@@ -285,14 +294,14 @@ describe('Donation List', () => {
       getDonationTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
-      cy.get('#q-portal--menu--2 .q-item').eq(2).click()
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(2).click()
       getDonationTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 20')
     })
     it('should allow filtering by toggling isDisabled status', () => {
-      const getIncludeDisabledFilter = () => getFilterMenu().eq(5).children().eq(2).children().eq(2)
+      const getIncludeDisabledFilter = () => getFilterMenu().eq(2).children().eq(4).children().eq(2)
       cy.visit('/donations')
       cy.wait(['@getDonationList', '@getDonationListContext'])
       cy.get(filter).click()

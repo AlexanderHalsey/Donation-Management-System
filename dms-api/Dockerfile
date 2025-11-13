@@ -43,7 +43,8 @@ FROM base AS runtime
 WORKDIR /app/dms-api
 
 COPY --from=builder --chown=dms:dms /app/dms-api/dist ./dist
-COPY --from=builder --chown=dms:dms /app/dms-api/prisma ./prisma
+COPY --from=builder --chown=dms:dms /app/dms-api/prisma/schema.prisma ./prisma/
+COPY --from=builder --chown=dms:dms /app/dms-api/prisma/migrations ./prisma/migrations
 
 EXPOSE 3000
 

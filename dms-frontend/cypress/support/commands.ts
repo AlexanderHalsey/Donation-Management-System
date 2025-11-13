@@ -3,6 +3,7 @@
 import {
   buildMockDonations,
   buildMockDonationTypes,
+  buildMockDonors,
   buildMockOrganisations,
   buildMockPaymentModes,
   type DonationListFilterMock,
@@ -54,6 +55,7 @@ Cypress.Commands.add(
         paymentModes: buildMockPaymentModes(),
         organisations,
         donationTypes: buildMockDonationTypes(organisations),
+        donors: buildMockDonors(),
       },
     }).as('getDonationListContext')
   },

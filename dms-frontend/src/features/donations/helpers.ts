@@ -6,6 +6,6 @@ export const DONATION_STATUS_OPTIONS = [
   {
     className: 'bg-green-3',
     label: 'Dons avec reçu',
-    predicate: (row: Donation) => !!row.receiptId,
+    predicate: (row: Donation) => !!row.taxReceiptId,
   },
 ] as const satisfies { className: string; label: string; predicate: (row: Donation) => boolean }[]

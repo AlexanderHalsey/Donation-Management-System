@@ -18,7 +18,7 @@ export class DonationListFilter {
   @ApiProperty({ type: UuidFilter, required: false })
   @ValidateNested()
   @Type(() => UuidFilter)
-  contactId?: UuidFilter
+  donorId?: UuidFilter
 
   @ApiProperty({ type: DateTimeFilter, required: false })
   @ValidateNested()

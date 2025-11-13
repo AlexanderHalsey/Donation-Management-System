@@ -44,6 +44,10 @@ docker-compose*.yml
 **/*.test.js
 **/*.spec.js
 
+# Prisma development data (not needed in production builds)
+**/prisma/mocks/
+**/prisma/seed.ts
+
 # Documentation
 README.md
 docs/

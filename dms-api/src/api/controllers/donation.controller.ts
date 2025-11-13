@@ -4,6 +4,7 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 import {
   DonationService,
   DonationTypeService,
+  DonorService,
   OrganisationService,
   PaymentModeService,
 } from '@/domain'
@@ -11,6 +12,7 @@ import {
 import {
   DonationConverter,
   DonationTypeConverter,
+  DonorConverter,
   OrganisationConverter,
   PaymentModeConverter,
 } from '../converters'
@@ -33,6 +35,8 @@ export class DonationController {
     private readonly organisationConverter: OrganisationConverter,
     private readonly paymentModeService: PaymentModeService,
     private readonly paymentModeConverter: PaymentModeConverter,
+    private readonly donorService: DonorService,
+    private readonly donorConverter: DonorConverter,
   ) {}
 
   @Post('filtered-list')
@@ -67,10 +71,11 @@ export class DonationController {
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
   @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
   async getContext(): Promise<GetDonationListContextResponse> {
-    const [paymentModes, organisations, donationTypes] = await Promise.all([
+    const [paymentModes, organisations, donationTypes, donors] = await Promise.all([
       this.paymentModeService.getAll(),
       this.organisationService.getAllSummaries(),
       this.donationTypeService.getAll(),
+      this.donorService.getAllSummaries(),
     ])
     return {
       paymentModes: paymentModes.map((paymentMode) =>
@@ -82,6 +87,7 @@ export class DonationController {
       donationTypes: donationTypes.map((donationType) =>
         this.donationTypeConverter.convertDonationTypeToDto(donationType),
       ),
+      donors: donors.map((donor) => this.donorConverter.convertDonorSummaryToDto(donor)),
     }
   }
 

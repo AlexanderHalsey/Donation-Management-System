@@ -11,6 +11,7 @@ import type {
   DonationType,
   OrganisationSummary,
   PaymentMode,
+  DonorSummary,
 } from '@shared/models'
 
 export const useDonationStore = defineStore('donation', () => {
@@ -25,10 +26,12 @@ export const useDonationStore = defineStore('donation', () => {
     paymentModes: PaymentMode[]
     organisations: OrganisationSummary[]
     donationTypes: DonationType[]
+    donors: DonorSummary[]
   }>({
     paymentModes: [],
     organisations: [],
     donationTypes: [],
+    donors: [],
   })
   const filter = ref<DonationListFilter | undefined>({
     isDisabled: { equals: false },
@@ -41,8 +44,7 @@ export const useDonationStore = defineStore('donation', () => {
   }
 
   const fetchContext = async () => {
-    const response = await getDonationsContext()
-    context.value = response
+    context.value = await getDonationsContext()
   }
 
   const fetchDonation = async (donationId: string) => {

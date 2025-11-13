@@ -5,6 +5,7 @@ import {
   buildMockDonationCreateManyInput,
   buildMockDonationMethodCreateManyInput,
   buildMockDonationTypeCreateManyInput,
+  buildMockDonorCreateManyInput,
   buildMockOrganisationCreateManyInput,
   buildMockPaymentModeCreateManyInput,
 } from './mocks'
@@ -43,6 +44,11 @@ async function main() {
       .map((_, index) => buildMockDonationAssetTypeCreateManyInput(index)),
   })
 
+  const donors = await prisma.donor.createManyAndReturn({
+    select: { id: true },
+    data: new Array(300).fill(null).map((_, index) => buildMockDonorCreateManyInput(index)),
+  })
+
   await prisma.donation.createMany({
     data: new Array(1000).fill(null).map((_, index) =>
       buildMockDonationCreateManyInput({
@@ -52,6 +58,7 @@ async function main() {
         donationTypeId: donationTypes[index % donationTypes.length].id,
         organisationId: organisations[index % organisations.length].id,
         paymentModeId: paymentModes[index % paymentModes.length].id,
+        donorId: donors[Math.floor(Math.random() * donors.length)].id,
       }),
     ),
   })

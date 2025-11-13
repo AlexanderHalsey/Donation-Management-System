@@ -8,6 +8,7 @@ import { buildMockOrganisations } from './organisation'
 import { buildMockDonationTypes } from './donationType'
 import { buildMockDonationMethods } from './donationMethod'
 import { buildMockDonationAssetTypes } from './donationAssetType'
+import { buildMockDonors } from './donor'
 
 import type {
   Donation,
@@ -34,6 +35,7 @@ export function buildMockDonations(
   const donationTypes = buildMockDonationTypes(organisations)
   const donationMethods = buildMockDonationMethods()
   const donationAssetTypes = buildMockDonationAssetTypes()
+  const donors = buildMockDonors()
 
   const totalCount = 100 as const
 
@@ -49,7 +51,7 @@ export function buildMockDonations(
     donationMethod: donationMethods[index % donationMethods.length],
     donationAssetType: donationAssetTypes[index % donationAssetTypes.length],
     isDisabled: index % 25 === 0,
-    contactId: v4(),
+    donor: donors[index % donors.length],
   }))
 
   donations = donations.filter((donation) => {

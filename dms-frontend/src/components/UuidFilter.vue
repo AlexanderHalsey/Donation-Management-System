@@ -6,7 +6,7 @@
     dense
     rounded
     multiple
-    style="margin-bottom: 20px; width: 230px"
+    style="margin-bottom: 24px; width: 230px"
     @update:model-value="updateModelValue"
   >
     <template v-for="(_, slot) of $slots" #[slot]="scope">

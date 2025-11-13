@@ -8,6 +8,7 @@ import {
   DonationConverter,
   DonationMethodConverter,
   DonationTypeConverter,
+  DonorConverter,
   OrganisationConverter,
   PaymentModeConverter,
 } from '@/api/converters'
@@ -15,6 +16,7 @@ import {
 import {
   DonationService,
   DonationTypeService,
+  DonorService,
   OrganisationService,
   PaymentModeService,
 } from '@/domain'
@@ -31,6 +33,8 @@ import { PrismaService } from '@/infrastructure'
     DonationService,
     DonationTypeConverter,
     DonationTypeService,
+    DonorConverter,
+    DonorService,
     OrganisationConverter,
     OrganisationService,
     PaymentModeConverter,

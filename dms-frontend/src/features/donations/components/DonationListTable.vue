@@ -9,6 +9,9 @@
     class="donation-list-table"
     @update:pagination="updatePagination"
   >
+    <template #body-cell-donor="{ row }">
+      <td>{{ getDonorFullName(row.donor) }}</td>
+    </template>
     <template #body-cell-donatedAt="{ row }">
       <td><FormattedDate :value="row.donatedAt" /></td>
     </template>
@@ -28,7 +31,7 @@
     </template>
     <template #body-cell-actions="{ row }">
       <td>
-        <DonationListItemActions v-if="!row.isDisabled || row.receiptId" :donation="row" />
+        <DonationListItemActions v-if="!row.isDisabled || row.taxReceiptId" :donation="row" />
       </td>
     </template>
   </Table>
@@ -45,6 +48,7 @@ import OrganisationTag from '@/components/OrganisationTag.vue'
 import DonationListItemActions from './DonationListItemActions.vue'
 
 import { DONATION_STATUS_OPTIONS } from '../helpers'
+import { getDonorFullName } from '@/features/donors'
 
 import type { QTableProps } from 'quasar'
 import type {
@@ -80,10 +84,11 @@ const emit = defineEmits<{
 
 const headers: QTableProps['columns'] = [
   {
-    name: 'contactId',
-    label: 'Contact',
-    field: 'contactId',
+    name: 'donor',
+    label: 'Donateur',
+    field: 'donor',
     align: 'left',
+    sortable: true,
   },
   {
     name: 'donatedAt',
@@ -167,9 +172,11 @@ const updatePagination = ({
       ? ({
           [sortBy]: ['paymentMode', 'organisation', 'donationType'].includes(sortBy)
             ? { name: descending ? 'desc' : 'asc' }
-            : descending
-              ? 'desc'
-              : 'asc',
+            : sortBy === 'donor'
+              ? { lastName: descending ? 'desc' : 'asc' }
+              : descending
+                ? 'desc'
+                : 'asc',
         } as DonationListSortOrder)
       : undefined,
   }

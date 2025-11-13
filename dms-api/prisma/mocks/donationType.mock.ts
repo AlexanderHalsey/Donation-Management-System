@@ -1,6 +1,18 @@
 import { Organisation } from '@generated/prisma/client'
 import { DonationTypeCreateManyInput } from '@generated/prisma/models/DonationType'
 
+const DONATION_TYPE_NAMES = [
+  'Sponsor AA',
+  'General Donation',
+  'One-time Gift',
+  'Monthly Contribution',
+  'Annual Fund',
+  'In-Kind Donation',
+  'Memorial Gift',
+  'Sponsor BB',
+  'Tribute Gift',
+] as const
+
 export const buildMockDonationTypeCreateManyInput = ({
   index,
   organisation,
@@ -8,6 +20,6 @@ export const buildMockDonationTypeCreateManyInput = ({
   index: number
   organisation: Organisation
 }): DonationTypeCreateManyInput => ({
-  name: `Donation Type ${index} of ${organisation.name}`,
+  name: DONATION_TYPE_NAMES[index],
   organisationId: organisation.id,
 })

@@ -6,6 +6,7 @@ import { omit } from 'es-toolkit'
 import { DonationAssetTypeConverter } from './donationAssetType.converter'
 import { DonationMethodConverter } from './donationMethod.converter'
 import { DonationTypeConverter } from './donationType.converter'
+import { DonorConverter } from './donor.converter'
 import { OrganisationConverter } from './organisation.converter'
 import { PaymentModeConverter } from './paymentMode.converter'
 
@@ -17,6 +18,7 @@ export class DonationConverter {
     private readonly donationAssetTypeConverter: DonationAssetTypeConverter,
     private readonly donationMethodConverter: DonationMethodConverter,
     private readonly donationTypeConverter: DonationTypeConverter,
+    private readonly donorConverter: DonorConverter,
     private readonly organisationConverter: OrganisationConverter,
     private readonly paymentModeConverter: PaymentModeConverter,
   ) {}
@@ -32,6 +34,7 @@ export class DonationConverter {
         'donationType',
         'organisation',
         'paymentMode',
+        'donor',
       ]),
       createdAt: formatISO(donation.createdAt),
       updatedAt: formatISO(donation.updatedAt),
@@ -47,6 +50,7 @@ export class DonationConverter {
         donation.organisation,
       ),
       paymentMode: this.paymentModeConverter.convertPaymentModeToDto(donation.paymentMode),
+      donor: this.donorConverter.convertDonorSummaryToDto(donation.donor),
     }
   }
 }
