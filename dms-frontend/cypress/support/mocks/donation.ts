@@ -19,11 +19,12 @@ import type {
 
 export type DonationListFilterMock = Omit<
   DonationListFilter,
-  'paymentModeId' | 'organisationId' | 'donationTypeId'
+  'paymentModeId' | 'organisationId' | 'donationTypeId' | 'donorId'
 > & {
   paymentModeId?: { in?: number[] }
   organisationId?: { in?: number[] }
   donationTypeId?: { in?: number[] }
+  donorId?: { in?: number[] }
 }
 
 export function buildMockDonations(
@@ -63,6 +64,8 @@ export function buildMockDonations(
       (typeof filter?.donatedAt?.lte === 'object' && donation.donatedAt > filter.donatedAt.lte) ||
       (filter?.isDisabled?.equals !== undefined &&
         donation.isDisabled !== filter.isDisabled.equals) ||
+      (filter?.donorId?.in !== undefined &&
+        !filter.donorId.in.includes(donors.indexOf(donation.donor))) ||
       (filter?.organisationId?.in !== undefined &&
         !filter.organisationId.in.includes(organisations.indexOf(donation.organisation))) ||
       (filter?.donationTypeId?.in !== undefined &&

@@ -2,26 +2,29 @@ import { withClient } from './client'
 
 import {
   convertDtoToDonation,
+  convertDtoToDonationListItem,
   convertDtoToDonationType,
-  convertDtoToDonorSummary,
-  convertDtoToOrganisationSummary,
   convertDtoToPaymentMode,
 } from './converters'
 
 import type {
-  GetDonationListContextResponse,
   GetDonationListRequest,
   GetDonationListResponse,
   GetDonationResponse,
+  GetDonationTypeListResponse,
+  GetDonorRefListResponse,
+  GetOrganisationRefListResponse,
+  GetPaymentModeListResponse,
 } from '@shared/dtos'
 import type {
   Donation,
   DonationListFilter,
+  DonationListItem,
   DonationListPagination,
   DonationListPaginationRequest,
   DonationType,
-  DonorSummary,
-  OrganisationSummary,
+  DonorRef,
+  OrganisationRef,
   PaymentMode,
 } from '@shared/models'
 
@@ -29,7 +32,7 @@ export const getDonations = async (
   pagination: DonationListPaginationRequest,
   filter?: DonationListFilter,
 ): Promise<{
-  donations: Donation[]
+  donations: DonationListItem[]
   pagination: DonationListPagination
 }> => {
   const request: GetDonationListRequest = {
@@ -40,26 +43,35 @@ export const getDonations = async (
     client.post<GetDonationListResponse>('/donations/filtered-list', request),
   )
   return {
-    donations: response.donations.map(convertDtoToDonation),
+    donations: response.donations.map(convertDtoToDonationListItem),
     pagination: response.pagination,
   }
 }
 
-export const getDonationsContext = async (): Promise<{
-  paymentModes: PaymentMode[]
-  organisations: OrganisationSummary[]
-  donationTypes: DonationType[]
-  donors: DonorSummary[]
-}> => {
+export const getOrganisationRefs = async (): Promise<OrganisationRef[]> => {
   const response = await withClient((client) =>
-    client.get<GetDonationListContextResponse>('/donations/context'),
+    client.get<GetOrganisationRefListResponse>('/refs/organisations'),
   )
-  return {
-    paymentModes: response.paymentModes.map(convertDtoToPaymentMode),
-    organisations: response.organisations.map(convertDtoToOrganisationSummary),
-    donationTypes: response.donationTypes.map(convertDtoToDonationType),
-    donors: response.donors.map(convertDtoToDonorSummary),
-  }
+  return response.organisationRefs
+}
+
+export const getPaymentModes = async (): Promise<PaymentMode[]> => {
+  const response = await withClient((client) =>
+    client.get<GetPaymentModeListResponse>('/refs/payment-modes'),
+  )
+  return response.paymentModes.map(convertDtoToPaymentMode)
+}
+
+export const getDonationTypes = async (): Promise<DonationType[]> => {
+  const response = await withClient((client) =>
+    client.get<GetDonationTypeListResponse>('/refs/donation-types'),
+  )
+  return response.donationTypes.map(convertDtoToDonationType)
+}
+
+export const getDonorRefs = async (): Promise<DonorRef[]> => {
+  const response = await withClient((client) => client.get<GetDonorRefListResponse>('/refs/donors'))
+  return response.donorRefs
 }
 
 export const getDonation = async (donationId: string): Promise<Donation> => {

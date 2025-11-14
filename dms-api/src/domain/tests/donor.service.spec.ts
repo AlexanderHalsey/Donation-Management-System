@@ -31,15 +31,15 @@ describe('DonorService', () => {
   it('should get donor list', async () => {
     prismaServiceMock.donor.findMany.mockResolvedValueOnce([])
 
-    await donorService.getAll()
+    await donorService.getFilteredList()
 
     expect(prismaServiceMock.donor.findMany).toHaveBeenCalledTimes(1)
   })
 
-  it('should get donor summaries', async () => {
+  it('should get donor ref items', async () => {
     prismaServiceMock.donor.findMany.mockResolvedValueOnce([])
 
-    await donorService.getAllSummaries()
+    await donorService.getAllRefs()
 
     expect(prismaServiceMock.donor.findMany).toHaveBeenCalledTimes(1)
   })

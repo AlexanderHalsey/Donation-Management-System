@@ -1,7 +1,7 @@
-import { DonationDto, DonationListSortOrder } from './donation.dto'
+import { DonationListItemDto, DonationListSortOrder } from './donation.dto'
 import { PaginationDto } from './pagination.dto'
 
 export class GetDonationListResponse {
-  donations: DonationDto[]
+  donations: DonationListItemDto[]
   pagination: PaginationDto<DonationListSortOrder>
 }

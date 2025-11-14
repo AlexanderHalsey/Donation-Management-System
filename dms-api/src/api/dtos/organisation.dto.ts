@@ -1,12 +1,12 @@
 import { NameSortOrder } from './sort-order.dto'
 
-export class OrganisationSummaryDto {
+export class OrganisationRefDto {
   id: string
-  createdAt: string
-  updatedAt: string
   name: string
 }
-export class OrganisationDto extends OrganisationSummaryDto {
+export class OrganisationDto extends OrganisationRefDto {
+  createdAt: string
+  updatedAt: string
   title?: string
   address?: string
   locality?: string
@@ -19,4 +19,4 @@ export class OrganisationDto extends OrganisationSummaryDto {
   signatureUrl?: string
 }
 
-export class OrganisationListSortOrder extends NameSortOrder {}
+export class OrganisationRefSortOrder extends NameSortOrder {}

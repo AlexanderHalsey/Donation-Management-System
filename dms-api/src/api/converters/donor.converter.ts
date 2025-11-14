@@ -3,24 +3,23 @@ import { Injectable } from '@nestjs/common'
 import { formatISO } from 'date-fns'
 import { omit } from 'es-toolkit'
 
-import { DonorDto, DonorSummaryDto } from '../dtos'
-import { Donor, DonorSummary } from '@shared/models'
+import { DonorDto, DonorListItemDto } from '../dtos'
+import type { Donor, DonorListItem } from '@shared/models'
 
 @Injectable()
 export class DonorConverter {
   constructor() {}
 
-  convertDonorSummaryToDto(donorSummary: DonorSummary): DonorSummaryDto {
+  convertDonorListItemToDto(donorListItem: DonorListItem): DonorListItemDto {
     return {
-      ...omit(donorSummary, ['createdAt', 'updatedAt']),
-      createdAt: formatISO(donorSummary.createdAt),
-      updatedAt: formatISO(donorSummary.updatedAt),
+      ...omit(donorListItem, ['updatedAt']),
+      updatedAt: formatISO(donorListItem.updatedAt),
     }
   }
 
   convertDonorToDto(donor: Donor): DonorDto {
     return {
-      ...omit(donor, ['createdAt', 'updatedAt']),
+      ...omit(donor, ['updatedAt', 'createdAt']),
       createdAt: formatISO(donor.createdAt),
       updatedAt: formatISO(donor.updatedAt),
     }

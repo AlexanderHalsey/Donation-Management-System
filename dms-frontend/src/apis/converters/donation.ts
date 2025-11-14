@@ -1,14 +1,15 @@
 import { parseISO } from 'date-fns'
 
-import { convertDtoToPaymentMode } from './paymentMode'
-import { convertDtoToOrganisationSummary } from './organisation'
-import { convertDtoToDonationType } from './donationType'
-import { convertDtoToDonationMethod } from './donationMethod'
-import { convertDtoToDonationAssetType } from './donationAssetType'
-import { convertDtoToDonorSummary } from './donor'
+import type { DonationDto, DonationListItemDto } from '@shared/dtos'
+import type { Donation, DonationListItem } from '@shared/models'
 
-import type { DonationDto } from '@shared/dtos'
-import type { Donation } from '@shared/models'
+export const convertDtoToDonationListItem = (dto: DonationListItemDto): DonationListItem => {
+  return {
+    ...dto,
+    updatedAt: parseISO(dto.updatedAt),
+    donatedAt: parseISO(dto.donatedAt),
+  }
+}
 
 export const convertDtoToDonation = (dto: DonationDto): Donation => {
   return {
@@ -16,11 +17,5 @@ export const convertDtoToDonation = (dto: DonationDto): Donation => {
     createdAt: parseISO(dto.createdAt),
     updatedAt: parseISO(dto.updatedAt),
     donatedAt: parseISO(dto.donatedAt),
-    paymentMode: convertDtoToPaymentMode(dto.paymentMode),
-    organisation: convertDtoToOrganisationSummary(dto.organisation),
-    donationType: convertDtoToDonationType(dto.donationType),
-    donationMethod: convertDtoToDonationMethod(dto.donationMethod),
-    donationAssetType: convertDtoToDonationAssetType(dto.donationAssetType),
-    donor: convertDtoToDonorSummary(dto.donor),
   }
 }

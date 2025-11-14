@@ -1,17 +1,7 @@
 import { parseISO } from 'date-fns'
 
-import type { OrganisationDto, OrganisationSummaryDto } from '@shared/dtos'
-import type { Organisation, OrganisationSummary } from '@shared/models'
-
-export const convertDtoToOrganisationSummary = (
-  dto: OrganisationSummaryDto,
-): OrganisationSummary => {
-  return {
-    ...dto,
-    createdAt: parseISO(dto.createdAt),
-    updatedAt: parseISO(dto.updatedAt),
-  }
-}
+import type { OrganisationDto } from '@shared/dtos'
+import type { Organisation } from '@shared/models'
 
 export const convertDtoToOrganisation = (dto: OrganisationDto): Organisation => {
   return {

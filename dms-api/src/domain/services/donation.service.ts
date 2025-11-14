@@ -4,39 +4,40 @@ import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService } from '@/infrastructure'
 
-import { Donation, DonationListPaginationRequest, DonationListFilter } from '@shared/models'
+import {
+  Donation,
+  DonationListPaginationRequest,
+  DonationListFilter,
+  DonationListItem,
+} from '@shared/models'
 
-const DONATION_QUERY_OPTIONS = {
-  include: {
-    donationAssetType: true,
-    donationMethod: true,
-    donationType: true,
-    organisation: {
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        name: true,
-      },
-    },
-    paymentMode: true,
-    donor: {
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        firstName: true,
-        lastName: true,
-      },
+const BASIC_REF_FIELDS = {
+  select: {
+    id: true,
+    name: true,
+  },
+} as const
+
+const BASIC_INCLUDE_FIELDS = {
+  donationType: BASIC_REF_FIELDS,
+  organisation: BASIC_REF_FIELDS,
+  paymentMode: BASIC_REF_FIELDS,
+  donor: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
     },
   },
-  omit: {
-    donationAssetTypeId: true,
-    donationMethodId: true,
-    donationTypeId: true,
-    organisationId: true,
-    paymentModeId: true,
-  },
+} as const
+
+const BASIC_OMIT_FIELDS = {
+  donationAssetTypeId: true,
+  donationMethodId: true,
+  donationTypeId: true,
+  organisationId: true,
+  paymentModeId: true,
+  donorId: true,
 } as const
 
 @Injectable()
@@ -46,10 +47,11 @@ export class DonationService {
   async getFilteredList(
     pagination: DonationListPaginationRequest,
     filter?: DonationListFilter,
-  ): Promise<Donation[]> {
+  ): Promise<DonationListItem[]> {
     return (
       await this.prisma.donation.findMany({
-        ...DONATION_QUERY_OPTIONS,
+        include: BASIC_INCLUDE_FIELDS,
+        omit: BASIC_OMIT_FIELDS,
         where: filter,
         orderBy: pagination.orderBy,
         skip: (pagination.page - 1) * pagination.pageSize,
@@ -67,8 +69,13 @@ export class DonationService {
   async getById(donationId: string): Promise<Donation> {
     return nullsToUndefined(
       await this.prisma.donation.findUniqueOrThrow({
+        include: {
+          ...BASIC_INCLUDE_FIELDS,
+          donationMethod: BASIC_REF_FIELDS,
+          donationAssetType: BASIC_REF_FIELDS,
+        },
+        omit: BASIC_OMIT_FIELDS,
         where: { id: donationId },
-        ...DONATION_QUERY_OPTIONS,
       }),
     )
   }

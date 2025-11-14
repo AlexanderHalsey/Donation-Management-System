@@ -14,10 +14,15 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable<Subject> {
+      mockDonation(index: number): Chainable<Subject>
       mockDonationList(
         pagination?: DonationListPaginationRequest,
         filter?: DonationListFilterMock,
       ): Chainable<Subject>
+      mockDonationTypeList(): Chainable<Subject>
+      mockDonorRefList(): Chainable<Subject>
+      mockOrganisationRefList(): Chainable<Subject>
+      mockPaymentModeList(): Chainable<Subject>
     }
   }
 }
@@ -29,7 +34,7 @@ Cypress.Commands.add(
       pagination = {
         page: 1,
         pageSize: 10,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { updatedAt: 'desc' },
       }
     }
     const donations = buildMockDonations(pagination, filter ?? { isDisabled: { equals: false } })
@@ -46,18 +51,58 @@ Cypress.Commands.add(
         },
       },
     }).as('getDonationList')
-
-    const organisations = buildMockOrganisations()
-
-    cy.intercept('GET', '/donations/context', {
-      statusCode: 200,
-      body: {
-        paymentModes: buildMockPaymentModes(),
-        organisations,
-        donationTypes: buildMockDonationTypes(organisations),
-        donors: buildMockDonors(),
-      },
-    }).as('getDonationListContext')
   },
 )
+
+Cypress.Commands.add('mockDonation', (index: number) => {
+  const donation = buildMockDonations()[index]
+  cy.intercept('GET', '/donations/*', {
+    statusCode: 200,
+    body: {
+      donation,
+    },
+  }).as('getDonation')
+})
+
+const organisations = buildMockOrganisations()
+const paymentModes = buildMockPaymentModes()
+const donationTypes = buildMockDonationTypes(organisations)
+
+Cypress.Commands.add('mockOrganisationRefList', () => {
+  cy.intercept('GET', '/refs/organisations', {
+    statusCode: 200,
+    body: {
+      organisationRefs: organisations,
+    },
+  }).as('getOrganisationRefList')
+})
+
+Cypress.Commands.add('mockPaymentModeList', () => {
+  cy.intercept('GET', '/refs/payment-modes', {
+    statusCode: 200,
+    body: {
+      paymentModes,
+    },
+  }).as('getPaymentModeList')
+})
+
+Cypress.Commands.add('mockDonationTypeList', () => {
+  cy.intercept('GET', '/refs/donation-types', {
+    statusCode: 200,
+    body: {
+      donationTypes,
+    },
+  }).as('getDonationTypeList')
+})
+
+Cypress.Commands.add('mockDonorRefList', () => {
+  const donors = buildMockDonors()
+  cy.intercept('GET', '/refs/donors', {
+    statusCode: 200,
+    body: {
+      donorRefs: donors,
+    },
+  }).as('getDonorRefList')
+})
+
 export {}

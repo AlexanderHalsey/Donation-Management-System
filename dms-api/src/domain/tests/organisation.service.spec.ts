@@ -36,10 +36,10 @@ describe('OrganisationService', () => {
     expect(prismaServiceMock.organisation.findMany).toHaveBeenCalledTimes(1)
   })
 
-  it('should get organisation summaries', async () => {
+  it('should get organisation refs', async () => {
     prismaServiceMock.organisation.findMany.mockResolvedValueOnce([])
 
-    await organisationService.getAllSummaries()
+    await organisationService.getAllRefs()
 
     expect(prismaServiceMock.organisation.findMany).toHaveBeenCalledTimes(1)
   })

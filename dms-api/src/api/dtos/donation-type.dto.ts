@@ -1,11 +1,14 @@
 import { NameSortOrder } from './sort-order.dto'
 
-export class DonationTypeDto {
+export class DonationTypeRefDto {
   id: string
+  name: string
+}
+
+export class DonationTypeDto extends DonationTypeRefDto {
   createdAt: string
   updatedAt: string
-  name: string
   organisationId: string
 }
 
-export class DonationTypeListSortOrder extends NameSortOrder {}
+export class DonationTypeRefSortOrder extends NameSortOrder {}

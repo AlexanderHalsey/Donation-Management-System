@@ -4,7 +4,7 @@ import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService } from '@/infrastructure'
 
-import { Organisation, OrganisationSummary } from '@shared/models'
+import { Organisation, OrganisationRef } from '@shared/models'
 
 @Injectable()
 export class OrganisationService {
@@ -14,13 +14,11 @@ export class OrganisationService {
     return (await this.prisma.organisation.findMany()).map(nullsToUndefined)
   }
 
-  async getAllSummaries(): Promise<OrganisationSummary[]> {
-    return await this.prisma.organisation.findMany({
+  async getAllRefs(): Promise<OrganisationRef[]> {
+    return this.prisma.organisation.findMany({
       select: {
         id: true,
         name: true,
-        createdAt: true,
-        updatedAt: true,
       },
     })
   }

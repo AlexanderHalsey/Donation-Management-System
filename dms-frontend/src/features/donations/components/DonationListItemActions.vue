@@ -33,11 +33,11 @@ import { ref, type PropType } from 'vue'
 
 import Btn from '@/components/ui/Btn.vue'
 
-import type { Donation } from '@shared/models'
+import type { DonationListItem } from '@shared/models'
 
 defineProps({
   donation: {
-    type: Object as PropType<Donation>,
+    type: Object as PropType<DonationListItem>,
     required: true,
   },
 })

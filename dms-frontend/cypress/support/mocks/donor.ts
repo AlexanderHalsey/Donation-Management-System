@@ -7,6 +7,7 @@ export function buildMockDonors(): Donor[] {
     id: v4(),
     createdAt: new Date(2024, 0, index + 1),
     updatedAt: new Date(2024, 1, index + 1),
+    externalId: index + 1,
     firstName: index % 50 !== 49 ? `FirstName${index + 1}` : undefined,
     lastName: `LastName${index + 1}`,
     email: index % 30 !== 29 ? `donor${index + 1}@example.com` : undefined,

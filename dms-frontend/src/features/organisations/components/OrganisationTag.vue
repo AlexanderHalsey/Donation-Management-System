@@ -5,16 +5,16 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
 
-import type { OrganisationSummary } from '@shared/models'
+import type { OrganisationRef } from '@shared/models'
 import type { Tag } from '@/types'
 
 const props = defineProps({
   organisation: {
-    type: Object as PropType<OrganisationSummary>,
+    type: Object as PropType<OrganisationRef>,
     required: true,
   },
   organisationOptions: {
-    type: Array as PropType<OrganisationSummary[]>,
+    type: Array as PropType<OrganisationRef[]>,
     required: true,
   },
 })

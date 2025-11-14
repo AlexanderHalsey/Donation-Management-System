@@ -1,11 +1,11 @@
-export type OrganisationSummary = {
+export type OrganisationRef = {
   id: string
-  createdAt: Date
-  updatedAt: Date
   name: string
 }
 
-export type Organisation = OrganisationSummary & {
+export interface Organisation extends OrganisationRef {
+  createdAt: Date
+  updatedAt: Date
   title?: string
   address?: string
   locality?: string

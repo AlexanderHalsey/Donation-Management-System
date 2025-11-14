@@ -2,36 +2,39 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsEnum, IsOptional, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 
-import { OrganisationSummaryDto, OrganisationListSortOrder } from './organisation.dto'
-import { DonationTypeDto, DonationTypeListSortOrder } from './donation-type.dto'
-import { DonationMethodDto, DonationMethodListSortOrder } from './donation-method.dto'
-import { DonationAssetTypeDto, DonationAssetTypeListSortOrder } from './donation-asset-type.dto'
-import { PaymentModeDto, PaymentModeListSortOrder } from './payment-mode.dto'
-import { DonorSummaryDto, DonorSummaryListSortOrder } from './donor.dto'
+import { OrganisationRefDto, OrganisationRefSortOrder } from './organisation.dto'
+import { DonationTypeRefDto, DonationTypeRefSortOrder } from './donation-type.dto'
+import { DonationMethodRefDto, DonationMethodRefSortOrder } from './donation-method.dto'
+import { DonationAssetTypeRefDto, DonationAssetTypeRefSortOrder } from './donation-asset-type.dto'
+import { PaymentModeRefDto, PaymentModeRefSortOrder } from './payment-mode.dto'
+import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
 
 import { SortOrderEnum, SortOrder } from './sort-order.dto'
 
-export class DonationDto {
+export class DonationListItemDto {
   id: string
-  createdAt: string
   updatedAt: string
   donatedAt: string
   amount: number
-  paymentMode: PaymentModeDto
-  organisation: OrganisationSummaryDto
-  donationType: DonationTypeDto
-  donationMethod: DonationMethodDto
-  donationAssetType: DonationAssetTypeDto
+  paymentMode: PaymentModeRefDto
+  organisation: OrganisationRefDto
+  donationType: DonationTypeRefDto
   isDisabled: boolean
-  donor: DonorSummaryDto
+  donor: DonorRefDto
   taxReceiptId?: string
+}
+
+export class DonationDto extends DonationListItemDto {
+  createdAt: string
+  donationMethod: DonationMethodRefDto
+  donationAssetType: DonationAssetTypeRefDto
 }
 
 export class DonationListSortOrder {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)
-  createdAt?: SortOrder
+  updatedAt?: SortOrder
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -43,33 +46,33 @@ export class DonationListSortOrder {
   @IsEnum(SortOrderEnum)
   amount?: SortOrder
 
-  @ApiProperty({ type: PaymentModeListSortOrder, required: false })
+  @ApiProperty({ type: PaymentModeRefSortOrder, required: false })
   @ValidateNested()
-  @Type(() => PaymentModeListSortOrder)
-  paymentMode?: PaymentModeListSortOrder
+  @Type(() => PaymentModeRefSortOrder)
+  paymentMode?: PaymentModeRefSortOrder
 
-  @ApiProperty({ type: OrganisationListSortOrder, required: false })
+  @ApiProperty({ type: OrganisationRefSortOrder, required: false })
   @ValidateNested()
-  @Type(() => OrganisationListSortOrder)
-  organisation?: OrganisationListSortOrder
+  @Type(() => OrganisationRefSortOrder)
+  organisation?: OrganisationRefSortOrder
 
-  @ApiProperty({ type: DonationTypeListSortOrder, required: false })
+  @ApiProperty({ type: DonationTypeRefSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationTypeListSortOrder)
-  donationType?: DonationTypeListSortOrder
+  @Type(() => DonationTypeRefSortOrder)
+  donationType?: DonationTypeRefSortOrder
 
-  @ApiProperty({ type: DonationMethodListSortOrder, required: false })
+  @ApiProperty({ type: DonationMethodRefSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationMethodListSortOrder)
-  donationMethod?: DonationMethodListSortOrder
+  @Type(() => DonationMethodRefSortOrder)
+  donationMethod?: DonationMethodRefSortOrder
 
-  @ApiProperty({ type: DonationAssetTypeListSortOrder, required: false })
+  @ApiProperty({ type: DonationAssetTypeRefSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationAssetTypeListSortOrder)
-  donationAssetType?: DonationAssetTypeListSortOrder
+  @Type(() => DonationAssetTypeRefSortOrder)
+  donationAssetType?: DonationAssetTypeRefSortOrder
 
-  @ApiProperty({ type: DonorSummaryListSortOrder, required: false })
+  @ApiProperty({ type: DonorRefSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonorSummaryListSortOrder)
-  donor?: DonorSummaryListSortOrder
+  @Type(() => DonorRefSortOrder)
+  donor?: DonorRefSortOrder
 }

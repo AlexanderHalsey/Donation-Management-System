@@ -1,27 +1,27 @@
 export interface DonationListSortOrder {
-  createdAt?: SortOrder
+  updatedAt?: SortOrder
   donatedAt?: SortOrder
   amount?: SortOrder
-  paymentMode?: PaymentModeListSortOrder
-  organisation?: OrganisationListSortOrder
-  donationType?: DonationTypeListSortOrder
-  donationMethod?: DonationMethodListSortOrder
-  donationAssetType?: DonationAssetTypeListSortOrder
-  donor?: DonorSummaryListSortOrder
+  paymentMode?: PaymentModeRefSortOrder
+  organisation?: OrganisationRefSortOrder
+  donationType?: DonationTypeRefSortOrder
+  donationMethod?: DonationMethodRefSortOrder
+  donationAssetType?: DonationAssetTypeRefSortOrder
+  donor?: DonorSummaryRefSortOrder
 }
 
-export interface DonorListSortOrder extends DonorSummaryListSortOrder {
+export interface DonorListSortOrder extends DonorSummaryRefSortOrder {
   donationCount?: SortOrder
   donationTotalAmount?: SortOrder
   email?: SortOrder
 }
 
-export interface PaymentModeListSortOrder extends NameSortOrder {}
-export interface OrganisationListSortOrder extends NameSortOrder {}
-export interface DonationTypeListSortOrder extends NameSortOrder {}
-export interface DonationMethodListSortOrder extends NameSortOrder {}
-export interface DonationAssetTypeListSortOrder extends NameSortOrder {}
-export interface DonorSummaryListSortOrder {
+export interface PaymentModeRefSortOrder extends NameSortOrder {}
+export interface OrganisationRefSortOrder extends NameSortOrder {}
+export interface DonationTypeRefSortOrder extends NameSortOrder {}
+export interface DonationMethodRefSortOrder extends NameSortOrder {}
+export interface DonationAssetTypeRefSortOrder extends NameSortOrder {}
+export interface DonorSummaryRefSortOrder {
   lastName?: SortOrder
 }
 

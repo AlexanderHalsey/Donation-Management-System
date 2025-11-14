@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import { DonationController } from '@/api/controllers'
+import { DonationController, RefsController } from '@/api/controllers'
 
 import {
   DonationAssetTypeConverter,
@@ -25,7 +25,7 @@ import { PrismaService } from '@/infrastructure'
 
 @Module({
   imports: [ConfigModule.forRoot()],
-  controllers: [DonationController],
+  controllers: [DonationController, RefsController],
   providers: [
     DonationAssetTypeConverter,
     DonationConverter,

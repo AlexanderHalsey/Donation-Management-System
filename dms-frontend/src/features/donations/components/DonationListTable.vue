@@ -23,7 +23,7 @@
     </template>
     <template #body-cell-organisation="{ row }">
       <td>
-        <OrganisationTag :organisation="row.organisation" :organisationOptions="organisations" />
+        <OrganisationTag :organisation="row.organisation" :organisation-options="organisations" />
       </td>
     </template>
     <template #body-cell-donationType="{ row }">
@@ -44,7 +44,9 @@ import { isEqual, omit } from 'es-toolkit'
 
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 import FormattedDate from '@/components/FormattedDate.vue'
-import OrganisationTag from '@/components/OrganisationTag.vue'
+
+import { OrganisationTag } from '@/features/organisations'
+
 import DonationListItemActions from './DonationListItemActions.vue'
 
 import { DONATION_STATUS_OPTIONS } from '../helpers'
@@ -52,16 +54,16 @@ import { getDonorFullName } from '@/features/donors'
 
 import type { QTableProps } from 'quasar'
 import type {
-  OrganisationSummary,
-  Donation,
-  DonationListSortOrder,
+  DonationListItem,
   DonationListPagination,
   DonationListPaginationRequest,
+  DonationListSortOrder,
+  OrganisationRef,
 } from '@shared/models'
 
 const props = defineProps({
   donationList: {
-    type: Array as PropType<Donation[]>,
+    type: Array as PropType<DonationListItem[]>,
     required: true,
   },
   pagination: {
@@ -69,8 +71,8 @@ const props = defineProps({
     required: true,
   },
   organisations: {
-    type: Array as PropType<OrganisationSummary[]>,
-    default: () => [],
+    type: Array as PropType<OrganisationRef[]>,
+    required: true,
   },
   loading: {
     type: Boolean,
@@ -133,7 +135,7 @@ const headers: QTableProps['columns'] = [
   },
 ]
 
-const rowClassFn = (row: Donation) => {
+const rowClassFn = (row: DonationListItem) => {
   for (const option of DONATION_STATUS_OPTIONS) {
     if (option.predicate(row)) {
       return option.className

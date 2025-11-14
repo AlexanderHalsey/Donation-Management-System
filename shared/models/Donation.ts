@@ -1,33 +1,36 @@
-import type { DonationAssetType } from './DonationAssetType'
-import type { DonationMethod } from './DonationMethod'
-import type { DonationType } from './DonationType'
-import type { DonorSummary } from './Donor'
+import type { DonationAssetTypeRef } from './DonationAssetType'
+import type { DonationMethodRef } from './DonationMethod'
+import type { DonationTypeRef } from './DonationType'
+import type { DonorRef } from './Donor'
 import type { BoolFilter, DateTimeFilter, FloatFilter, UuidFilter } from './Filters'
-import type { OrganisationSummary } from './Organisation'
+import type { OrganisationRef } from './Organisation'
 import type { Pagination, PaginationRequest } from './Pagination'
-import type { PaymentMode } from './PaymentMode'
+import type { PaymentModeRef } from './PaymentMode'
 import type { DonationListSortOrder } from './SortOrder'
 
-export type Donation = {
+export interface DonationListItem {
   id: string
-  createdAt: Date
   updatedAt: Date
   donatedAt: Date
   amount: number
-  paymentMode: PaymentMode
-  organisation: OrganisationSummary
-  donationType: DonationType
-  donationMethod: DonationMethod
-  donationAssetType: DonationAssetType
+  paymentMode: PaymentModeRef
+  organisation: OrganisationRef
+  donationType: DonationTypeRef
   isDisabled: boolean
-  donor: DonorSummary
+  donor: DonorRef
   taxReceiptId?: string
+}
+
+export interface Donation extends DonationListItem {
+  createdAt: Date
+  donationMethod: DonationMethodRef
+  donationAssetType: DonationAssetTypeRef
 }
 
 export type DonationListPaginationRequest = PaginationRequest<DonationListSortOrder>
 export type DonationListPagination = Pagination<DonationListSortOrder>
 
-export type DonationListFilter = {
+export interface DonationListFilter {
   donorId?: UuidFilter
   donatedAt?: DateTimeFilter
   amount?: FloatFilter

@@ -24,19 +24,11 @@ const route = useRoute()
 
 const donationId = computed(() => route.params.id as string)
 
-const donation = computed(() => {
-  const donation = donationStore.donationList.find((donation) => donation.id === donationId.value)
-  if (!donation) {
-    throw new Error('Donation not found')
-  }
-  return donation
-})
+const donation = computed(() => donationStore.donation)
 
 const loading = ref(true)
 onMounted(async () => {
-  if (donationStore.donationList.length === 0) {
-    await donationStore.fetchDonation(donationId.value)
-  }
+  await donationStore.fetchDonation(donationId.value)
   loading.value = false
 })
 </script>

@@ -1,18 +1,21 @@
-export interface PaymentModeDto {
+export interface PaymentModeRefDto {
   id: string
-  createdAt: string
-  updatedAt: string
   name: string
 }
 
-export interface OrganisationSummaryDto {
-  id: string
+export interface PaymentModeDto extends PaymentModeRefDto {
   createdAt: string
   updatedAt: string
+}
+
+export interface OrganisationRefDto {
+  id: string
   name: string
 }
 
-export interface OrganisationDto extends OrganisationSummaryDto {
+export interface OrganisationDto extends OrganisationRefDto {
+  createdAt: string
+  updatedAt: string
   title?: string
   address?: string
   locality?: string
@@ -25,39 +28,54 @@ export interface OrganisationDto extends OrganisationSummaryDto {
   signatureUrl?: string
 }
 
-export interface DonationTypeDto {
+export interface DonationTypeRefDto {
   id: string
+  name: string
+}
+
+export interface DonationTypeDto extends DonationTypeRefDto {
   createdAt: string
   updatedAt: string
-  name: string
   organisationId: string
 }
 
-export interface DonationMethodDto {
+export interface DonationMethodRefDto {
   id: string
+  name: string
+}
+
+export interface DonationMethodDto extends DonationMethodRefDto {
   createdAt: string
   updatedAt: string
-  name: string
   isDefault: boolean
 }
 
-export interface DonationAssetTypeDto {
+export interface DonationAssetTypeRefDto {
   id: string
+  name: string
+}
+
+export interface DonationAssetTypeDto extends DonationAssetTypeRefDto {
   createdAt: string
   updatedAt: string
-  name: string
   isDefault: boolean
 }
-export interface DonorSummaryDto {
+
+export interface DonorRefDto {
   id: string
-  createdAt: string
-  updatedAt: string
-  firstName: string
   lastName: string
+  firstName?: string
+}
+export interface DonorListItemDto extends DonorRefDto {
+  updatedAt: string
+  externalId: number
+  donationCount: number
+  donationTotalAmount: number
+  email?: string
 }
 
-export interface DonorDto extends DonorSummaryDto {
-  email?: string
+export interface DonorDto extends DonorListItemDto {
+  createdAt: string
   phoneNumber?: string
   civility?: string
   streetAddress1?: string
@@ -68,24 +86,25 @@ export interface DonorDto extends DonorSummaryDto {
   country?: string
   isFacilitator: boolean
   isDisabled: boolean
-  donationCount: number
-  donationTotalAmount: number
 }
 
-export interface DonationDto {
+export interface DonationListItemDto {
   id: string
-  createdAt: string
   updatedAt: string
   donatedAt: string
   amount: number
-  paymentMode: PaymentModeDto
-  organisation: OrganisationSummaryDto
-  donationType: DonationTypeDto
-  donationMethod: DonationMethodDto
-  donationAssetType: DonationAssetTypeDto
+  paymentMode: PaymentModeRefDto
+  organisation: OrganisationRefDto
+  donationType: DonationTypeRefDto
   isDisabled: boolean
-  donor: DonorSummaryDto
+  donor: DonorRefDto
   taxReceiptId?: string
+}
+
+export interface DonationDto extends DonationListItemDto {
+  createdAt: string
+  donationMethod: DonationMethodRefDto
+  donationAssetType: DonationAssetTypeRefDto
 }
 
 /**
@@ -110,29 +129,29 @@ export interface DonationListPaginationRequest extends PaginationRequest<Donatio
 export interface DonationListPagination extends PaginationDto<DonationListSortOrder> {}
 
 export interface DonationListSortOrder {
-  createdAt?: SortOrder
+  updatedAt?: SortOrder
   donatedAt?: SortOrder
   amount?: SortOrder
-  paymentMode?: PaymentModeListSortOrder
-  organisation?: OrganisationListSortOrder
-  donationType?: DonationTypeListSortOrder
-  donationMethod?: DonationMethodListSortOrder
-  donationAssetType?: DonationAssetTypeListSortOrder
-  donor?: DonorSummaryListSortOrder
+  paymentMode?: PaymentModeRefSortOrder
+  organisation?: OrganisationRefSortOrder
+  donationType?: DonationTypeRefSortOrder
+  donationMethod?: DonationMethodRefSortOrder
+  donationAssetType?: DonationAssetTypeRefSortOrder
+  donor?: DonorRefSortOrder
 }
 
-export interface DonorListSortOrder extends DonorSummaryListSortOrder {
+export interface DonorListSortOrder extends DonorRefSortOrder {
   donationCount?: SortOrder
   donationTotalAmount?: SortOrder
   email?: SortOrder
 }
 
-export interface PaymentModeListSortOrder extends NameSortOrder {}
-export interface OrganisationListSortOrder extends NameSortOrder {}
-export interface DonationTypeListSortOrder extends NameSortOrder {}
-export interface DonationMethodListSortOrder extends NameSortOrder {}
-export interface DonationAssetTypeListSortOrder extends NameSortOrder {}
-export interface DonorSummaryListSortOrder {
+export interface PaymentModeRefSortOrder extends NameSortOrder {}
+export interface OrganisationRefSortOrder extends NameSortOrder {}
+export interface DonationTypeRefSortOrder extends NameSortOrder {}
+export interface DonationMethodRefSortOrder extends NameSortOrder {}
+export interface DonationAssetTypeRefSortOrder extends NameSortOrder {}
+export interface DonorRefSortOrder {
   lastName?: SortOrder
 }
 
@@ -177,15 +196,24 @@ export interface GetDonationListRequest {
 }
 
 export interface GetDonationListResponse {
-  donations: DonationDto[]
+  donations: DonationListItemDto[]
   pagination: DonationListPagination
 }
 
-export interface GetDonationListContextResponse {
+export interface GetOrganisationRefListResponse {
+  organisationRefs: OrganisationRefDto[]
+}
+
+export interface GetPaymentModeListResponse {
   paymentModes: PaymentModeDto[]
-  organisations: OrganisationSummaryDto[]
+}
+
+export interface GetDonationTypeListResponse {
   donationTypes: DonationTypeDto[]
-  donors: DonorSummaryDto[]
+}
+
+export interface GetDonorRefListResponse {
+  donorRefs: DonorRefDto[]
 }
 
 export interface GetDonationResponse {

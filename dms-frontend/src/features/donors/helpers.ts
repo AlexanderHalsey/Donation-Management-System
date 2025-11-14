@@ -1,4 +1,4 @@
-import type { DonorSummary } from '@shared/models'
+import type { DonorRef } from '@shared/models'
 
-export const getDonorFullName = (donor: DonorSummary): string =>
+export const getDonorFullName = (donor: DonorRef): string =>
   `${donor.lastName.toUpperCase()}${donor.firstName ? ` ${donor.firstName}` : ''}`

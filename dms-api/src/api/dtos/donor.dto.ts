@@ -3,16 +3,22 @@ import { IsEnum, IsOptional } from 'class-validator'
 
 import { SortOrder, SortOrderEnum } from './sort-order.dto'
 
-export class DonorSummaryDto {
+export class DonorRefDto {
   id: string
-  createdAt: string
-  updatedAt: string
-  firstName?: string
   lastName: string
+  firstName?: string
 }
 
-export class DonorDto extends DonorSummaryDto {
+export class DonorListItemDto extends DonorRefDto {
+  updatedAt: string
+  externalId: number
+  donationCount: number
+  donationTotalAmount: number
   email?: string
+}
+
+export class DonorDto extends DonorListItemDto {
+  createdAt: string
   phoneNumber?: string
   civility?: string
   streetAddress1?: string
@@ -23,18 +29,16 @@ export class DonorDto extends DonorSummaryDto {
   country?: string
   isFacilitator: boolean
   isDisabled: boolean
-  donationCount: number
-  donationTotalAmount: number
 }
 
-export class DonorSummaryListSortOrder {
+export class DonorRefSortOrder {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)
   lastName?: SortOrder
 }
 
-export class DonorListSortOrder extends DonorSummaryListSortOrder {
+export class DonorListSortOrder extends DonorRefSortOrder {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)

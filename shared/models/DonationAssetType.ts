@@ -1,7 +1,10 @@
-export type DonationAssetType = {
+export interface DonationAssetTypeRef {
   id: string
+  name: string
+}
+
+export interface DonationAssetType extends DonationAssetTypeRef {
   createdAt: Date
   updatedAt: Date
-  name: string
   isDefault: boolean
 }

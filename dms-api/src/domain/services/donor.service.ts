@@ -4,16 +4,22 @@ import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService } from '@/infrastructure'
 
-import { Donor, DonorSummary } from '@shared/models'
+import { DonorListItem, DonorRef } from '@shared/models'
 import { omit } from 'es-toolkit'
 
 @Injectable()
 export class DonorService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAll(): Promise<Donor[]> {
+  async getFilteredList(): Promise<DonorListItem[]> {
     const donors = await this.prisma.donor.findMany({
-      include: {
+      select: {
+        id: true,
+        externalId: true,
+        firstName: true,
+        lastName: true,
+        updatedAt: true,
+        email: true,
         donations: {
           select: {
             amount: true,
@@ -21,26 +27,28 @@ export class DonorService {
         },
       },
     })
-    return nullsToUndefined(
-      donors.map((donor) => ({
-        ...omit(donor, ['donations']),
-        donationCount: donor.donations.length,
-        donationTotalAmount: donor.donations.reduce((sum, donation) => sum + donation.amount, 0),
-      })),
-    )
+    return nullsToUndefined(donors.map((donor) => this.getAdditionalProperties(donor)))
   }
 
-  async getAllSummaries(): Promise<DonorSummary[]> {
+  async getAllRefs(): Promise<DonorRef[]> {
     return nullsToUndefined(
       await this.prisma.donor.findMany({
         select: {
           id: true,
           firstName: true,
           lastName: true,
-          createdAt: true,
-          updatedAt: true,
         },
       }),
     )
+  }
+
+  private getAdditionalProperties<T extends { donations: { amount: number }[] }>(
+    donor: T,
+  ): Omit<T, 'donations'> & { donationCount: number; donationTotalAmount: number } {
+    return {
+      ...omit(donor, ['donations']),
+      donationCount: donor.donations.length,
+      donationTotalAmount: donor.donations.reduce((sum, donation) => sum + donation.amount, 0),
+    }
   }
 }

@@ -1,6 +1,7 @@
 describe('Donation List', () => {
   beforeEach(() => {
     cy.mockDonationList()
+    cy.mockOrganisationRefList()
   })
 
   const donationListTable = '.donation-list-table'
@@ -14,7 +15,7 @@ describe('Donation List', () => {
 
   it('displays the donation list', () => {
     cy.visit('/donations')
-    cy.wait(['@getDonationList', '@getDonationListContext'])
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
     cy.get(donationListItem).should('have.length', 10)
     cy.get(donationListItem)
       .first()
@@ -49,28 +50,28 @@ describe('Donation List', () => {
   })
   it('allows the user to navigate pages', () => {
     cy.visit('/donations')
-    cy.wait(['@getDonationList', '@getDonationListContext'])
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
     cy.get(paginationInfo).should('contain.text', '1-10 of 96')
 
-    cy.mockDonationList({ page: 2, pageSize: 10, orderBy: { createdAt: 'desc' } })
+    cy.mockDonationList({ page: 2, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
     cy.get(paginationInfo).should('contain.text', '11-20 of 96')
 
-    cy.mockDonationList({ page: 10, pageSize: 10, orderBy: { createdAt: 'desc' } })
+    cy.mockDonationList({ page: 10, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(3).click() // Go to end page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 6)
     cy.get(paginationInfo).should('contain.text', '91-96 of 96')
 
-    cy.mockDonationList({ page: 9, pageSize: 10, orderBy: { createdAt: 'desc' } })
+    cy.mockDonationList({ page: 9, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(1).click() // Go to previous page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
     cy.get(paginationInfo).should('contain.text', '81-90 of 96')
 
-    cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } })
+    cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(0).click() // Go to first page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
@@ -78,17 +79,17 @@ describe('Donation List', () => {
   })
   it('allows the user to change page size', () => {
     cy.visit('/donations')
-    cy.wait(['@getDonationList', '@getDonationListContext'])
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
     cy.get(paginationInfo).should('contain.text', '1-10 of 96')
 
-    cy.mockDonationList({ page: 2, pageSize: 10, orderBy: { createdAt: 'desc' } })
+    cy.mockDonationList({ page: 2, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
     cy.get(paginationInfo).should('contain.text', '11-20 of 96')
 
     cy.get(pageSizeSelect).should('contain.text', '10').click()
-    cy.mockDonationList({ page: 1, pageSize: 50, orderBy: { createdAt: 'desc' } })
+    cy.mockDonationList({ page: 1, pageSize: 50, orderBy: { updatedAt: 'desc' } })
     cy.get('#q-portal--menu--1 .q-item').eq(3).click() // Select 50 rows per page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 50)
@@ -96,7 +97,7 @@ describe('Donation List', () => {
   })
   it('allows the user to sort certain columns', () => {
     cy.visit('/donations')
-    cy.wait(['@getDonationList', '@getDonationListContext'])
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
     cy.get(donationListHeader).within(() => {
       cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { amount: 'asc' } })
       cy.get('th').eq(2).click() // Sort by Amount ascending
@@ -140,7 +141,8 @@ describe('Donation List', () => {
   })
   it('should allow a user to navigate to the user update page', () => {
     cy.visit('/donations')
-    cy.wait(['@getDonationList', '@getDonationListContext'])
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
+    cy.mockDonation(3)
     cy.get(donationListItem)
       .eq(3)
       .within(() => {
@@ -152,13 +154,46 @@ describe('Donation List', () => {
   describe('Filters', () => {
     const getFilterMenu = () =>
       cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children().eq(1).children()
-    // TODO add test for donor uuidfilter when implemented
-    it('should allow filtering by a date range', () => {
+    it('should allow filtering by donor name', () => {
+      const getDonorFilter = () => getFilterMenu().eq(0).children().eq(0)
       cy.visit('/donations')
-      cy.wait(['@getDonationList', '@getDonationListContext'])
+      cy.wait(['@getDonationList', '@getOrganisationRefList'])
       cy.get(filter).click()
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
+        { donorId: { in: [0] } },
+      )
+      cy.mockDonorRefList()
+      getDonorFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click()
+      })
+      cy.wait(['@getDonorRefList'])
+      // select donor 1 as filter
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
+      getDonorFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click() // close dropdown
+      })
+      cy.get(paginationInfo).should('contain.text', '1-4 of 4')
+      cy.mockDonationList(
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
+        { donorId: { in: [0, 1] } },
+      )
+      getDonorFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click()
+      })
+      // select donor 2 as filter too
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(1).click()
+      getDonorFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click() // close dropdown
+      })
+      cy.get(paginationInfo).should('contain.text', '1-8 of 8')
+    })
+    it('should allow filtering by a date range', () => {
+      cy.visit('/donations')
+      cy.wait(['@getDonationList', '@getOrganisationRefList'])
+      cy.get(filter).click()
+      cy.mockDonationList(
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { donatedAt: { gte: new Date(2024, 1, 1) } },
       )
       // add start date filter
@@ -172,7 +207,7 @@ describe('Donation List', () => {
       cy.get(paginationInfo).should('contain.text', '1-10 of 69')
 
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { donatedAt: { gte: new Date(2024, 1, 1), lte: new Date(2024, 2, 5) } },
       )
       // add end date filter
@@ -187,10 +222,10 @@ describe('Donation List', () => {
     })
     it('should allow filtering by an amount range', () => {
       cy.visit('/donations')
-      cy.wait(['@getDonationList', '@getDonationListContext'])
+      cy.wait(['@getDonationList', '@getOrganisationRefList'])
       cy.get(filter).click()
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { amount: { gte: 40 } },
       )
       // add minimum amount filter
@@ -204,7 +239,7 @@ describe('Donation List', () => {
       cy.get(paginationInfo).should('contain.text', '1-10 of 70')
 
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { amount: { gte: 40, lte: 70 } },
       )
       // add maximum amount filter
@@ -220,23 +255,25 @@ describe('Donation List', () => {
     it('should allow filtering by payment mode', () => {
       const getPaymentModeFilter = () => getFilterMenu().eq(0).children().eq(2)
       cy.visit('/donations')
-      cy.wait(['@getDonationList', '@getDonationListContext'])
+      cy.wait(['@getDonationList', '@getOrganisationRefList'])
       cy.get(filter).click()
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { paymentModeId: { in: [0] } },
       )
-      // select payment mode 1 as filter
+      cy.mockPaymentModeList()
       getPaymentModeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
+      cy.wait(['@getPaymentModeList'])
+      // select payment mode 1 as filter
       cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
       getPaymentModeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 25')
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { paymentModeId: { in: [0, 1] } },
       )
       // select payment mode 2 as filter too
@@ -252,16 +289,16 @@ describe('Donation List', () => {
     it('should allow filtering by organisation', () => {
       const getOrganisationFilter = () => getFilterMenu().eq(0).children().eq(4)
       cy.visit('/donations')
-      cy.wait(['@getDonationList', '@getDonationListContext'])
+      cy.wait(['@getDonationList', '@getOrganisationRefList'])
       cy.get(filter).click()
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { organisationId: { in: [0] } },
       )
-      // select organisation 1 as filter
       getOrganisationFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
+      // select organisation 1 as filter
       cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
       getOrganisationFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
@@ -271,23 +308,25 @@ describe('Donation List', () => {
     it('should allow filtering by donation type', () => {
       const getDonationTypeFilter = () => getFilterMenu().eq(2).children().eq(4).children().eq(0)
       cy.visit('/donations')
-      cy.wait(['@getDonationList', '@getDonationListContext'])
+      cy.wait(['@getDonationList', '@getOrganisationRefList'])
       cy.get(filter).click()
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { donationTypeId: { in: [0] } },
       )
-      // select donation type 1 as filter
+      cy.mockDonationTypeList()
       getDonationTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
       })
+      cy.wait(['@getDonationTypeList'])
+      // select donation type 1 as filter
       cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
       getDonationTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 10')
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { donationTypeId: { in: [0, 3] } },
       )
       // select donation type 3 as filter too
@@ -303,9 +342,9 @@ describe('Donation List', () => {
     it('should allow filtering by toggling isDisabled status', () => {
       const getIncludeDisabledFilter = () => getFilterMenu().eq(2).children().eq(4).children().eq(2)
       cy.visit('/donations')
-      cy.wait(['@getDonationList', '@getDonationListContext'])
+      cy.wait(['@getDonationList', '@getOrganisationRefList'])
       cy.get(filter).click()
-      cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } }, {})
+      cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } }, {})
       // select isDisabled = false as filter
       getIncludeDisabledFilter().within(() => {
         cy.get('.q-toggle__thumb').click()
@@ -313,7 +352,7 @@ describe('Donation List', () => {
       cy.get(paginationInfo).should('contain.text', '1-10 of 100')
       // now exclude back the disabled donations
       cy.mockDonationList(
-        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         {
           isDisabled: { equals: false },
         },

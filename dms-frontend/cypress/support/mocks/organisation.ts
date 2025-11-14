@@ -1,11 +1,13 @@
 import { v4 } from 'uuid'
 
-import type { Organisation, OrganisationSummary } from '@shared/models'
+import type { Organisation } from '@shared/models'
 
 export function buildMockOrganisations(): Organisation[] {
-  const summaries = buildMockOrganisationSummaries()
   return Array.from({ length: 2 }).map((_, index) => ({
-    ...summaries[index],
+    id: v4(),
+    createdAt: new Date(2024, 0, index + 1),
+    updatedAt: new Date(2024, 1, index + 1),
+    name: `Organisation ${index + 1}`,
     title: `Title ${index + 1}`,
     address: `Address ${index + 1}`,
     locality: `Locality ${index + 1}`,
@@ -16,14 +18,5 @@ export function buildMockOrganisations(): Organisation[] {
     signatoryName: `Signatory Name ${index + 1}`,
     signatoryPosition: `Signatory Position ${index + 1}`,
     signatureUrl: `http://example.com/signature${index + 1}.png`,
-  }))
-}
-
-export function buildMockOrganisationSummaries(): OrganisationSummary[] {
-  return Array.from({ length: 2 }).map((_, index) => ({
-    id: v4(),
-    createdAt: new Date(2024, 0, index + 1),
-    updatedAt: new Date(2024, 1, index + 1),
-    name: `Organisation ${index + 1}`,
   }))
 }

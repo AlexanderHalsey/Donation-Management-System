@@ -1,13 +1,19 @@
-export type DonorSummary = {
+export interface DonorRef {
   id: string
-  createdAt: Date
-  updatedAt: Date
   firstName?: string
   lastName: string
 }
 
-export type Donor = DonorSummary & {
+export interface DonorListItem extends DonorRef {
+  updatedAt: Date
+  externalId: number
+  donationCount: number
+  donationTotalAmount: number
   email?: string
+}
+
+export interface Donor extends DonorListItem {
+  createdAt: Date
   phoneNumber?: string
   civility?: string
   streetAddress1?: string
@@ -18,6 +24,4 @@ export type Donor = DonorSummary & {
   country?: string
   isFacilitator: boolean
   isDisabled: boolean
-  donationCount: number
-  donationTotalAmount: number
 }

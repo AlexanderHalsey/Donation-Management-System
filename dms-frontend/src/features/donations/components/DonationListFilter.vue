@@ -25,9 +25,10 @@
             <div class="text-bold q-mb-sm">Donateur</div>
             <UuidFilterComponent
               :model-value="filter?.donorId"
+              @filter="donors.filterFn"
               @update:model-value="updateFilter({ ...filter, donorId: $event })"
               :options="
-                context.donors.map((donor) => ({
+                donors.options.map((donor) => ({
                   id: donor.id,
                   name: getDonorFullName(donor),
                 }))
@@ -39,8 +40,9 @@
             <div class="text-bold q-mb-sm">Mode de paiement</div>
             <UuidFilterComponent
               :model-value="filter?.paymentModeId"
+              @filter="paymentModes.filterFn"
               @update:model-value="updateFilter({ ...filter, paymentModeId: $event })"
-              :options="context.paymentModes"
+              :options="paymentModes.options"
             >
               <template #option="scope">
                 <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
@@ -57,14 +59,14 @@
             <UuidFilterComponent
               :model-value="filter?.organisationId"
               @update:model-value="updateFilter({ ...filter, organisationId: $event })"
-              :options="context.organisations"
+              :options="organisations"
             >
               <template #option="scope">
                 <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
                   <QItemSection>
                     <OrganisationTag
-                      :organisation="getOrganisationById(scope.opt.value)"
-                      :organisation-options="context.organisations"
+                      :organisation="getOrganisationRefById(scope.opt.value)"
+                      :organisation-options="organisations"
                     />
                   </QItemSection>
                 </QItem>
@@ -95,8 +97,9 @@
               <div class="text-bold q-mb-sm">Type de don</div>
               <UuidFilterComponent
                 :model-value="filter?.donationTypeId"
+                @filter="donationTypes.filterFn"
                 @update:model-value="updateFilter({ ...filter, donationTypeId: $event })"
-                :options="context.donationTypes"
+                :options="donationTypes.options"
               >
                 <template #option="scope">
                   <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
@@ -105,8 +108,8 @@
                       <QItemLabel caption class="flex items-center">
                         Organisation :
                         <OrganisationTag
-                          :organisation="getOrganisationByDonationTypeId(scope.opt.value)"
-                          :organisation-options="context.organisations"
+                          :organisation="getOrganisationRefByDonationTypeId(scope.opt.value)"
+                          :organisation-options="organisations"
                           class="q-ml-xs"
                         />
                       </QItemLabel>
@@ -138,11 +141,16 @@ import { computed, type PropType } from 'vue'
 import { debounce, isEqual } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { isDate } from 'date-fns'
+
 import { getDonorFullName } from '@/features/donors'
+import {
+  getOrganisationRefByDonationTypeId,
+  getOrganisationRefById,
+  OrganisationTag,
+} from '@/features/organisations'
 
 import BtnDropdown from '@/components/ui/BtnDropdown.vue'
 import Btn from '@/components/ui/Btn.vue'
-import OrganisationTag from '@/components/OrganisationTag.vue'
 
 import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
 import FloatFilterComponent from '@/components/FloatFilter.vue'
@@ -151,19 +159,31 @@ import UuidFilterComponent from '@/components/UuidFilter.vue'
 import type {
   DonationListFilter,
   DonationType,
-  DonorSummary,
-  OrganisationSummary,
+  DonorRef,
+  OrganisationRef,
   PaymentMode,
 } from '@shared/models'
 
+export type LazySelectOptions<T> = {
+  options: T[]
+  filterFn: (_: unknown, update: () => void) => Promise<void>
+}
+
 const props = defineProps({
-  context: {
-    type: Object as PropType<{
-      paymentModes: PaymentMode[]
-      organisations: OrganisationSummary[]
-      donationTypes: DonationType[]
-      donors: DonorSummary[]
-    }>,
+  organisations: {
+    type: Object as PropType<OrganisationRef[]>,
+    required: true,
+  },
+  donationTypes: {
+    type: Object as PropType<LazySelectOptions<DonationType>>,
+    required: true,
+  },
+  paymentModes: {
+    type: Object as PropType<LazySelectOptions<PaymentMode>>,
+    required: true,
+  },
+  donors: {
+    type: Object as PropType<LazySelectOptions<DonorRef>>,
     required: true,
   },
   filter: {
@@ -194,17 +214,6 @@ const updateFilter = debounce((newFilter: DonationListFilter) => {
   if (isEqual(simplifiedFilter, props.filter)) return
   emit('update:filter', simplifiedFilter)
 }, 300)
-
-const getOrganisationById = (id: string): OrganisationSummary => {
-  const organisation = props.context.organisations.find((org) => org.id === id)
-  if (!organisation) throw new Error(`Organisation with id ${id} not found`)
-  return organisation
-}
-const getOrganisationByDonationTypeId = (id: string): OrganisationSummary => {
-  const donationType = props.context.donationTypes.find((dt) => dt.id === id)
-  if (!donationType) throw new Error(`Donation type with id ${id} not found`)
-  return getOrganisationById(donationType.organisationId)
-}
 
 const filterCount = computed(
   () =>
