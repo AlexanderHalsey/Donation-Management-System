@@ -42,6 +42,11 @@ export class DonorListSortOrder extends DonorRefSortOrder {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEnum(SortOrderEnum)
+  updatedAt?: SortOrder
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEnum(SortOrderEnum)
   donationCount?: SortOrder
 
   @ApiProperty({ required: false })

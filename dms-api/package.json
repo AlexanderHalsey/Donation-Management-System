@@ -59,7 +59,10 @@
   },
   "prisma": {
     "schema": "prisma",
-    "seed": "node dist/dms-api/prisma/seed.js"
+    "seed": "node dist/dms-api/prisma/seed.js",
+    "typedSql": {
+      "path": "./prisma/sql"
+    }
   },
   "jest": {
     "moduleFileExtensions": [

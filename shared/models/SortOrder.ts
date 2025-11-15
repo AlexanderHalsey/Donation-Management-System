@@ -11,6 +11,7 @@ export interface DonationListSortOrder {
 }
 
 export interface DonorListSortOrder extends DonorSummaryRefSortOrder {
+  updatedAt?: SortOrder
   donationCount?: SortOrder
   donationTotalAmount?: SortOrder
   email?: SortOrder

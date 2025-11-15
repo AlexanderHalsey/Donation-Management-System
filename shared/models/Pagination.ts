@@ -5,7 +5,7 @@
 export type PaginationRequest<T> = {
   page: number
   pageSize: number
-  orderBy?: T
+  orderBy: T
 }
 
 /**

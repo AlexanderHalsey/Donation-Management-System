@@ -29,11 +29,13 @@ describe('DonorService', () => {
   })
 
   it('should get donor list', async () => {
-    prismaServiceMock.donor.findMany.mockResolvedValueOnce([])
+    prismaServiceMock.$queryRawTyped.mockResolvedValueOnce([])
+    await donorService.getFilteredList(
+      { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
+      { amount: { gte: 10 } },
+    )
 
-    await donorService.getFilteredList()
-
-    expect(prismaServiceMock.donor.findMany).toHaveBeenCalledTimes(1)
+    expect(prismaServiceMock.$queryRawTyped).toHaveBeenCalledTimes(1)
   })
 
   it('should get donor ref items', async () => {
@@ -42,5 +44,17 @@ describe('DonorService', () => {
     await donorService.getAllRefs()
 
     expect(prismaServiceMock.donor.findMany).toHaveBeenCalledTimes(1)
+  })
+
+  it('should get donor by id', async () => {
+    prismaServiceMock.donor.findUniqueOrThrow.mockResolvedValueOnce({
+      id: 'donor-id-123',
+      donations: [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+
+    await donorService.getById('donor-id-123')
+
+    expect(prismaServiceMock.donor.findUniqueOrThrow).toHaveBeenCalledTimes(1)
   })
 })

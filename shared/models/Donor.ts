@@ -1,3 +1,7 @@
+import type { DateTimeFilter, FloatFilter, UuidFilter } from './Filters'
+import type { Pagination, PaginationRequest } from './Pagination'
+import type { DonorListSortOrder } from './SortOrder'
+
 export interface DonorRef {
   id: string
   firstName?: string
@@ -24,4 +28,13 @@ export interface Donor extends DonorListItem {
   country?: string
   isFacilitator: boolean
   isDisabled: boolean
+}
+
+export type DonorListPaginationRequest = PaginationRequest<DonorListSortOrder>
+export type DonorListPagination = Pagination<DonorListSortOrder>
+
+export interface DonorListFilter {
+  id?: UuidFilter
+  donatedAt?: DateTimeFilter
+  amount?: FloatFilter
 }

@@ -47,23 +47,22 @@ export class DonationService {
   async getFilteredList(
     pagination: DonationListPaginationRequest,
     filter?: DonationListFilter,
-  ): Promise<DonationListItem[]> {
-    return (
-      await this.prisma.donation.findMany({
+  ): Promise<{ donations: DonationListItem[]; totalCount: number }> {
+    const [donations, totalCount] = await this.prisma.$transaction([
+      this.prisma.donation.findMany({
         include: BASIC_INCLUDE_FIELDS,
         omit: BASIC_OMIT_FIELDS,
         where: filter,
         orderBy: pagination.orderBy,
         skip: (pagination.page - 1) * pagination.pageSize,
         take: pagination.pageSize,
-      })
-    ).map(nullsToUndefined)
-  }
-
-  async getCount(filter?: DonationListFilter): Promise<number> {
-    return this.prisma.donation.count({
-      where: filter,
-    })
+      }),
+      this.prisma.donation.count({ where: filter }),
+    ])
+    return {
+      donations: donations.map(nullsToUndefined),
+      totalCount,
+    }
   }
 
   async getById(donationId: string): Promise<Donation> {

@@ -114,7 +114,7 @@ export interface DonationDto extends DonationListItemDto {
 export interface PaginationRequest<T> {
   page: number
   pageSize: number
-  orderBy?: T
+  orderBy: T
 }
 
 /**
@@ -127,6 +127,9 @@ export interface PaginationDto<T> extends PaginationRequest<T> {
 
 export interface DonationListPaginationRequest extends PaginationRequest<DonationListSortOrder> {}
 export interface DonationListPagination extends PaginationDto<DonationListSortOrder> {}
+
+export interface DonorListPaginationRequest extends PaginationRequest<DonorListSortOrder> {}
+export interface DonorListPagination extends PaginationDto<DonorListSortOrder> {}
 
 export interface DonationListSortOrder {
   updatedAt?: SortOrder
@@ -141,6 +144,7 @@ export interface DonationListSortOrder {
 }
 
 export interface DonorListSortOrder extends DonorRefSortOrder {
+  updatedAt?: SortOrder
   donationCount?: SortOrder
   donationTotalAmount?: SortOrder
   email?: SortOrder
@@ -169,6 +173,12 @@ export interface DonationListFilter {
   organisationId?: UuidFilter
   donationTypeId?: UuidFilter
   isDisabled?: BoolFilter
+}
+
+export interface DonorListFilter {
+  id?: UuidFilter
+  donatedAt?: DateTimeFilter
+  amount?: FloatFilter
 }
 
 export interface UuidFilter {
@@ -200,6 +210,16 @@ export interface GetDonationListResponse {
   pagination: DonationListPagination
 }
 
+export interface GetDonorListRequest {
+  pagination: DonorListPaginationRequest
+  filter?: DonorListFilter
+}
+
+export interface GetDonorListResponse {
+  donors: DonorListItemDto[]
+  pagination: DonorListPagination
+}
+
 export interface GetOrganisationRefListResponse {
   organisationRefs: OrganisationRefDto[]
 }
@@ -218,4 +238,8 @@ export interface GetDonorRefListResponse {
 
 export interface GetDonationResponse {
   donation: DonationDto
+}
+
+export interface GetDonorResponse {
+  donor: DonorDto
 }

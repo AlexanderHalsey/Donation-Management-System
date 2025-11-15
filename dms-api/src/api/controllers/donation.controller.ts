@@ -22,13 +22,10 @@ export class DonationController {
   async getFilteredList(
     @Body() { pagination, filter }: GetDonationListRequest,
   ): Promise<GetDonationListResponse> {
-    const [donationList, totalCount] = await Promise.all([
-      this.donationService.getFilteredList(pagination, filter),
-      this.donationService.getCount(filter),
-    ])
+    const { donations, totalCount } = await this.donationService.getFilteredList(pagination, filter)
 
     return {
-      donations: donationList.map((donation) =>
+      donations: donations.map((donation) =>
         this.donationConverter.convertDonationListItemToDto(donation),
       ),
       pagination: {

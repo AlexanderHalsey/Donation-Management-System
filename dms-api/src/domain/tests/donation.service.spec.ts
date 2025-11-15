@@ -29,19 +29,14 @@ describe('DonationService', () => {
   })
 
   it('should get donation list', async () => {
-    prismaServiceMock.donation.findMany.mockResolvedValueOnce([])
+    prismaServiceMock.$transaction.mockResolvedValueOnce([[], 0])
 
-    await donationService.getFilteredList({ page: 1, pageSize: 10 }, { amount: { gte: 10 } })
+    await donationService.getFilteredList(
+      { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
+      { amount: { gte: 10 } },
+    )
 
-    expect(prismaServiceMock.donation.findMany).toHaveBeenCalledTimes(1)
-  })
-
-  it('should count donations', async () => {
-    prismaServiceMock.donation.count.mockResolvedValueOnce(42)
-
-    await donationService.getCount({ isDisabled: { equals: false } })
-
-    expect(prismaServiceMock.donation.count).toHaveBeenCalledTimes(1)
+    expect(prismaServiceMock.$transaction).toHaveBeenCalledTimes(1)
   })
 
   it('should get donation by id', async () => {

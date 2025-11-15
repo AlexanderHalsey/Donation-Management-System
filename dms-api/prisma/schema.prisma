@@ -4,7 +4,8 @@ datasource db {
 }
 
 generator client {
-  provider      = "prisma-client"
-  output        = "./generated/prisma"
-  binaryTargets = ["native", "darwin-arm64", "linux-arm64-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x"]
+  provider        = "prisma-client"
+  previewFeatures = ["typedSql"]
+  output          = "./generated/prisma"
+  binaryTargets   = ["native", "darwin-arm64", "linux-arm64-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x"]
 }
