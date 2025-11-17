@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { omit } from 'es-toolkit'
+import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService } from '@/infrastructure'
@@ -25,12 +26,13 @@ export class DonorService {
     const startDate = filter?.donatedAt?.gte || null
     const endDate = filter?.donatedAt?.lte || null
     const donorIds = filter?.id?.in ? filter.id.in.join(',') : null
-    const minAmount = filter?.amount?.gte || null
-    const maxAmount = filter?.amount?.lte || null
+    const minAmount = filter?.totalAmount?.gte || null
+    const maxAmount = filter?.totalAmount?.lte || null
 
-    Object.keys(pagination.orderBy).forEach((key) =>
-      pagination.orderBy[key] === undefined ? delete pagination.orderBy[key] : {},
+    Object.keys(pagination.orderBy ?? {}).forEach((key) =>
+      pagination.orderBy![key] === undefined ? delete pagination.orderBy![key] : {},
     )
+    pagination.orderBy = isEmpty(pagination.orderBy) ? { updatedAt: 'desc' } : pagination.orderBy
     const [orderByField, orderByDirection] = Object.entries(pagination.orderBy)[0]
     const limit = pagination.pageSize
     const offset = (pagination.page - 1) * pagination.pageSize

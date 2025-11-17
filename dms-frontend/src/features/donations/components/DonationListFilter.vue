@@ -156,6 +156,7 @@ import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
 import FloatFilterComponent from '@/components/FloatFilter.vue'
 import UuidFilterComponent from '@/components/UuidFilter.vue'
 
+import type { LazySelectOptions } from '@/types'
 import type {
   DonationListFilter,
   DonationType,
@@ -163,11 +164,6 @@ import type {
   OrganisationRef,
   PaymentMode,
 } from '@shared/models'
-
-export type LazySelectOptions<T> = {
-  options: T[]
-  filterFn: (_: unknown, update: () => void) => Promise<void>
-}
 
 const props = defineProps({
   organisations: {

@@ -114,7 +114,7 @@ export interface DonationDto extends DonationListItemDto {
 export interface PaginationRequest<T> {
   page: number
   pageSize: number
-  orderBy: T
+  orderBy?: T
 }
 
 /**
@@ -178,7 +178,7 @@ export interface DonationListFilter {
 export interface DonorListFilter {
   id?: UuidFilter
   donatedAt?: DateTimeFilter
-  amount?: FloatFilter
+  totalAmount?: FloatFilter
 }
 
 export interface UuidFilter {

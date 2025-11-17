@@ -15,3 +15,8 @@ export type Tag = {
   backgroundColor: string
   color: string
 }
+
+export type LazySelectOptions<T> = {
+  options: T[]
+  filterFn: (_: unknown, update: () => void) => Promise<void>
+}

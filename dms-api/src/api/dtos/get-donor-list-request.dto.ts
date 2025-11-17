@@ -11,7 +11,7 @@ export class DonorListPaginationRequest extends PaginationRequest {
   @ApiProperty({ type: DonorListSortOrder, required: false })
   @ValidateNested()
   @Type(() => DonorListSortOrder)
-  orderBy: DonorListSortOrder
+  orderBy?: DonorListSortOrder
 }
 
 export class DonorListFilter {
@@ -28,7 +28,7 @@ export class DonorListFilter {
   @ApiProperty({ type: FloatFilter, required: false })
   @ValidateNested()
   @Type(() => FloatFilter)
-  amount?: FloatFilter
+  totalAmount?: FloatFilter
 }
 
 export class GetDonorListRequest {

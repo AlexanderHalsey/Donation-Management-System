@@ -1,6 +1,7 @@
 export * from './donation'
 export * from './donationList'
 export * from './donationTypeList'
+export * from './donor'
 export * from './donorList'
 export * from './organisationList'
 export * from './paymentModeList'

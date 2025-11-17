@@ -36,5 +36,5 @@ export type DonorListPagination = Pagination<DonorListSortOrder>
 export interface DonorListFilter {
   id?: UuidFilter
   donatedAt?: DateTimeFilter
-  amount?: FloatFilter
+  totalAmount?: FloatFilter
 }

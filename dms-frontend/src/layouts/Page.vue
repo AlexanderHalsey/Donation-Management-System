@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, type PropType } from 'vue'
+import { inject, watch, type PropType } from 'vue'
 
 import { setBreadcrumbsInjectionKey } from '@/symbols'
 import type { Breadcrumb } from '@/types'
@@ -44,9 +44,15 @@ const props = defineProps({
 })
 
 const setBreadcrumbs = inject(setBreadcrumbsInjectionKey)
-if (setBreadcrumbs) {
-  setBreadcrumbs(props.breadcrumbs)
-}
+watch(
+  () => props.breadcrumbs,
+  (newBreadcrumbs) => {
+    if (setBreadcrumbs) {
+      setBreadcrumbs(newBreadcrumbs)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style lang="scss" scoped>

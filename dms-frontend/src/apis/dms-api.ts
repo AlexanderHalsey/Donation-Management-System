@@ -4,6 +4,8 @@ import {
   convertDtoToDonation,
   convertDtoToDonationListItem,
   convertDtoToDonationType,
+  convertDtoToDonor,
+  convertDtoToDonorListItem,
   convertDtoToPaymentMode,
 } from './converters'
 
@@ -12,7 +14,10 @@ import type {
   GetDonationListResponse,
   GetDonationResponse,
   GetDonationTypeListResponse,
+  GetDonorListRequest,
+  GetDonorListResponse,
   GetDonorRefListResponse,
+  GetDonorResponse,
   GetOrganisationRefListResponse,
   GetPaymentModeListResponse,
 } from '@shared/dtos'
@@ -23,6 +28,11 @@ import type {
   DonationListPagination,
   DonationListPaginationRequest,
   DonationType,
+  Donor,
+  DonorListFilter,
+  DonorListItem,
+  DonorListPagination,
+  DonorListPaginationRequest,
   DonorRef,
   OrganisationRef,
   PaymentMode,
@@ -79,4 +89,29 @@ export const getDonation = async (donationId: string): Promise<Donation> => {
     client.get<GetDonationResponse>(`/donations/${donationId}`),
   )
   return convertDtoToDonation(response.donation)
+}
+
+export const getDonors = async (
+  pagination: DonorListPaginationRequest,
+  filter?: DonorListFilter,
+): Promise<{
+  donors: DonorListItem[]
+  pagination: DonorListPagination
+}> => {
+  const request: GetDonorListRequest = {
+    pagination,
+    filter,
+  }
+  const response = await withClient((client) =>
+    client.post<GetDonorListResponse>('/donors/filtered-list', request),
+  )
+  return {
+    donors: response.donors.map(convertDtoToDonorListItem),
+    pagination: response.pagination,
+  }
+}
+
+export const getDonor = async (donorId: string): Promise<Donor> => {
+  const response = await withClient((client) => client.get<GetDonorResponse>(`/donors/${donorId}`))
+  return convertDtoToDonor(response.donor)
 }

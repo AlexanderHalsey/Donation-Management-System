@@ -7,8 +7,9 @@ import {
   buildMockOrganisations,
   buildMockPaymentModes,
   type DonationListFilterMock,
+  type DonorListFilterMock,
 } from './mocks'
-import type { DonationListPaginationRequest } from '@shared/models'
+import type { DonationListPaginationRequest, DonorListPaginationRequest } from '@shared/models'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -20,6 +21,11 @@ declare global {
         filter?: DonationListFilterMock,
       ): Chainable<Subject>
       mockDonationTypeList(): Chainable<Subject>
+      mockDonorList(
+        pagination?: DonorListPaginationRequest,
+        filter?: DonorListFilterMock,
+      ): Chainable<Subject>
+      mockDonor(index: number): Chainable<Subject>
       mockDonorRefList(): Chainable<Subject>
       mockOrganisationRefList(): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
@@ -37,7 +43,10 @@ Cypress.Commands.add(
         orderBy: { updatedAt: 'desc' },
       }
     }
-    const donations = buildMockDonations(pagination, filter ?? { isDisabled: { equals: false } })
+    const donations = buildMockDonations(
+      pagination.orderBy,
+      filter ?? { isDisabled: { equals: false } },
+    )
     cy.intercept('POST', '/donations/filtered-list', {
       statusCode: 200,
       body: {
@@ -103,6 +112,40 @@ Cypress.Commands.add('mockDonorRefList', () => {
       donorRefs: donors,
     },
   }).as('getDonorRefList')
+})
+
+Cypress.Commands.add(
+  'mockDonorList',
+  (pagination?: DonorListPaginationRequest, filter?: DonorListFilterMock) => {
+    const donors = buildMockDonors(pagination?.orderBy, filter)
+
+    cy.intercept('POST', '/donors/filtered-list', {
+      statusCode: 200,
+      body: {
+        donors: donors.slice(
+          ((pagination?.page ?? 1) - 1) * (pagination?.pageSize ?? 10),
+          (pagination?.page ?? 1) * (pagination?.pageSize ?? 10),
+        ),
+        pagination: {
+          page: pagination?.page ?? 1,
+          pageSize: pagination?.pageSize ?? 10,
+          totalCount: donors.length,
+          orderBy: pagination?.orderBy,
+        },
+      },
+    }).as('getDonorList')
+  },
+)
+
+Cypress.Commands.add('mockDonor', (index: number) => {
+  const donors = buildMockDonors()
+  const donor = donors[index]
+  cy.intercept('GET', '/donors/*', {
+    statusCode: 200,
+    body: {
+      donor,
+    },
+  }).as('getDonor')
 })
 
 export {}

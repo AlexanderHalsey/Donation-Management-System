@@ -145,8 +145,8 @@ const rowClassFn = (row: DonationListItem) => {
 }
 
 const computedPagination = computed<QTablePagination>(() => {
-  const sortBy = Object.keys(props.pagination?.orderBy || {})[0]
-  let orderByValue = Object.values(props.pagination?.orderBy || {})[0]
+  const sortBy = Object.keys(props.pagination?.orderBy ?? {})[0] ?? null
+  let orderByValue = Object.values(props.pagination?.orderBy ?? {})[0] ?? null
   if (typeof orderByValue === 'object') {
     orderByValue = Object.values(orderByValue)[0]
   }
@@ -180,7 +180,7 @@ const updatePagination = ({
                 ? 'desc'
                 : 'asc',
         } as DonationListSortOrder)
-      : undefined,
+      : {},
   }
 
   if (!isEqual(paginationRequest, omit(props.pagination, ['totalCount']))) {

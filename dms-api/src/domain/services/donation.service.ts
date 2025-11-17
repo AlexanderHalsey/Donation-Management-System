@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
+import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService } from '@/infrastructure'
@@ -53,7 +54,7 @@ export class DonationService {
         include: BASIC_INCLUDE_FIELDS,
         omit: BASIC_OMIT_FIELDS,
         where: filter,
-        orderBy: pagination.orderBy,
+        orderBy: isEmpty(pagination.orderBy) ? { updatedAt: 'desc' } : pagination.orderBy,
         skip: (pagination.page - 1) * pagination.pageSize,
         take: pagination.pageSize,
       }),

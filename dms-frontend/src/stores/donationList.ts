@@ -15,7 +15,6 @@ export const useDonationListStore = defineStore('donationList', () => {
   const pagination = ref<DonationListPagination>({
     page: 1,
     pageSize: 10,
-    orderBy: { updatedAt: 'desc' },
     totalCount: 0,
   })
 

@@ -40,6 +40,16 @@ const router = createRouter({
           name: 'donation-update',
           component: () => import('@/features/donations/pages/DonationUpdate.vue'),
         },
+        {
+          path: 'donors',
+          name: 'donors',
+          component: () => import('@/features/donors/pages/DonorList.vue'),
+        },
+        {
+          path: 'donors/:donorId',
+          name: 'donor-detail',
+          component: () => import('@/features/donors/pages/DonorDetail.vue'),
+        },
       ],
     },
     {

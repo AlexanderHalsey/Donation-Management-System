@@ -93,6 +93,7 @@ const $q = useQuasar()
 const menuItems: MenuItem[] = [
   { label: 'Tableau de bord', icon: 'speed', to: '/dashboard' },
   { label: 'Dons', icon: 'volunteer_activism', to: '/donations' },
+  { label: 'Donateurs', icon: 'group', to: '/donors' },
 ]
 
 const breadcrumbs = ref<Breadcrumb[]>([])

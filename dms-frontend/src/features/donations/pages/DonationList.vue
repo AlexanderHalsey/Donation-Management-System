@@ -31,7 +31,7 @@ import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
 
 import DonationListTable from '../components/DonationListTable.vue'
-import DonationListFilter, { type LazySelectOptions } from '../components/DonationListFilter.vue'
+import DonationListFilter from '../components/DonationListFilter.vue'
 
 import {
   useDonationListStore,
@@ -41,13 +41,13 @@ import {
   usePaymentModeListStore,
 } from '@/stores'
 
-import type { Breadcrumb } from '@/types'
-import {
-  type DonationListFilter as DonationListFilterRequest,
-  type DonationListPaginationRequest,
-  type DonationType,
-  type DonorRef,
-  type PaymentMode,
+import type { Breadcrumb, LazySelectOptions } from '@/types'
+import type {
+  DonationListFilter as DonationListFilterRequest,
+  DonationListPaginationRequest,
+  DonationType,
+  DonorRef,
+  PaymentMode,
 } from '@shared/models'
 
 const breadcrumbs: Breadcrumb[] = [
