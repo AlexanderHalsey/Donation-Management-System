@@ -2,6 +2,7 @@
   "include": [
     "src/**/*",
     "prisma/**/*",
+    "prisma.config.ts",
     "../shared/**/*"
   ],
   "compilerOptions": {
