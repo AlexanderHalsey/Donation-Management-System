@@ -52,11 +52,10 @@ const filter = computed(() => donorListStore.filter)
 
 const donorRefs = computed<LazySelectOptions<DonorRef>>(() => ({
   options: donorListStore.donorRefList,
-  filterFn: async (_, update) => {
+  load: async () => {
     if (!donorListStore.refsInitialized) {
       await donorListStore.fetchDonorRefs()
     }
-    update()
   },
 }))
 

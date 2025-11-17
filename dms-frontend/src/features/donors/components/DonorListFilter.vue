@@ -16,14 +16,14 @@
         <div class="text-bold q-mb-sm">Donateur</div>
         <UuidFilterComponent
           :model-value="filter?.id"
-          @filter="donorRefs.filterFn"
-          @update:model-value="updateFilter({ ...filter, id: $event })"
           :options="
             donorRefs.options.map((donor) => ({
               id: donor.id,
               name: getDonorFullName(donor),
             }))
           "
+          :lazy-load="donorRefs.load"
+          @update:model-value="updateFilter({ ...filter, id: $event })"
         />
       </div>
       <QSeparator class="q-mt-xs q-mb-sm" />

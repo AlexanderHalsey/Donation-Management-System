@@ -71,31 +71,28 @@ const organisations = computed(() => organisationListStore.organisationRefList)
 
 const donationTypes = computed<LazySelectOptions<DonationType>>(() => ({
   options: donationTypeListStore.donationTypeList,
-  filterFn: async (_, update) => {
+  load: async () => {
     if (!donationTypeListStore.initialized) {
       await donationTypeListStore.fetchDonationTypes()
     }
-    update()
   },
 }))
 
 const paymentModes = computed<LazySelectOptions<PaymentMode>>(() => ({
   options: paymentModeListStore.paymentModeList,
-  filterFn: async (_, update) => {
+  load: async () => {
     if (!paymentModeListStore.initialized) {
       await paymentModeListStore.fetchPaymentModes()
     }
-    update()
   },
 }))
 
 const donors = computed<LazySelectOptions<DonorRef>>(() => ({
   options: donorListStore.donorRefList,
-  filterFn: async (_, update) => {
+  load: async () => {
     if (!donorListStore.refsInitialized) {
       await donorListStore.fetchDonorRefs()
     }
-    update()
   },
 }))
 

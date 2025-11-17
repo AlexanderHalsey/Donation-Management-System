@@ -18,5 +18,5 @@ export type Tag = {
 
 export type LazySelectOptions<T> = {
   options: T[]
-  filterFn: (_: unknown, update: () => void) => Promise<void>
+  load: () => Promise<void>
 }

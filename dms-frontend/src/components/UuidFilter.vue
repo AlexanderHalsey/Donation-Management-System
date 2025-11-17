@@ -6,11 +6,19 @@
     dense
     rounded
     multiple
+    use-input
+    :input-debounce="0"
     style="margin-bottom: 24px; width: 230px"
     @update:model-value="updateModelValue"
+    @filter="filterFn"
   >
     <template v-for="(_, slot) of $slots" #[slot]="scope">
       <slot :name="slot" v-bind="scope || {}"></slot>
+    </template>
+    <template #no-option>
+      <QItem>
+        <QItemSection class="text-grey"> Aucune option trouvée </QItemSection>
+      </QItem>
     </template>
     <template #selected-item="scope">
       <QChip
@@ -30,6 +38,8 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, type PropType } from 'vue'
+
+import { useTextHelpers } from '@/composables'
 
 import type { UuidFilter } from '@shared/models'
 
@@ -52,26 +62,44 @@ const props = defineProps({
     type: Array as PropType<Array<UuidOption>>,
     default: () => [],
   },
+  lazyLoad: {
+    type: Function as PropType<() => Promise<void>>,
+    default: undefined,
+  },
 })
 
 const emit = defineEmits<{
   'update:model-value': [value: UuidFilter]
+  'lazy-load': []
 }>()
 
+const textHelpers = useTextHelpers()
+
 const values = ref<SelectOption[]>([])
+const filter = ref('')
 
 const selectOptions = computed(() =>
-  props.options.map(
-    (option): SelectOption => ({
-      value: option.id,
-      label: option.name,
-    }),
-  ),
+  props.options
+    .map(
+      (option): SelectOption => ({
+        value: option.id,
+        label: option.name,
+      }),
+    )
+    .filter((option) => textHelpers.isSearchMatch(filter.value, option.label)),
 )
 
 const updateModelValue = (newValues: SelectOption[]) => {
   emit('update:model-value', {
     in: newValues.map((option) => option.value),
+  })
+}
+
+function filterFn(val: string, update: (cb: () => void) => void) {
+  ;(props.lazyLoad?.() ?? Promise.resolve()).then(() => {
+    update(() => {
+      filter.value = val
+    })
   })
 }
 

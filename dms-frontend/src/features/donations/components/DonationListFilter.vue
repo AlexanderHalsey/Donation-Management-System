@@ -25,14 +25,14 @@
             <div class="text-bold q-mb-sm">Donateur</div>
             <UuidFilterComponent
               :model-value="filter?.donorId"
-              @filter="donors.filterFn"
-              @update:model-value="updateFilter({ ...filter, donorId: $event })"
               :options="
                 donors.options.map((donor) => ({
                   id: donor.id,
                   name: getDonorFullName(donor),
                 }))
               "
+              :lazy-load="donors.load"
+              @update:model-value="updateFilter({ ...filter, donorId: $event })"
             />
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
@@ -40,9 +40,9 @@
             <div class="text-bold q-mb-sm">Mode de paiement</div>
             <UuidFilterComponent
               :model-value="filter?.paymentModeId"
-              @filter="paymentModes.filterFn"
-              @update:model-value="updateFilter({ ...filter, paymentModeId: $event })"
               :options="paymentModes.options"
+              :lazy-load="paymentModes.load"
+              @update:model-value="updateFilter({ ...filter, paymentModeId: $event })"
             >
               <template #option="scope">
                 <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
@@ -97,9 +97,9 @@
               <div class="text-bold q-mb-sm">Type de don</div>
               <UuidFilterComponent
                 :model-value="filter?.donationTypeId"
-                @filter="donationTypes.filterFn"
-                @update:model-value="updateFilter({ ...filter, donationTypeId: $event })"
                 :options="donationTypes.options"
+                :lazy-load="donationTypes.load"
+                @update:model-value="updateFilter({ ...filter, donationTypeId: $event })"
               >
                 <template #option="scope">
                   <QItem v-bind="scope.itemProps" active-class="bg-blue-grey-1">
