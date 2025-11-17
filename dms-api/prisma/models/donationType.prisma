@@ -3,7 +3,7 @@ model DonationType {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   name           String
+  organisationId String       @db.Uuid
   donations      Donation[]
   organisation   Organisation @relation(fields: [organisationId], references: [id])
-  organisationId String       @db.Uuid
 }

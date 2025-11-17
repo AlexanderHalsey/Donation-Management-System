@@ -51,49 +51,49 @@ describe('Donation List', () => {
   it('allows the user to navigate pages', () => {
     cy.visit('/donations')
     cy.wait(['@getDonationList', '@getOrganisationRefList'])
-    cy.get(paginationInfo).should('contain.text', '1-10 of 96')
+    cy.get(paginationInfo).should('contain.text', '1-10 of 100')
 
     cy.mockDonationList({ page: 2, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '11-20 of 96')
+    cy.get(paginationInfo).should('contain.text', '11-20 of 100')
 
     cy.mockDonationList({ page: 10, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(3).click() // Go to end page
     cy.wait(['@getDonationList'])
-    cy.get(donationListItem).should('have.length', 6)
-    cy.get(paginationInfo).should('contain.text', '91-96 of 96')
+    cy.get(donationListItem).should('have.length', 10)
+    cy.get(paginationInfo).should('contain.text', '91-100 of 100')
 
     cy.mockDonationList({ page: 9, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(1).click() // Go to previous page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '81-90 of 96')
+    cy.get(paginationInfo).should('contain.text', '81-90 of 100')
 
     cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(0).click() // Go to first page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '1-10 of 96')
+    cy.get(paginationInfo).should('contain.text', '1-10 of 100')
   })
   it('allows the user to change page size', () => {
     cy.visit('/donations')
     cy.wait(['@getDonationList', '@getOrganisationRefList'])
-    cy.get(paginationInfo).should('contain.text', '1-10 of 96')
+    cy.get(paginationInfo).should('contain.text', '1-10 of 100')
 
     cy.mockDonationList({ page: 2, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '11-20 of 96')
+    cy.get(paginationInfo).should('contain.text', '11-20 of 100')
 
     cy.get(pageSizeSelect).should('contain.text', '10').click()
     cy.mockDonationList({ page: 1, pageSize: 50, orderBy: { updatedAt: 'desc' } })
     cy.get('#q-portal--menu--1 .q-item').eq(3).click() // Select 50 rows per page
     cy.wait(['@getDonationList'])
     cy.get(donationListItem).should('have.length', 50)
-    cy.get(paginationInfo).should('contain.text', '1-50 of 96')
+    cy.get(paginationInfo).should('contain.text', '1-50 of 100')
   })
   it('allows the user to sort certain columns', () => {
     cy.visit('/donations')
@@ -149,7 +149,7 @@ describe('Donation List', () => {
         cy.get('td').eq(6).find('button').click() // Click action button
       })
     cy.get('#q-portal--menu--1 .q-item').eq(0).click() // Click edit action
-    cy.url().should('match', /\/donations\/[a-f0-9\-]{36}$/)
+    cy.url().should('match', /\/donations\/[a-f0-9-]{36}$/)
   })
   describe('Filters', () => {
     const getFilterMenu = () =>
@@ -339,28 +339,39 @@ describe('Donation List', () => {
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 20')
     })
-    it('should allow filtering by toggling isDisabled status', () => {
+    it('should allow filtering by toggling donor isDisabled status', () => {
       const getIncludeDisabledFilter = () => getFilterMenu().eq(2).children().eq(4).children().eq(2)
       cy.visit('/donations')
       cy.wait(['@getDonationList', '@getOrganisationRefList'])
       cy.get(filter).click()
-      cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } }, {})
-      // select isDisabled = false as filter
-      getIncludeDisabledFilter().within(() => {
-        cy.get('.q-toggle__thumb').click()
-      })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 100')
-      // now exclude back the disabled donations
       cy.mockDonationList(
         { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         {
-          isDisabled: { equals: false },
+          donor: { isDisabled: { equals: false } },
+        },
+      )
+      // select donor.isDisabled = false as filter
+      getIncludeDisabledFilter().within(() => {
+        cy.get('.q-checkbox').eq(0).click()
+      })
+      cy.get(paginationInfo).should('contain.text', '1-10 of 97')
+      // now select donor.isDisabled = true as filter too
+      cy.mockDonationList(
+        { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
+        {
+          donor: { isDisabled: { equals: true } },
         },
       )
       getIncludeDisabledFilter().within(() => {
-        cy.get('.q-toggle__thumb').click()
+        cy.get('.q-checkbox').eq(1).click()
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 96')
+      cy.get(paginationInfo).should('contain.text', '1-3 of 3')
+      // now click true again for all results
+      cy.mockDonationList({ page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } })
+      getIncludeDisabledFilter().within(() => {
+        cy.get('.q-checkbox').eq(1).click()
+      })
+      cy.get(paginationInfo).should('contain.text', '1-10 of 100')
     })
   })
 })

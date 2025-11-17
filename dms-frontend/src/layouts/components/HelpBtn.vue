@@ -1,25 +1,29 @@
 <template>
   <Btn flat dense icon="help" color="primary" no-caps>
     Aide
-    <QMenu :offset="[0, 8]">
+    <QMenu :offset="[0, 8]" style="width: 300px">
       <QList>
-        <QItem clickable>
-          <QItemSection thumbnail>
-            <QIcon name="keyboard_arrow_left" />
-          </QItemSection>
-          <QItemSection> Liste des dons </QItemSection>
-          <QMenu self="top left" anchor="top right" :offset="[8, 0]">
-            <div class="q-pa-md" style="min-width: 180px">
-              <div
-                v-for="({ className, label }, index) in DONATION_STATUS_OPTIONS"
-                :key="index"
-                :class="'row items-center ' + (index === 0 ? '' : 'q-mt-md')"
-              >
-                <div :class="'help-item ' + className"></div>
-                {{ label }}
-              </div>
+        <QItem>
+          <QItemSection>
+            <div class="text-subtitle1 text-weight-bold q-mb-xs">
+              <QIcon name="volunteer_activism" class="q-mr-sm" />
+              Dons
             </div>
-          </QMenu>
+            <TitledComponent title="Dons avec reçu fiscal">
+              <div class="list-item-line bg-green-3">
+                <span class="text-primary text-bold">NOM Prénom</span>
+                &emsp;...&emsp;...&emsp;...&emsp;...&emsp;...&emsp;...
+              </div>
+            </TitledComponent>
+            <QSeparator class="q-my-sm" />
+            <div class="text-subtitle1 text-weight-bold q-mb-xs">
+              <QIcon name="person" class="q-mr-sm" />
+              Donateurs
+            </div>
+            <TitledComponent title="Donateur désactivé">
+              <div class="text-primary text-bold">🚫 NOM Prénom</div>
+            </TitledComponent>
+          </QItemSection>
         </QItem>
       </QList>
     </QMenu>
@@ -27,17 +31,18 @@
 </template>
 
 <script setup lang="ts">
+import TitledComponent from '@/components/TitledComponent.vue'
 import Btn from '@/components/ui/Btn.vue'
 
-import { DONATION_STATUS_OPTIONS } from '@/features/donations/helpers'
 import { QItemSection } from 'quasar'
 </script>
 
 <style lang="scss" scoped>
-.help-item {
-  width: 25px;
-  height: 18px;
-  margin-right: 10px;
-  border-radius: 4px;
+.list-item-line {
+  width: 100%;
+  height: 25px;
+  padding: 1px 8px;
+  border-top: 2px solid lightgrey;
+  border-bottom: 2px solid lightgrey;
 }
 </style>

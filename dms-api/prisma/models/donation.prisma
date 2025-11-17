@@ -4,19 +4,17 @@ model Donation {
   updatedAt           DateTime          @updatedAt
   donatedAt           DateTime
   amount              Float
-  paymentMode         PaymentMode       @relation(fields: [paymentModeId], references: [id])
   paymentModeId       String            @db.Uuid
-  organisation        Organisation      @relation(fields: [organisationId], references: [id])
   organisationId      String            @db.Uuid
-  donationType        DonationType      @relation(fields: [donationTypeId], references: [id])
   donationTypeId      String            @db.Uuid
-  donationMethod      DonationMethod    @relation(fields: [donationMethodId], references: [id])
   donationMethodId    String            @db.Uuid
-  donationAssetType   DonationAssetType @relation(fields: [donationAssetTypeId], references: [id])
   donationAssetTypeId String            @db.Uuid
-  isDisabled          Boolean           @default(false)
-  donor               Donor             @relation(fields: [donorId], references: [id])
   donorId             String            @db.Uuid
-  // receipt TaxReceipt? @relation(fields: [taxReceiptId], references: [id])
   taxReceiptId        String?           @db.Uuid
+  donationAssetType   DonationAssetType @relation(fields: [donationAssetTypeId], references: [id])
+  donationMethod      DonationMethod    @relation(fields: [donationMethodId], references: [id])
+  donationType        DonationType      @relation(fields: [donationTypeId], references: [id])
+  donor               Donor             @relation(fields: [donorId], references: [id])
+  organisation        Organisation      @relation(fields: [organisationId], references: [id])
+  paymentMode         PaymentMode       @relation(fields: [paymentModeId], references: [id])
 }

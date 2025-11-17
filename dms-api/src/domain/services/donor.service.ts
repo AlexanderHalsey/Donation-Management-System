@@ -70,6 +70,7 @@ export class DonorService {
           id: true,
           firstName: true,
           lastName: true,
+          isDisabled: true,
         },
       }),
     )

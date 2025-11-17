@@ -46,7 +46,6 @@ export function buildMockDonations(
     donationType: donationTypes[index % donationTypes.length],
     donationMethod: donationMethods[index % donationMethods.length],
     donationAssetType: donationAssetTypes[index % donationAssetTypes.length],
-    isDisabled: index % 25 === 0,
     donor: donors[index % donors.length],
   }))
 
@@ -57,8 +56,8 @@ export function buildMockDonations(
       (filter?.amount?.equals !== undefined && donation.amount !== filter.amount.equals) ||
       (typeof filter?.donatedAt?.gte === 'object' && donation.donatedAt < filter.donatedAt.gte) ||
       (typeof filter?.donatedAt?.lte === 'object' && donation.donatedAt > filter.donatedAt.lte) ||
-      (filter?.isDisabled?.equals !== undefined &&
-        donation.isDisabled !== filter.isDisabled.equals) ||
+      (filter?.donor?.isDisabled?.equals !== undefined &&
+        donation.donor.isDisabled !== filter.donor.isDisabled.equals) ||
       (filter?.donorId?.in !== undefined &&
         !filter.donorId.in.includes(donors.indexOf(donation.donor))) ||
       (filter?.organisationId?.in !== undefined &&

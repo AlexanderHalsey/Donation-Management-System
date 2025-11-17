@@ -65,6 +65,7 @@ export interface DonorRefDto {
   id: string
   lastName: string
   firstName?: string
+  isDisabled: boolean
 }
 export interface DonorListItemDto extends DonorRefDto {
   updatedAt: string
@@ -96,7 +97,6 @@ export interface DonationListItemDto {
   paymentMode: PaymentModeRefDto
   organisation: OrganisationRefDto
   donationType: DonationTypeRefDto
-  isDisabled: boolean
   donor: DonorRefDto
   taxReceiptId?: string
 }
@@ -166,13 +166,15 @@ interface NameSortOrder {
 }
 
 export interface DonationListFilter {
-  donorId?: UuidFilter
+  donor?: {
+    id?: UuidFilter
+    isDisabled?: BoolFilter
+  }
   donatedAt?: DateTimeFilter
   amount?: FloatFilter
   paymentModeId?: UuidFilter
   organisationId?: UuidFilter
   donationTypeId?: UuidFilter
-  isDisabled?: BoolFilter
 }
 
 export interface DonorListFilter {

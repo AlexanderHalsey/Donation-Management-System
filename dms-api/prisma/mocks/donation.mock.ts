@@ -26,7 +26,6 @@ export const buildMockDonationCreateManyInput = ({
     donationTypeId,
     organisationId,
     paymentModeId,
-    isDisabled: index % 25 === 24,
     donorId,
   }
 }

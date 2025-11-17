@@ -19,7 +19,6 @@ export class DonationListItemDto {
   paymentMode: PaymentModeRefDto
   organisation: OrganisationRefDto
   donationType: DonationTypeRefDto
-  isDisabled: boolean
   donor: DonorRefDto
   taxReceiptId?: string
 }

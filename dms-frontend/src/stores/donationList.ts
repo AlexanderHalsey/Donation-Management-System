@@ -18,9 +18,7 @@ export const useDonationListStore = defineStore('donationList', () => {
     totalCount: 0,
   })
 
-  const filter = ref<DonationListFilter | undefined>({
-    isDisabled: { equals: false },
-  })
+  const filter = ref<DonationListFilter>()
 
   const fetchDonations = async (paginationRequest: DonationListPaginationRequest) => {
     const response = await getDonations(paginationRequest, filter.value)

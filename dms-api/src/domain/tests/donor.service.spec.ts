@@ -32,7 +32,7 @@ describe('DonorService', () => {
     prismaServiceMock.$queryRawTyped.mockResolvedValueOnce([])
     await donorService.getFilteredList(
       { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
-      { amount: { gte: 10 } },
+      { totalAmount: { gte: 10 } },
     )
 
     expect(prismaServiceMock.$queryRawTyped).toHaveBeenCalledTimes(1)

@@ -16,17 +16,16 @@ WITH donor_aggregates AS (
 		donor."updatedAt",
 		donor."externalId",
 		donor.email,
+		donor."isDisabled",
 		SUM(donation.amount) AS "donationTotalAmount",
 		COUNT(donation.id) AS "donationCount"
 	FROM "Donor" donor
 	INNER JOIN "Donation" donation
 		ON donor.id = donation."donorId"
-		AND donation."isDisabled" = false
 		AND ($1::timestamp IS NULL OR donation."donatedAt" >= $1)
 		AND ($2::timestamp IS NULL OR donation."donatedAt" <= $2)
 	WHERE
-		donor."isDisabled" = false
-		AND ($3::text IS NULL OR donor.id::text = ANY(string_to_array($3::text, ',')))
+		($3::text IS NULL OR donor.id::text = ANY(string_to_array($3::text, ',')))
 	GROUP BY donor.id, donor."firstName", donor."lastName", donor."updatedAt", donor."externalId", donor.email
   HAVING
     ($4::float8 IS NULL OR COALESCE(SUM(donation.amount), 0) >= $4)

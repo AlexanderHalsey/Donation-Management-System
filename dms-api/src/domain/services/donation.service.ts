@@ -28,6 +28,7 @@ const BASIC_INCLUDE_FIELDS = {
       id: true,
       firstName: true,
       lastName: true,
+      isDisabled: true,
     },
   },
 } as const

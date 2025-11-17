@@ -14,11 +14,23 @@ export class DonationListPaginationRequest extends PaginationRequest {
   orderBy?: DonationListSortOrder
 }
 
-export class DonationListFilter {
+export class DonationListDonorFilter {
   @ApiProperty({ type: UuidFilter, required: false })
   @ValidateNested()
   @Type(() => UuidFilter)
-  donorId?: UuidFilter
+  id?: UuidFilter
+
+  @ApiProperty({ type: BoolFilter, required: false })
+  @ValidateNested()
+  @Type(() => BoolFilter)
+  isDisabled?: BoolFilter
+}
+
+export class DonationListFilter {
+  @ApiProperty({ type: DonationListDonorFilter, required: false })
+  @ValidateNested()
+  @Type(() => DonationListDonorFilter)
+  donor?: DonationListDonorFilter
 
   @ApiProperty({ type: DateTimeFilter, required: false })
   @ValidateNested()

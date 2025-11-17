@@ -141,7 +141,7 @@ describe('Donor List', () => {
       .within(() => {
         cy.get('td').eq(0).find('a').click() // Click action button
       })
-    cy.url().should('match', /\/donors\/[a-f0-9\-]{36}$/)
+    cy.url().should('match', /\/donors\/[a-f0-9-]{36}$/)
   })
   describe('Filters', () => {
     const getFilterMenu = () => cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children()

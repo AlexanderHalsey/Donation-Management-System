@@ -7,6 +7,7 @@ export class DonorRefDto {
   id: string
   lastName: string
   firstName?: string
+  isDisabled: boolean
 }
 
 export class DonorListItemDto extends DonorRefDto {
@@ -28,7 +29,6 @@ export class DonorDto extends DonorListItemDto {
   state?: string
   country?: string
   isFacilitator: boolean
-  isDisabled: boolean
 }
 
 export class DonorRefSortOrder {

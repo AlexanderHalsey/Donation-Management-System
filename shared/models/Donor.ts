@@ -6,6 +6,7 @@ export interface DonorRef {
   id: string
   firstName?: string
   lastName: string
+  isDisabled: boolean
 }
 
 export interface DonorListItem extends DonorRef {

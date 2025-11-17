@@ -11,7 +11,7 @@
               </div>
               <div class="row q-col-gutter-xl">
                 <TitledComponent title="Nom complet" class="col-auto">
-                  {{ getDonorFullName(donor) }}
+                  {{ getDonorFullName(donor, false) }}
                 </TitledComponent>
                 <TitledComponent title="Civilité" class="col-auto">
                   {{ donor.civility || '-' }}

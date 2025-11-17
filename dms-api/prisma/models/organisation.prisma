@@ -13,6 +13,6 @@ model Organisation {
   signatoryName     String?
   signatoryPosition String?
   signatureUrl      String?
-  donationTypes     DonationType[]
   donations         Donation[]
+  donationTypes     DonationType[]
 }

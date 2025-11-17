@@ -43,10 +43,7 @@ Cypress.Commands.add(
         orderBy: { updatedAt: 'desc' },
       }
     }
-    const donations = buildMockDonations(
-      pagination.orderBy,
-      filter ?? { isDisabled: { equals: false } },
-    )
+    const donations = buildMockDonations(pagination.orderBy, filter)
     cy.intercept('POST', '/donations/filtered-list', {
       statusCode: 200,
       body: {

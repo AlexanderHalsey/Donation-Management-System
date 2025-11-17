@@ -10,7 +10,7 @@
     @update:pagination="updatePagination"
   >
     <template #body-cell-donor="{ row }">
-      <td>{{ getDonorFullName(row.donor) }}</td>
+      <td><DonorLink :donor="row.donor" /></td>
     </template>
     <template #body-cell-donatedAt="{ row }">
       <td><FormattedDate :value="row.donatedAt" /></td>
@@ -31,7 +31,7 @@
     </template>
     <template #body-cell-actions="{ row }">
       <td>
-        <DonationListItemActions v-if="!row.isDisabled || row.taxReceiptId" :donation="row" />
+        <DonationListItemActions v-if="!row.taxReceiptId" :donation="row" />
       </td>
     </template>
   </Table>
@@ -45,12 +45,10 @@ import { isEqual, omit } from 'es-toolkit'
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 import FormattedDate from '@/components/FormattedDate.vue'
 
+import { DonorLink } from '@/features/donors'
 import { OrganisationTag } from '@/features/organisations'
 
 import DonationListItemActions from './DonationListItemActions.vue'
-
-import { DONATION_STATUS_OPTIONS } from '../helpers'
-import { getDonorFullName } from '@/features/donors'
 
 import type { QTableProps } from 'quasar'
 import type {
@@ -148,10 +146,8 @@ const headers: QTableProps['columns'] = [
 ]
 
 const rowClassFn = (row: DonationListItem) => {
-  for (const option of DONATION_STATUS_OPTIONS) {
-    if (option.predicate(row)) {
-      return option.className
-    }
+  if (row.taxReceiptId) {
+    return 'bg-green-3'
   }
   return 'bg-white'
 }

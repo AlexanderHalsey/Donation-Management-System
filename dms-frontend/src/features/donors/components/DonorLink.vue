@@ -4,9 +4,12 @@
       name: 'donor-detail',
       params: { donorId: donor.id },
     }"
-    class="text-bold text-primary"
+    class="text-bold text-primary donor-link"
   >
     {{ getDonorFullName(donor) }}
+    <QTooltip v-if="donor.isDisabled" :delay="300" :offset="[10, 10]">
+      Donateur désactivé
+    </QTooltip>
   </RouterLink>
 </template>
 
@@ -24,3 +27,9 @@ defineProps({
   },
 })
 </script>
+
+<style lang="scss" scoped>
+.donor-link:not(:hover) {
+  text-decoration: none;
+}
+</style>

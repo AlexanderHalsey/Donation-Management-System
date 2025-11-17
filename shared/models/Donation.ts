@@ -16,7 +16,6 @@ export interface DonationListItem {
   paymentMode: PaymentModeRef
   organisation: OrganisationRef
   donationType: DonationTypeRef
-  isDisabled: boolean
   donor: DonorRef
   taxReceiptId?: string
 }
@@ -31,11 +30,13 @@ export type DonationListPaginationRequest = PaginationRequest<DonationListSortOr
 export type DonationListPagination = Pagination<DonationListSortOrder>
 
 export interface DonationListFilter {
-  donorId?: UuidFilter
+  donor?: {
+    id?: UuidFilter
+    isDisabled?: BoolFilter
+  }
   donatedAt?: DateTimeFilter
   amount?: FloatFilter
   paymentModeId?: UuidFilter
   organisationId?: UuidFilter
   donationTypeId?: UuidFilter
-  isDisabled?: BoolFilter
 }

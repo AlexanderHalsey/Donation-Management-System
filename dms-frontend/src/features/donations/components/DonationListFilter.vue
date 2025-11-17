@@ -8,13 +8,7 @@
     <div class="q-px-md q-py-sm">
       <div class="row justify-between items-center q-mb-lg">
         <div class="text-bold" style="font-size: 18px">Filtres des dons</div>
-        <Btn
-          flat
-          size="md"
-          color="primary"
-          icon="refresh"
-          @click="updateFilter({ isDisabled: { equals: false } })"
-        >
+        <Btn flat size="md" color="primary" icon="refresh" @click="updateFilter()">
           Réinitialiser
         </Btn>
       </div>
@@ -24,7 +18,7 @@
           <div>
             <div class="text-bold q-mb-sm">Donateur</div>
             <UuidFilterComponent
-              :model-value="filter?.donorId"
+              :model-value="filter?.donor?.id"
               :options="
                 donors.options.map((donor) => ({
                   id: donor.id,
@@ -32,7 +26,9 @@
                 }))
               "
               :lazy-load="donors.load"
-              @update:model-value="updateFilter({ ...filter, donorId: $event })"
+              @update:model-value="
+                updateFilter({ ...filter, donor: { ...filter?.donor, id: $event } })
+              "
             />
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
@@ -93,7 +89,7 @@
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div class="row">
-            <div class="col">
+            <div>
               <div class="text-bold q-mb-sm">Type de don</div>
               <UuidFilterComponent
                 :model-value="filter?.donationTypeId"
@@ -120,11 +116,14 @@
             </div>
             <QSeparator vertical class="q-mx-md" />
             <div>
-              <div class="text-bold q-mb-sm">Inclure les dons supprimés</div>
-              <QToggle
-                :model-value="filter?.isDisabled?.equals === false ? false : true"
+              <div class="text-bold q-mb-sm">Donateurs désactivés</div>
+              <YesNoCheckbox
+                :model-value="filter?.donor?.isDisabled?.equals"
                 @update:model-value="
-                  updateFilter({ ...filter, isDisabled: { equals: $event ? undefined : false } })
+                  updateFilter({
+                    ...filter,
+                    donor: { ...filter?.donor, isDisabled: { equals: $event } },
+                  })
                 "
               />
             </div>
@@ -155,6 +154,7 @@ import Btn from '@/components/ui/Btn.vue'
 import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
 import FloatFilterComponent from '@/components/FloatFilter.vue'
 import UuidFilterComponent from '@/components/UuidFilter.vue'
+import YesNoCheckbox from '@/components/YesNoCheckbox.vue'
 
 import type { LazySelectOptions } from '@/types'
 import type {
@@ -192,7 +192,7 @@ const emit = defineEmits<{
   (e: 'update:filter', value: DonationListFilter | undefined): void
 }>()
 
-const updateFilter = debounce((newFilter: DonationListFilter) => {
+const updateFilter = debounce((newFilter?: DonationListFilter) => {
   const simplifyFilterForComparison = <T extends object>(obj: T): T | undefined => {
     const simplifiedObject = Object.entries(obj)
       .filter(([_, value]) => {
@@ -206,7 +206,7 @@ const updateFilter = debounce((newFilter: DonationListFilter) => {
     return isEmpty(simplifiedObject) ? undefined : simplifiedObject
   }
 
-  const simplifiedFilter = simplifyFilterForComparison(newFilter)
+  const simplifiedFilter = newFilter && simplifyFilterForComparison(newFilter)
   if (isEqual(simplifiedFilter, props.filter)) return
   emit('update:filter', simplifiedFilter)
 }, 300)
@@ -214,7 +214,7 @@ const updateFilter = debounce((newFilter: DonationListFilter) => {
 const filterCount = computed(
   () =>
     [
-      !!props.filter?.donorId?.in,
+      !!props.filter?.donor?.id?.in,
       !!props.filter?.donatedAt?.lte,
       !!props.filter?.donatedAt?.gte,
       !!props.filter?.amount?.lte,
@@ -222,7 +222,7 @@ const filterCount = computed(
       !!props.filter?.organisationId?.in,
       !!props.filter?.paymentModeId?.in,
       !!props.filter?.donationTypeId?.in,
-      !props.filter?.isDisabled,
+      props.filter?.donor?.isDisabled?.equals !== undefined,
     ].filter(Boolean).length,
 )
 </script>
