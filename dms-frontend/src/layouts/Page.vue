@@ -1,7 +1,7 @@
 <template>
-  <QPage padding>
+  <QPage style="padding: 20px 20px">
     <QPageSticky expand position="top" class="page">
-      <QToolbar style="padding: 24px 24px">
+      <QToolbar style="padding: 20px 20px">
         <QToolbarTitle>
           {{ title }}
         </QToolbarTitle>
@@ -9,7 +9,7 @@
       </QToolbar>
     </QPageSticky>
 
-    <div v-if="!loading" style="margin-top: 80px">
+    <div v-if="!loading" style="margin-top: 65px">
       <slot />
     </div>
     <div

@@ -98,6 +98,8 @@ const headers: QTableProps['columns'] = [
     field: 'donatedAt',
     align: 'left',
     sortable: true,
+    headerStyle: 'width: 150px',
+    style: 'width: 150px',
   },
   {
     name: 'amount',
@@ -105,6 +107,8 @@ const headers: QTableProps['columns'] = [
     field: 'amount',
     align: 'left',
     sortable: true,
+    headerStyle: 'width: 120px',
+    style: 'width: 120px',
   },
   {
     name: 'paymentMode',
@@ -112,6 +116,8 @@ const headers: QTableProps['columns'] = [
     field: 'paymentMode',
     align: 'left',
     sortable: true,
+    headerStyle: 'width: 180px',
+    style: 'width: 180px',
   },
   {
     name: 'organisation',
@@ -119,6 +125,8 @@ const headers: QTableProps['columns'] = [
     field: 'organisation',
     align: 'left',
     sortable: true,
+    headerStyle: 'width: 140px',
+    style: 'width: 140px',
   },
   {
     name: 'donationType',
@@ -126,12 +134,16 @@ const headers: QTableProps['columns'] = [
     field: 'donationType',
     align: 'left',
     sortable: true,
+    headerStyle: 'width: 180px',
+    style: 'width: 180px',
   },
   {
     name: 'actions',
     label: '',
     field: 'id',
     align: 'right',
+    headerStyle: 'width: 50px',
+    style: 'width: 50px',
   },
 ]
 

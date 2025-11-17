@@ -38,7 +38,7 @@ const style = computed(() => {
 
 <style scoped>
 .tag {
-  padding: 4px 8px;
+  padding: 4px 4px;
   border-radius: 10px;
   display: flex;
   align-items: center;

@@ -8,13 +8,16 @@
         @update:filter="onFilterUpdate"
       />
     </template>
-    <DonorListTable
-      :donor-list="donorList"
-      :pagination="pagination"
-      :loading="tableLoading"
-      data-cy="donor-list-table"
-      @update:pagination="fetchDonors"
-    />
+    <div class="row justify-center">
+      <DonorListTable
+        :donor-list="donorList"
+        :pagination="pagination"
+        :loading="tableLoading"
+        data-cy="donor-list-table"
+        style="width: 90%"
+        @update:pagination="fetchDonors"
+      />
+    </div>
   </Page>
 </template>
 

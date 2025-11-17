@@ -17,7 +17,7 @@
       <td class="text-center">{{ row.donationCount }}</td>
     </template>
     <template #body-cell-donationTotalAmount="{ row }">
-      <td class="text-center"><FormattedCurrency :value="row.donationTotalAmount" /></td>
+      <td class="text-right"><FormattedCurrency :value="row.donationTotalAmount" /></td>
     </template>
     <template #body-cell-actions="{ row }">
       <td>
@@ -74,26 +74,30 @@ const headers: QTableProps['columns'] = [
     field: 'email',
     align: 'left',
     sortable: true,
+    headerStyle: 'width: 300px',
   },
   {
     name: 'donationCount',
     label: 'Nombre de dons',
     field: 'donationCount',
-    align: 'left',
+    align: 'center',
     sortable: true,
+    headerStyle: 'width: 100px',
   },
   {
     name: 'donationTotalAmount',
-    label: 'Montant total des dons',
+    label: 'Montant total',
     field: 'donationTotalAmount',
-    align: 'left',
+    align: 'right',
     sortable: true,
+    headerStyle: 'width: 180px',
   },
   {
     name: 'actions',
     label: '',
     field: 'id',
     align: 'right',
+    headerStyle: 'width: 50px',
   },
 ]
 
