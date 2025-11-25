@@ -3,7 +3,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
-import { Quasar } from 'quasar'
+import { Quasar, Loading, Notify, QSpinnerPie } from 'quasar'
 
 import App from './App.vue'
 import router from './router'
@@ -21,7 +21,33 @@ async function main() {
 
   app.use(pinia)
   app.use(router)
-  app.use(Quasar)
+  app.use(Quasar, {
+    plugins: { Loading, Notify },
+    config: {
+      loading: {
+        delay: 0,
+        message: 'Chargement...',
+        spinnerColor: 'primary',
+        spinnerSize: 70,
+        spinner: QSpinnerPie,
+      },
+      notify: {
+        position: 'top-right',
+        timeout: 4000,
+        textColor: 'white',
+        actions: [
+          {
+            icon: 'close',
+            color: 'white',
+            round: true,
+            handler: () => {
+              /* ... */
+            },
+          },
+        ],
+      },
+    },
+  })
 
   app.mount('#app')
 }

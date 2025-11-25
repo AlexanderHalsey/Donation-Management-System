@@ -25,6 +25,8 @@
 <script setup lang="ts">
 import { inject, watch, type PropType } from 'vue'
 
+import { QSpinnerPie, useQuasar } from 'quasar'
+
 import { setBreadcrumbsInjectionKey } from '@/symbols'
 import type { Breadcrumb } from '@/types'
 
@@ -41,7 +43,25 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  working: {
+    type: Boolean,
+    default: false,
+  },
 })
+
+const $q = useQuasar()
+
+watch(
+  () => props.working,
+  (newWorking) => {
+    if (newWorking) {
+      $q.loading?.show()
+    } else {
+      $q.loading?.hide()
+    }
+  },
+  { immediate: true },
+)
 
 const setBreadcrumbs = inject(setBreadcrumbsInjectionKey)
 watch(
