@@ -11,8 +11,8 @@
       type="number"
       rounded
       dense
-      :error="!!errors?.[key]"
-      style="width: 200px"
+      :error="errors?.[key]"
+      style="width: 230px"
       @update:model-value="updateModelValue($event as number | undefined, key)"
     >
       <template #append><span class="text-body1 text-bold">€</span></template>

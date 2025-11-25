@@ -1,22 +1,22 @@
 <template>
   <Input
-    v-bind="$attrs"
     v-model="dateInput"
     dense
     mask="##/##/####"
     placeholder="JJ/MM/AAAA"
-    :error="!!error"
-    @blur="onBlur"
+    :error="internalError"
+    :rounded="rounded"
+    @blur="internalOnBlur"
   >
     <template #append>
       <QIcon name="event" class="cursor-pointer">
         <QPopupProxy ref="qPopupProxy" cover transition-show="scale" transition-hide="scale">
           <QDate
             ref="qDatePicker"
-            :model-value="formatDate(props.modelValue)"
+            :model-value="formatDate(modelValue)"
             minimal
             mask="DD/MM/YYYY"
-            :options="options()"
+            :options="options?.()"
             @update:model-value="
               (emit('update:modelValue', parseDate($event)), qPopupProxy?.hide())
             "
@@ -24,28 +24,16 @@
         </QPopupProxy>
       </QIcon>
     </template>
-    <template #error>
-      {{ error }}
-    </template>
   </Input>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, type PropType } from 'vue'
+import { ref, watch } from 'vue'
 import { format, isValid, parse } from 'date-fns'
 
 import Input from './Input.vue'
 
-const props = defineProps({
-  modelValue: {
-    type: Date,
-    default: undefined,
-  },
-  options: {
-    type: Function as PropType<() => (date: string) => boolean>,
-    default: () => () => true,
-  },
-})
+const props = defineProps<DatePickerInputProps>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Date | undefined): void
 }>()
@@ -54,7 +42,7 @@ const qPopupProxy = ref<InstanceType<typeof import('quasar').QPopupProxy> | null
 const qDatePicker = ref<InstanceType<typeof import('quasar').QDate> | null>(null)
 
 const dateInput = ref('')
-const error = ref<string | undefined>(undefined)
+const internalError = ref<string | undefined>(props.error)
 
 const formatDate = (date?: Date): string => {
   return date ? format(date, 'dd/MM/yyyy') : ''
@@ -70,10 +58,10 @@ const parseDate = (dateString: string): Date | undefined => {
 const validate = (date?: Date): boolean => {
   if (!date) return false
   if (isValid(date)) {
-    error.value = undefined
+    internalError.value = undefined
     return true
   } else {
-    error.value = "La date n'est pas valide"
+    internalError.value = "La date n'est pas valide"
     return false
   }
 }
@@ -83,7 +71,7 @@ watch(
   (value) => {
     if (dateInput.value !== formatDate(value)) {
       dateInput.value = formatDate(value)
-      error.value = undefined
+      internalError.value = undefined
     }
   },
   { immediate: true },
@@ -100,13 +88,40 @@ watch(dateInput, (value) => {
       emit('update:modelValue', undefined)
     }
   } else {
-    error.value = undefined
+    internalError.value = undefined
   }
 })
 
-const onBlur = (event: Event) => {
+watch(
+  () => props.error,
+  (newError) => {
+    internalError.value = newError
+  },
+)
+
+const internalOnBlur = (event: Event) => {
   if (qDatePicker.value?.$parent?.$el !== (event as FocusEvent).relatedTarget) {
     validate(parseDate(dateInput.value))
+  }
+  props?.onBlur?.(event)
+}
+</script>
+
+<script lang="ts">
+import type { QInputProps } from 'quasar'
+export type DatePickerInputProps = {
+  modelValue?: Date
+  options?: () => (date: string) => boolean
+  error?: string
+} & Omit<QInputProps, 'modelValue' | 'onUpdate:modelValue' | 'options' | 'error'>
+
+export const dateOptions = (options?: { minDate?: Date; maxDate?: Date }) => {
+  return (datelike: string): boolean => {
+    const date = parse(datelike, 'yyyy/MM/dd', new Date())
+    if (isNaN(date.getTime())) return false
+    if (!!options?.minDate && date < options.minDate) return false
+    if (!!options?.maxDate && date > options.maxDate) return false
+    return true
   }
 }
 </script>

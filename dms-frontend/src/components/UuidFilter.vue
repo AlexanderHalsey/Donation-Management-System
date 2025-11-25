@@ -1,16 +1,14 @@
 <template>
-  <QSelect
+  <Select
     v-model="values"
-    :options="selectOptions"
-    outlined
-    dense
+    :options="options"
     rounded
     multiple
     use-input
+    :lazy-load="lazyLoad"
     :input-debounce="0"
-    style="margin-bottom: 24px; width: 230px"
+    style="width: 230px"
     @update:model-value="updateModelValue"
-    @filter="filterFn"
   >
     <template v-for="(_, slot) of $slots" #[slot]="scope">
       <slot :name="slot" v-bind="scope || {}"></slot>
@@ -33,25 +31,15 @@
         <span class="ellipsis">{{ scope.opt.label }}</span>
       </QChip>
     </template>
-  </QSelect>
+  </Select>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, type PropType } from 'vue'
+import { ref, watch, type PropType } from 'vue'
 
-import { useTextHelpers } from '@/composables'
+import Select, { type SelectOption } from './ui/Select.vue'
 
 import type { UuidFilter } from '@shared/models'
-
-export type UuidOption = {
-  id: string
-  name: string
-}
-
-type SelectOption = {
-  value: string
-  label: string
-}
 
 const props = defineProps({
   modelValue: {
@@ -59,7 +47,7 @@ const props = defineProps({
     default: undefined,
   },
   options: {
-    type: Array as PropType<Array<UuidOption>>,
+    type: Array as PropType<Array<SelectOption>>,
     default: () => [],
   },
   lazyLoad: {
@@ -73,41 +61,17 @@ const emit = defineEmits<{
   'lazy-load': []
 }>()
 
-const textHelpers = useTextHelpers()
-
 const values = ref<SelectOption[]>([])
-const filter = ref('')
-
-const selectOptions = computed(() =>
-  props.options
-    .map(
-      (option): SelectOption => ({
-        value: option.id,
-        label: option.name,
-      }),
-    )
-    .filter((option) => textHelpers.isSearchMatch(filter.value, option.label)),
-)
-
 const updateModelValue = (newValues: SelectOption[]) => {
   emit('update:model-value', {
-    in: newValues.map((option) => option.value),
-  })
-}
-
-function filterFn(val: string, update: (cb: () => void) => void) {
-  ;(props.lazyLoad?.() ?? Promise.resolve()).then(() => {
-    update(() => {
-      filter.value = val
-    })
+    in: newValues.map((option) => option.id),
   })
 }
 
 watch(
   () => props.modelValue,
   (newValue) => {
-    values.value =
-      selectOptions.value.filter((option) => newValue?.in?.includes(option.value)) ?? []
+    values.value = props.options.filter((option) => newValue?.in?.includes(option.id)) ?? []
   },
   { immediate: true },
 )

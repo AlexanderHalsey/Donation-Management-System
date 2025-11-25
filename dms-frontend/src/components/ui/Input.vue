@@ -1,5 +1,13 @@
 <template>
-  <QInput v-bind="omit(props, ['onUpdate:modelValue'])" outlined @update:model-value="onInput">
+  <QInput
+    ref="inputRef"
+    v-bind="omit(props, ['onUpdate:modelValue'])"
+    dense
+    outlined
+    :error="!!props.error"
+    :error-message="props.error"
+    @update:model-value="onInput"
+  >
     <template v-for="(_, slot) of $slots" #[slot]="scope">
       <slot :name="slot" v-bind="scope || {}"></slot>
     </template>
@@ -10,7 +18,7 @@
 import { omit } from 'es-toolkit'
 import type { QInputProps } from 'quasar'
 
-const props = defineProps<QInputProps>()
+const props = defineProps<Omit<QInputProps, 'error'> & { error?: string }>()
 const emit = defineEmits<{
   (e: 'update:model-value', value: string | number | null | undefined): void
 }>()

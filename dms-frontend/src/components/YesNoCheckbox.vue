@@ -47,7 +47,7 @@ const updateModelValue = (newValue: boolean[]) => {
 :deep() {
   .q-checkbox {
     border-radius: 50px;
-    padding: 9px 23px;
+    padding: 8px 23px;
     border: 1px solid $grey-5;
     &[aria-checked='true'] {
       outline: 1px solid $primary !important;
