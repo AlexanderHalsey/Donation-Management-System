@@ -10,8 +10,10 @@ export const usePaymentModeListStore = defineStore('paymentModeList', () => {
   const initialized = ref(false)
 
   const fetchPaymentModes = async () => {
-    paymentModeList.value = await getPaymentModes()
-    initialized.value = true
+    if (!initialized.value) {
+      paymentModeList.value = await getPaymentModes()
+      initialized.value = true
+    }
   }
 
   return {

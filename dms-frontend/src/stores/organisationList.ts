@@ -10,8 +10,10 @@ export const useOrganisationListStore = defineStore('organisationList', () => {
   const refsInitialized = ref(false)
 
   const fetchOrganisationRefs = async () => {
-    organisationRefList.value = await getOrganisationRefs()
-    refsInitialized.value = true
+    if (!refsInitialized.value) {
+      organisationRefList.value = await getOrganisationRefs()
+      refsInitialized.value = true
+    }
   }
 
   return {

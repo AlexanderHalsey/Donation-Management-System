@@ -10,8 +10,10 @@ export const useDonationTypeListStore = defineStore('donationTypeList', () => {
   const initialized = ref(false)
 
   const fetchDonationTypes = async () => {
-    donationTypeList.value = await getDonationTypes()
-    initialized.value = true
+    if (!initialized.value) {
+      donationTypeList.value = await getDonationTypes()
+      initialized.value = true
+    }
   }
 
   return {

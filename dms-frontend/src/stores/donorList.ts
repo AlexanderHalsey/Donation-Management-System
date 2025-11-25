@@ -34,8 +34,10 @@ export const useDonorListStore = defineStore('donorList', () => {
   const activeDonorRefList = computed(() => donorRefList.value.filter((ref) => !ref.isDisabled))
 
   const fetchDonorRefs = async () => {
-    _donorRefList.value = await getDonorRefs()
-    refsInitialized.value = true
+    if (!refsInitialized.value) {
+      _donorRefList.value = await getDonorRefs()
+      refsInitialized.value = true
+    }
   }
 
   const fetchDonors = async (paginationRequest: DonorListPaginationRequest) => {

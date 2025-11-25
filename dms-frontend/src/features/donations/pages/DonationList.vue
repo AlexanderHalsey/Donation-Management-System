@@ -18,12 +18,14 @@
       :organisations="organisations"
       :loading="tableLoading"
       @update:pagination="fetchDonations"
+      @delete:donation="deleteDonation"
     />
   </Page>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useQuasar } from 'quasar'
 
 import { omit } from 'es-toolkit'
 
@@ -35,6 +37,7 @@ import DonationListFilter from '../components/DonationListFilter.vue'
 
 import {
   useDonationListStore,
+  useDonationStore,
   useDonationTypeListStore,
   useDonorListStore,
   useOrganisationListStore,
@@ -46,7 +49,7 @@ import type {
   DonationListFilter as DonationListFilterRequest,
   DonationListPaginationRequest,
   DonationType,
-  DonorRef,
+  DonorRefSelect,
   PaymentMode,
 } from '@shared/models'
 
@@ -54,7 +57,10 @@ const breadcrumbs: Breadcrumb[] = [
   { id: 'donation-list', label: 'Liste des dons', icon: 'volunteer_activism' },
 ]
 
+const $q = useQuasar()
+
 const donationListStore = useDonationListStore()
+const donationStore = useDonationStore()
 const organisationListStore = useOrganisationListStore()
 const donationTypeListStore = useDonationTypeListStore()
 const paymentModeListStore = usePaymentModeListStore()
@@ -71,32 +77,21 @@ const organisations = computed(() => organisationListStore.organisationRefList)
 
 const donationTypes = computed<LazySelectOptions<DonationType>>(() => ({
   options: donationTypeListStore.donationTypeList,
-  load: async () => {
-    if (!donationTypeListStore.initialized) {
-      await donationTypeListStore.fetchDonationTypes()
-    }
-  },
+  load: async () => await donationTypeListStore.fetchDonationTypes(),
 }))
 
 const paymentModes = computed<LazySelectOptions<PaymentMode>>(() => ({
   options: paymentModeListStore.paymentModeList,
-  load: async () => {
-    if (!paymentModeListStore.initialized) {
-      await paymentModeListStore.fetchPaymentModes()
-    }
-  },
+  load: async () => await paymentModeListStore.fetchPaymentModes(),
 }))
 
-const donors = computed<LazySelectOptions<DonorRef>>(() => ({
+const donors = computed<LazySelectOptions<DonorRefSelect>>(() => ({
   options: donorListStore.donorRefList,
-  load: async () => {
-    if (!donorListStore.refsInitialized) {
-      await donorListStore.fetchDonorRefs()
-    }
-  },
+  load: async () => await donorListStore.fetchDonorRefs(),
 }))
 
 const loading = ref(true)
+const working = ref(false)
 const tableLoading = ref(false)
 
 const fetchDonations = async (paginationRequest: DonationListPaginationRequest) => {
@@ -113,12 +108,19 @@ const onFilterUpdate = async (filter?: DonationListFilterRequest) => {
   })
 }
 
+const deleteDonation = async (donationId: string) => {
+  working.value = true
+  await donationStore.deleteDonation(donationId)
+  working.value = false
+  $q.notify({ type: 'positive', message: 'Le don a été supprimé avec succès.' })
+  // Refetch donations to update the list
+  await fetchDonations(paginationRequest.value)
+}
+
 onMounted(async () => {
   await Promise.all([
     fetchDonations(paginationRequest.value),
-    organisationListStore.refsInitialized
-      ? Promise.resolve()
-      : organisationListStore.fetchOrganisationRefs(),
+    organisationListStore.fetchOrganisationRefs(),
   ])
   loading.value = false
 })

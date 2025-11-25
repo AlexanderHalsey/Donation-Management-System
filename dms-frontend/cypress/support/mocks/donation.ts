@@ -3,14 +3,17 @@ import { v4 } from 'uuid'
 import { sortBy } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
 
-import { buildMockPaymentModes } from './paymentMode'
-import { buildMockOrganisations } from './organisation'
-import { buildMockDonationTypes } from './donationType'
-import { buildMockDonationMethods } from './donationMethod'
-import { buildMockDonationAssetTypes } from './donationAssetType'
-import { buildMockDonors } from './donor'
-
-import type { Donation, DonationListFilter, DonationListSortOrder } from '@shared/models'
+import type {
+  Donation,
+  DonationAssetType,
+  DonationListFilter,
+  DonationListSortOrder,
+  DonationMethod,
+  DonationType,
+  DonorRef,
+  Organisation,
+  PaymentMode,
+} from '@shared/models'
 
 export type DonationListFilterMock = Omit<
   DonationListFilter,
@@ -23,16 +26,15 @@ export type DonationListFilterMock = Omit<
 }
 
 export function buildMockDonations(
+  paymentModes: PaymentMode[],
+  organisations: Organisation[],
+  donationTypes: DonationType[],
+  donationMethods: DonationMethod[],
+  donationAssetTypes: DonationAssetType[],
+  donorRefs: DonorRef[],
   orderBy?: DonationListSortOrder,
   filter?: DonationListFilterMock,
 ): Donation[] {
-  const paymentModes = buildMockPaymentModes()
-  const organisations = buildMockOrganisations()
-  const donationTypes = buildMockDonationTypes(organisations)
-  const donationMethods = buildMockDonationMethods()
-  const donationAssetTypes = buildMockDonationAssetTypes()
-  const donors = buildMockDonors()
-
   const totalCount = 100 as const
 
   let donations = Array.from({ length: totalCount }).map((_, index) => ({
@@ -46,7 +48,7 @@ export function buildMockDonations(
     donationType: donationTypes[index % donationTypes.length],
     donationMethod: donationMethods[index % donationMethods.length],
     donationAssetType: donationAssetTypes[index % donationAssetTypes.length],
-    donor: donors[index % donors.length],
+    donor: donorRefs[index % donorRefs.length],
   }))
 
   donations = donations.filter((donation) => {
@@ -59,7 +61,7 @@ export function buildMockDonations(
       (filter?.donor?.isDisabled?.equals !== undefined &&
         donation.donor.isDisabled !== filter.donor.isDisabled.equals) ||
       (filter?.donorId?.in !== undefined &&
-        !filter.donorId.in.includes(donors.indexOf(donation.donor))) ||
+        !filter.donorId.in.includes(donorRefs.indexOf(donation.donor))) ||
       (filter?.organisationId?.in !== undefined &&
         !filter.organisationId.in.includes(organisations.indexOf(donation.organisation))) ||
       (filter?.donationTypeId?.in !== undefined &&
@@ -85,4 +87,15 @@ export function buildMockDonations(
   if (order === 'desc') donations.reverse()
 
   return donations
+}
+
+export type DonationFormDataMock = {
+  donorId: string
+  donatedAt: Date
+  amount: number
+  organisationId: string
+  donationTypeId: string
+  paymentModeId: string
+  donationMethodId: string
+  donationAssetTypeId: string
 }

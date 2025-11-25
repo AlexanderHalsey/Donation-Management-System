@@ -1,13 +1,16 @@
 /// <reference types="cypress" />
-
+import { MOCK_API_HOST } from './constants'
 import {
   buildMockDonations,
+  buildMockDonationAssetTypes,
+  buildMockDonationMethods,
   buildMockDonationTypes,
   buildMockDonors,
   buildMockOrganisations,
   buildMockPaymentModes,
   type DonationListFilterMock,
   type DonorListFilterMock,
+  type DonationFormDataMock,
 } from './mocks'
 import type { DonationListPaginationRequest, DonorListPaginationRequest } from '@shared/models'
 
@@ -15,11 +18,15 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable<Subject> {
+      mockCreateDonation(formData: DonationFormDataMock): Chainable<Subject>
+      mockDeleteDonation(): Chainable<Subject>
       mockDonation(index: number): Chainable<Subject>
+      mockDonationAssetTypeList(): Chainable<Subject>
       mockDonationList(
         pagination?: DonationListPaginationRequest,
         filter?: DonationListFilterMock,
       ): Chainable<Subject>
+      mockDonationMethodList(): Chainable<Subject>
       mockDonationTypeList(): Chainable<Subject>
       mockDonorList(
         pagination?: DonorListPaginationRequest,
@@ -29,9 +36,81 @@ declare global {
       mockDonorRefList(): Chainable<Subject>
       mockOrganisationRefList(): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
+      mockUpdateDonation(donationId: string, formData: DonationFormDataMock): Chainable<Subject>
     }
   }
 }
+
+const organisations = buildMockOrganisations()
+const paymentModes = buildMockPaymentModes()
+const donationTypes = buildMockDonationTypes(organisations)
+const donationMethods = buildMockDonationMethods()
+const donationAssetTypes = buildMockDonationAssetTypes()
+const donors = buildMockDonors()
+
+Cypress.Commands.add('mockOrganisationRefList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/refs/organisations`, {
+    statusCode: 200,
+    body: {
+      organisationRefs: organisations,
+    },
+  }).as('getOrganisationRefList')
+})
+
+Cypress.Commands.add('mockPaymentModeList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/refs/payment-modes`, {
+    statusCode: 200,
+    body: {
+      paymentModes,
+    },
+  }).as('getPaymentModeList')
+})
+
+Cypress.Commands.add('mockDonationTypeList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/refs/donation-types`, {
+    statusCode: 200,
+    body: {
+      donationTypes,
+    },
+  }).as('getDonationTypeList')
+})
+
+Cypress.Commands.add('mockDonorRefList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/refs/donors`, {
+    statusCode: 200,
+    body: {
+      donorRefs: donors,
+    },
+  }).as('getDonorRefList')
+})
+
+Cypress.Commands.add('mockDonor', (index: number) => {
+  const donor = donors[index]
+  cy.intercept('GET', `${MOCK_API_HOST}/donors/*`, {
+    statusCode: 200,
+    body: {
+      donor,
+    },
+  }).as('getDonor')
+})
+
+Cypress.Commands.add('mockDonationAssetTypeList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/refs/donation-asset-types`, {
+    statusCode: 200,
+    body: {
+      donationAssetTypes,
+    },
+  }).as('getDonationAssetTypeList')
+})
+
+Cypress.Commands.add('mockDonationMethodList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/refs/donation-methods`, {
+    statusCode: 200,
+    body: {
+      donationMethods,
+    },
+  }).as('getDonationMethodList')
+})
 
 Cypress.Commands.add(
   'mockDonationList',
@@ -43,8 +122,17 @@ Cypress.Commands.add(
         orderBy: { updatedAt: 'desc' },
       }
     }
-    const donations = buildMockDonations(pagination.orderBy, filter)
-    cy.intercept('POST', '/donations/filtered-list', {
+    const donations = buildMockDonations(
+      paymentModes,
+      organisations,
+      donationTypes,
+      donationMethods,
+      donationAssetTypes,
+      donors,
+      pagination.orderBy,
+      filter,
+    )
+    cy.intercept('POST', `${MOCK_API_HOST}/donations/filtered-list`, {
       statusCode: 200,
       body: {
         donations: donations.slice(
@@ -61,8 +149,15 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add('mockDonation', (index: number) => {
-  const donation = buildMockDonations()[index]
-  cy.intercept('GET', '/donations/*', {
+  const donation = buildMockDonations(
+    paymentModes,
+    organisations,
+    donationTypes,
+    donationMethods,
+    donationAssetTypes,
+    donors,
+  )[index]
+  cy.intercept('GET', `${MOCK_API_HOST}/donations/*`, {
     statusCode: 200,
     body: {
       donation,
@@ -70,53 +165,12 @@ Cypress.Commands.add('mockDonation', (index: number) => {
   }).as('getDonation')
 })
 
-const organisations = buildMockOrganisations()
-const paymentModes = buildMockPaymentModes()
-const donationTypes = buildMockDonationTypes(organisations)
-
-Cypress.Commands.add('mockOrganisationRefList', () => {
-  cy.intercept('GET', '/refs/organisations', {
-    statusCode: 200,
-    body: {
-      organisationRefs: organisations,
-    },
-  }).as('getOrganisationRefList')
-})
-
-Cypress.Commands.add('mockPaymentModeList', () => {
-  cy.intercept('GET', '/refs/payment-modes', {
-    statusCode: 200,
-    body: {
-      paymentModes,
-    },
-  }).as('getPaymentModeList')
-})
-
-Cypress.Commands.add('mockDonationTypeList', () => {
-  cy.intercept('GET', '/refs/donation-types', {
-    statusCode: 200,
-    body: {
-      donationTypes,
-    },
-  }).as('getDonationTypeList')
-})
-
-Cypress.Commands.add('mockDonorRefList', () => {
-  const donors = buildMockDonors()
-  cy.intercept('GET', '/refs/donors', {
-    statusCode: 200,
-    body: {
-      donorRefs: donors,
-    },
-  }).as('getDonorRefList')
-})
-
 Cypress.Commands.add(
   'mockDonorList',
   (pagination?: DonorListPaginationRequest, filter?: DonorListFilterMock) => {
     const donors = buildMockDonors(pagination?.orderBy, filter)
 
-    cy.intercept('POST', '/donors/filtered-list', {
+    cy.intercept('POST', `${MOCK_API_HOST}/donors/filtered-list`, {
       statusCode: 200,
       body: {
         donors: donors.slice(
@@ -134,15 +188,38 @@ Cypress.Commands.add(
   },
 )
 
-Cypress.Commands.add('mockDonor', (index: number) => {
-  const donors = buildMockDonors()
-  const donor = donors[index]
-  cy.intercept('GET', '/donors/*', {
+Cypress.Commands.add('mockCreateDonation', (formData: DonationFormDataMock) => {
+  cy.intercept('POST', `${MOCK_API_HOST}/donations`, {
+    statusCode: 201,
+    body: {
+      donation: {
+        id: 'new-donation-id',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...formData,
+      },
+    },
+  }).as('createDonation')
+})
+
+Cypress.Commands.add('mockUpdateDonation', (donationId: string, formData: DonationFormDataMock) => {
+  cy.intercept('PUT', `${MOCK_API_HOST}/donations/${donationId}`, {
     statusCode: 200,
     body: {
-      donor,
+      donation: {
+        id: donationId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...formData,
+      },
     },
-  }).as('getDonor')
+  }).as('updateDonation')
+})
+
+Cypress.Commands.add('mockDeleteDonation', () => {
+  cy.intercept('DELETE', `${MOCK_API_HOST}/donations/*`, {
+    statusCode: 204,
+  }).as('deleteDonation')
 })
 
 export {}

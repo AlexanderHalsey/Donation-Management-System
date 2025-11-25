@@ -151,6 +151,22 @@ describe('Donation List', () => {
     cy.get('#q-portal--menu--1 .q-item').eq(0).click() // Click edit action
     cy.url().should('match', /\/donations\/[a-f0-9-]{36}$/)
   })
+  it('should allow deleting a donation from the list', () => {
+    cy.visit('/donations')
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
+
+    cy.get(donationListItem)
+      .eq(3)
+      .within(() => {
+        cy.get('td').eq(6).find('button').click() // Click action button
+      })
+    cy.get('#q-portal--menu--1 .q-item').eq(1).click() // Click delete action
+
+    cy.mockDeleteDonation()
+    cy.mockDonationList()
+    cy.get('.q-dialog .q-btn').eq(1).click() // confirm delete
+    cy.get('.q-notification').should('contain.text', 'Le don a été supprimé avec succès.')
+  })
   describe('Filters', () => {
     const getFilterMenu = () =>
       cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children().eq(1).children()

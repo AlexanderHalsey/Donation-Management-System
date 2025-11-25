@@ -31,7 +31,11 @@
     </template>
     <template #body-cell-actions="{ row }">
       <td>
-        <DonationListItemActions v-if="!row.taxReceiptId" :donation="row" />
+        <DonationListItemActions
+          v-if="!row.taxReceiptId"
+          :donation="row"
+          @delete:donation="$emit('delete:donation', $event)"
+        />
       </td>
     </template>
   </Table>
@@ -80,6 +84,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   'update:pagination': [pagination: DonationListPaginationRequest]
+  'delete:donation': [donationId: string]
 }>()
 
 const headers: QTableProps['columns'] = [

@@ -1,17 +1,24 @@
 import { withClient } from './client'
 
 import {
+  convertDonationFormDataToRequest,
   convertDtoToDonation,
+  convertDtoToDonationAssetType,
   convertDtoToDonationListItem,
+  convertDtoToDonationMethod,
   convertDtoToDonationType,
   convertDtoToDonor,
   convertDtoToDonorListItem,
   convertDtoToPaymentMode,
 } from './converters'
 
+import type { DonationFormData } from '@/features/donations'
+
 import type {
+  GetDonationAssetTypeListResponse,
   GetDonationListRequest,
   GetDonationListResponse,
+  GetDonationMethodListResponse,
   GetDonationResponse,
   GetDonationTypeListResponse,
   GetDonorListRequest,
@@ -23,10 +30,12 @@ import type {
 } from '@shared/dtos'
 import type {
   Donation,
+  DonationAssetType,
   DonationListFilter,
   DonationListItem,
   DonationListPagination,
   DonationListPaginationRequest,
+  DonationMethod,
   DonationType,
   Donor,
   DonorListFilter,
@@ -79,6 +88,20 @@ export const getDonationTypes = async (): Promise<DonationType[]> => {
   return response.donationTypes.map(convertDtoToDonationType)
 }
 
+export const getDonationAssetTypes = async (): Promise<DonationAssetType[]> => {
+  const response = await withClient((client) =>
+    client.get<GetDonationAssetTypeListResponse>('/refs/donation-asset-types'),
+  )
+  return response.donationAssetTypes.map(convertDtoToDonationAssetType)
+}
+
+export const getDonationMethods = async (): Promise<DonationMethod[]> => {
+  const response = await withClient((client) =>
+    client.get<GetDonationMethodListResponse>('/refs/donation-methods'),
+  )
+  return response.donationMethods.map(convertDtoToDonationMethod)
+}
+
 export const getDonorRefs = async (): Promise<DonorRef[]> => {
   const response = await withClient((client) => client.get<GetDonorRefListResponse>('/refs/donors'))
   return response.donorRefs
@@ -114,4 +137,27 @@ export const getDonors = async (
 export const getDonor = async (donorId: string): Promise<Donor> => {
   const response = await withClient((client) => client.get<GetDonorResponse>(`/donors/${donorId}`))
   return convertDtoToDonor(response.donor)
+}
+
+export const postDonation = async (formData: DonationFormData): Promise<Donation> => {
+  const request = convertDonationFormDataToRequest(formData)
+  const response = await withClient((client) =>
+    client.post<GetDonationResponse>('/donations', request),
+  )
+  return convertDtoToDonation(response.donation)
+}
+
+export const putDonation = async (
+  donationId: string,
+  formData: DonationFormData,
+): Promise<Donation> => {
+  const request = convertDonationFormDataToRequest(formData)
+  const response = await withClient((client) =>
+    client.put<GetDonationResponse>(`/donations/${donationId}`, request),
+  )
+  return convertDtoToDonation(response.donation)
+}
+
+export const deleteDonation = async (donationId: string): Promise<void> => {
+  await withClient((client) => client.delete<void>(`/donations/${donationId}`))
 }
