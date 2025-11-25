@@ -8,6 +8,8 @@ import { Quasar, Loading, Notify, QSpinnerPie } from 'quasar'
 import App from './App.vue'
 import router from './router'
 
+import './zodi18n.ts'
+
 import '@quasar/extras/roboto-font/roboto-font.css'
 import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
