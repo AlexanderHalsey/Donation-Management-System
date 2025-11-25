@@ -1,11 +1,16 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common'
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { DonationService } from '@/domain'
 
 import { DonationConverter } from '../converters'
 
-import { GetDonationListRequest, GetDonationListResponse, GetDonationResponse } from '../dtos'
+import {
+  DonationRequest,
+  GetDonationListRequest,
+  GetDonationListResponse,
+  GetDonationResponse,
+} from '../dtos'
 
 @Controller('donations')
 export class DonationController {
@@ -42,10 +47,50 @@ export class DonationController {
   @ApiResponse({ status: 200, type: GetDonationResponse })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
   @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
-  async getDonationById(@Param('donationId') donationId: string): Promise<GetDonationResponse> {
+  async getDonationById(
+    @Param('donationId', new ParseUUIDPipe({ version: '4' })) donationId: string,
+  ): Promise<GetDonationResponse> {
     const donation = await this.donationService.getById(donationId)
     return {
       donation: this.donationConverter.convertDonationToDto(donation),
     }
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new donation' })
+  @ApiResponse({ status: 201, description: 'Donation created successfully' })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async createDonation(@Body() request: DonationRequest): Promise<GetDonationResponse> {
+    const donation = await this.donationService.createDonation(request)
+    return {
+      donation: this.donationConverter.convertDonationToDto(donation),
+    }
+  }
+
+  @Put(':donationId')
+  @ApiOperation({ summary: 'Update an existing donation' })
+  @ApiResponse({ status: 200, description: 'Donation updated successfully' })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async updateDonation(
+    @Param('donationId', new ParseUUIDPipe({ version: '4' })) donationId: string,
+    @Body() request: DonationRequest,
+  ): Promise<GetDonationResponse> {
+    const donation = await this.donationService.updateDonation(donationId, request)
+    return {
+      donation: this.donationConverter.convertDonationToDto(donation),
+    }
+  }
+
+  @Delete(':donationId')
+  @ApiOperation({ summary: 'Delete a donation by ID' })
+  @ApiResponse({ status: 200, description: 'Donation deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async deleteDonation(
+    @Param('donationId', new ParseUUIDPipe({ version: '4' })) donationId: string,
+  ): Promise<void> {
+    await this.donationService.deleteDonation(donationId)
   }
 }

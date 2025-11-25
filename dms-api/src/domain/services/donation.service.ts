@@ -11,6 +11,7 @@ import {
   DonationListFilter,
   DonationListItem,
 } from '@shared/models'
+import { DonationRequest } from '@/api/dtos'
 
 const BASIC_REF_FIELDS = {
   select: {
@@ -31,6 +32,12 @@ const BASIC_INCLUDE_FIELDS = {
       isDisabled: true,
     },
   },
+} as const
+
+const FULL_INCLUDE_FIELDS = {
+  ...BASIC_INCLUDE_FIELDS,
+  donationMethod: BASIC_REF_FIELDS,
+  donationAssetType: BASIC_REF_FIELDS,
 } as const
 
 const BASIC_OMIT_FIELDS = {
@@ -70,16 +77,65 @@ export class DonationService {
   async getById(donationId: string): Promise<Donation> {
     return nullsToUndefined(
       await this.prisma.donation.findUniqueOrThrow({
-        include: {
-          ...BASIC_INCLUDE_FIELDS,
-          donationMethod: BASIC_REF_FIELDS,
-          donationAssetType: BASIC_REF_FIELDS,
-        },
+        include: FULL_INCLUDE_FIELDS,
         omit: BASIC_OMIT_FIELDS,
         where: { id: donationId },
       }),
     )
   }
 
-  // for create and update ensure donationType and organisation are correctly linked
+  async createDonation(formData: DonationRequest): Promise<Donation> {
+    await this._validateDonationType(formData)
+
+    return nullsToUndefined(
+      await this.prisma.donation.create({
+        data: {
+          donorId: formData.donorId,
+          donatedAt: formData.donatedAt,
+          amount: formData.amount,
+          organisationId: formData.organisationId,
+          donationTypeId: formData.donationTypeId,
+          paymentModeId: formData.paymentModeId,
+          donationMethodId: formData.donationMethodId,
+          donationAssetTypeId: formData.donationAssetTypeId,
+        },
+        include: FULL_INCLUDE_FIELDS,
+        omit: BASIC_OMIT_FIELDS,
+      }),
+    )
+  }
+
+  async updateDonation(donationId: string, formData: DonationRequest): Promise<Donation> {
+    await this._validateDonationType(formData)
+
+    return nullsToUndefined(
+      await this.prisma.donation.update({
+        data: {
+          donorId: formData.donorId,
+          donatedAt: formData.donatedAt,
+          amount: formData.amount,
+          organisationId: formData.organisationId,
+          donationTypeId: formData.donationTypeId,
+          paymentModeId: formData.paymentModeId,
+          donationMethodId: formData.donationMethodId,
+          donationAssetTypeId: formData.donationAssetTypeId,
+        },
+        where: { id: donationId },
+        include: FULL_INCLUDE_FIELDS,
+        omit: BASIC_OMIT_FIELDS,
+      }),
+    )
+  }
+
+  async deleteDonation(donationId: string): Promise<void> {
+    await this.prisma.donation.delete({
+      where: { id: donationId },
+    })
+  }
+
+  private async _validateDonationType(formData: DonationRequest) {
+    await this.prisma.donationType.findUniqueOrThrow({
+      where: { id: formData.donationTypeId, organisationId: formData.organisationId },
+    })
+  }
 }

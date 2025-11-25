@@ -14,6 +14,8 @@ import {
 } from '@/api/converters'
 
 import {
+  DonationAssetTypeService,
+  DonationMethodService,
   DonationService,
   DonationTypeService,
   DonorService,
@@ -28,8 +30,10 @@ import { PrismaService } from '@/infrastructure'
   controllers: [DonationController, DonorController, RefsController],
   providers: [
     DonationAssetTypeConverter,
+    DonationAssetTypeService,
     DonationConverter,
     DonationMethodConverter,
+    DonationMethodService,
     DonationService,
     DonationTypeConverter,
     DonationTypeService,

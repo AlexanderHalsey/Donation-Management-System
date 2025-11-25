@@ -234,6 +234,14 @@ export interface GetDonationTypeListResponse {
   donationTypes: DonationTypeDto[]
 }
 
+export interface GetDonationAssetTypeListResponse {
+  donationAssetTypes: DonationAssetTypeDto[]
+}
+
+export interface GetDonationMethodListResponse {
+  donationMethods: DonationMethodDto[]
+}
+
 export interface GetDonorRefListResponse {
   donorRefs: DonorRefDto[]
 }
@@ -244,4 +252,15 @@ export interface GetDonationResponse {
 
 export interface GetDonorResponse {
   donor: DonorDto
+}
+
+export interface DonationRequest {
+  donorId: string
+  donatedAt: string
+  amount: number
+  organisationId: string
+  donationTypeId: string
+  paymentModeId: string
+  donationMethodId: string
+  donationAssetTypeId: string
 }

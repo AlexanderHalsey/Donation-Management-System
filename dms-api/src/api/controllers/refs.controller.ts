@@ -2,15 +2,24 @@ import { Controller, Get } from '@nestjs/common'
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import {
+  DonationAssetTypeService,
+  DonationMethodService,
   DonationTypeService,
   DonorService,
   OrganisationService,
   PaymentModeService,
 } from '@/domain'
 
-import { DonationTypeConverter, PaymentModeConverter } from '../converters'
+import {
+  DonationAssetTypeConverter,
+  DonationMethodConverter,
+  DonationTypeConverter,
+  PaymentModeConverter,
+} from '../converters'
 
 import {
+  GetDonationAssetTypeListResponse,
+  GetDonationMethodListResponse,
   GetDonationTypeListResponse,
   GetDonorRefListResponse,
   GetOrganisationRefListResponse,
@@ -26,6 +35,10 @@ export class RefsController {
     private readonly paymentModeService: PaymentModeService,
     private readonly paymentModeConverter: PaymentModeConverter,
     private readonly donorService: DonorService,
+    private readonly donationAssetTypeService: DonationAssetTypeService,
+    private readonly donationAssetTypeConverter: DonationAssetTypeConverter,
+    private readonly donationMethodService: DonationMethodService,
+    private readonly donationMethodConverter: DonationMethodConverter,
   ) {}
 
   @Get('payment-modes')
@@ -75,6 +88,34 @@ export class RefsController {
   async getDonors(): Promise<GetDonorRefListResponse> {
     return {
       donorRefs: await this.donorService.getAllRefs(),
+    }
+  }
+
+  @Get('donation-methods')
+  @ApiOperation({ summary: 'Get donation method refs' })
+  @ApiResponse({ status: 200, type: [GetDonationMethodListResponse] })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async getDonationMethods(): Promise<GetDonationMethodListResponse> {
+    const donationMethods = await this.donationMethodService.getAll()
+    return {
+      donationMethods: donationMethods.map((donationMethod) =>
+        this.donationMethodConverter.convertDonationMethodToDto(donationMethod),
+      ),
+    }
+  }
+
+  @Get('donation-asset-types')
+  @ApiOperation({ summary: 'Get donation asset type refs' })
+  @ApiResponse({ status: 200, type: [GetDonationAssetTypeListResponse] })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async getDonationAssetTypes(): Promise<GetDonationAssetTypeListResponse> {
+    const donationAssetTypes = await this.donationAssetTypeService.getAll()
+    return {
+      donationAssetTypes: donationAssetTypes.map((donationAssetType) =>
+        this.donationAssetTypeConverter.convertDonationAssetTypeToDto(donationAssetType),
+      ),
     }
   }
 }
