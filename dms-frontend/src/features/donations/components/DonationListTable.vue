@@ -178,17 +178,17 @@ const updatePagination = ({
   const paginationRequest: DonationListPaginationRequest = {
     page,
     pageSize: rowsPerPage || rowsNumber || 0,
-    orderBy: sortBy
-      ? ({
-          [sortBy]: ['paymentMode', 'organisation', 'donationType'].includes(sortBy)
-            ? { name: descending ? 'desc' : 'asc' }
-            : sortBy === 'donor'
-              ? { lastName: descending ? 'desc' : 'asc' }
-              : descending
-                ? 'desc'
-                : 'asc',
-        } as DonationListSortOrder)
-      : {},
+  }
+  if (sortBy) {
+    paginationRequest.orderBy = {
+      [sortBy]: ['paymentMode', 'organisation', 'donationType'].includes(sortBy)
+        ? { name: descending ? 'desc' : 'asc' }
+        : sortBy === 'donor'
+          ? { lastName: descending ? 'desc' : 'asc' }
+          : descending
+            ? 'desc'
+            : 'asc',
+    } as DonationListSortOrder
   }
 
   if (!isEqual(paginationRequest, omit(props.pagination, ['totalCount']))) {
