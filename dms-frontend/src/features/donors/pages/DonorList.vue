@@ -37,7 +37,7 @@ import type { Breadcrumb, LazySelectOptions } from '@/types'
 import type {
   DonorListFilter as DonorListFilterRequest,
   DonorListPaginationRequest,
-  DonorRef,
+  DonorRefSelect,
 } from '@shared/models'
 
 const breadcrumbs: Breadcrumb[] = [
@@ -53,7 +53,7 @@ const paginationRequest = computed<DonorListPaginationRequest>(() =>
 )
 const filter = computed(() => donorListStore.filter)
 
-const donorRefs = computed<LazySelectOptions<DonorRef>>(() => ({
+const donorRefs = computed<LazySelectOptions<DonorRefSelect>>(() => ({
   options: donorListStore.donorRefList,
   load: async () => {
     if (!donorListStore.refsInitialized) {

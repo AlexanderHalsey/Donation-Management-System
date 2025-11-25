@@ -16,12 +16,7 @@
         <div class="text-bold q-mb-sm">Donateur</div>
         <UuidFilterComponent
           :model-value="filter?.id"
-          :options="
-            donorRefs.options.map((donor) => ({
-              id: donor.id,
-              name: getDonorFullName(donor),
-            }))
-          "
+          :options="donorRefs.options"
           :lazy-load="donorRefs.load"
           @update:model-value="updateFilter({ ...filter, id: $event })"
         />
@@ -53,8 +48,6 @@ import { debounce, isEqual } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { isDate } from 'date-fns'
 
-import { getDonorFullName } from '../helpers'
-
 import BtnDropdown from '@/components/ui/BtnDropdown.vue'
 import Btn from '@/components/ui/Btn.vue'
 
@@ -63,11 +56,11 @@ import FloatFilterComponent from '@/components/FloatFilter.vue'
 import UuidFilterComponent from '@/components/UuidFilter.vue'
 
 import type { LazySelectOptions } from '@/types'
-import type { DonorListFilter, DonorRef } from '@shared/models'
+import type { DonorListFilter, DonorRefSelect } from '@shared/models'
 
 const props = defineProps({
   donorRefs: {
-    type: Object as PropType<LazySelectOptions<DonorRef>>,
+    type: Object as PropType<LazySelectOptions<DonorRefSelect>>,
     required: true,
   },
   filter: {

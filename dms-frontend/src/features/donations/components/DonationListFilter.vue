@@ -19,12 +19,7 @@
             <div class="text-bold q-mb-sm">Donateur</div>
             <UuidFilterComponent
               :model-value="filter?.donor?.id"
-              :options="
-                donors.options.map((donor) => ({
-                  id: donor.id,
-                  name: getDonorFullName(donor),
-                }))
-              "
+              :options="donors.options"
               :lazy-load="donors.load"
               @update:model-value="
                 updateFilter({ ...filter, donor: { ...filter?.donor, id: $event } })
@@ -71,7 +66,7 @@
           </div>
         </div>
         <QSeparator vertical class="q-mx-md" />
-        <div class="col">
+        <div class="col" style="width: 510px">
           <div>
             <div class="text-bold q-mb-sm">Date du don</div>
             <DateTimeFilterComponent
@@ -141,7 +136,6 @@ import { debounce, isEqual } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { isDate } from 'date-fns'
 
-import { getDonorFullName } from '@/features/donors'
 import {
   getOrganisationRefByDonationTypeId,
   getOrganisationRefById,
@@ -160,7 +154,7 @@ import type { LazySelectOptions } from '@/types'
 import type {
   DonationListFilter,
   DonationType,
-  DonorRef,
+  DonorRefSelect,
   OrganisationRef,
   PaymentMode,
 } from '@shared/models'
@@ -179,7 +173,7 @@ const props = defineProps({
     required: true,
   },
   donors: {
-    type: Object as PropType<LazySelectOptions<DonorRef>>,
+    type: Object as PropType<LazySelectOptions<DonorRefSelect>>,
     required: true,
   },
   filter: {

@@ -1,7 +1,9 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { getDonorRefs, getDonors } from '@/apis/dms-api'
+
+import { getDonorFullName } from '@/features/donors'
 
 import type {
   DonorListPagination,
@@ -9,10 +11,11 @@ import type {
   DonorRef,
   DonorListPaginationRequest,
   DonorListFilter,
+  DonorRefSelect,
 } from '@shared/models'
 
 export const useDonorListStore = defineStore('donorList', () => {
-  const donorRefList = ref<DonorRef[]>([])
+  const _donorRefList = ref<DonorRef[]>([])
   const refsInitialized = ref(false)
   const donorList = ref<DonorListItem[]>([])
   const pagination = ref<DonorListPagination>({
@@ -22,8 +25,16 @@ export const useDonorListStore = defineStore('donorList', () => {
   })
   const filter = ref<DonorListFilter>()
 
+  const donorRefList = computed<DonorRefSelect[]>(() =>
+    _donorRefList.value.map((donor) => ({
+      ...donor,
+      name: getDonorFullName(donor),
+    })),
+  )
+  const activeDonorRefList = computed(() => donorRefList.value.filter((ref) => !ref.isDisabled))
+
   const fetchDonorRefs = async () => {
-    donorRefList.value = await getDonorRefs()
+    _donorRefList.value = await getDonorRefs()
     refsInitialized.value = true
   }
 
@@ -38,6 +49,7 @@ export const useDonorListStore = defineStore('donorList', () => {
   }
 
   return {
+    activeDonorRefList,
     donorList,
     donorRefList,
     fetchDonorRefs,

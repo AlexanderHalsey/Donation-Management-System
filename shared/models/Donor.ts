@@ -9,6 +9,12 @@ export interface DonorRef {
   isDisabled: boolean
 }
 
+export interface DonorRefSelect {
+  id: string
+  name: string
+  isDisabled: boolean
+}
+
 export interface DonorListItem extends DonorRef {
   updatedAt: Date
   externalId: number
