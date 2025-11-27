@@ -23,7 +23,7 @@ import {
   PaymentModeService,
 } from '@/domain'
 
-import { PrismaService } from '@/infrastructure'
+import { PrismaService, TypedSqlService } from '@/infrastructure'
 
 @Module({
   imports: [ConfigModule.forRoot()],
@@ -44,6 +44,7 @@ import { PrismaService } from '@/infrastructure'
     PaymentModeConverter,
     PaymentModeService,
     PrismaService,
+    TypedSqlService,
   ],
 })
 export class AppModule {}

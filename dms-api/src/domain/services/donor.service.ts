@@ -4,8 +4,7 @@ import { omit } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined } from '@shared/utils'
 
-import { PrismaService } from '@/infrastructure'
-import { getDonorListItem } from '@generated/prisma/sql'
+import { PrismaService, TypedSqlService } from '@/infrastructure'
 
 import {
   Donor,
@@ -17,7 +16,10 @@ import {
 
 @Injectable()
 export class DonorService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly typedSql: TypedSqlService,
+  ) {}
 
   async getFilteredList(
     pagination: DonorListPaginationRequest,
@@ -32,13 +34,13 @@ export class DonorService {
     Object.keys(pagination.orderBy ?? {}).forEach((key) =>
       pagination.orderBy![key] === undefined ? delete pagination.orderBy![key] : {},
     )
-    pagination.orderBy = isEmpty(pagination.orderBy) ? { updatedAt: 'desc' } : pagination.orderBy
+    pagination.orderBy = isEmpty(pagination.orderBy) ? { lastName: 'asc' } : pagination.orderBy
     const [orderByField, orderByDirection] = Object.entries(pagination.orderBy)[0]
     const limit = pagination.pageSize
     const offset = (pagination.page - 1) * pagination.pageSize
 
     const donors = await this.prisma.$queryRawTyped(
-      getDonorListItem(
+      await this.typedSql.getDonorListItem(
         startDate,
         endDate,
         donorIds,
@@ -51,14 +53,12 @@ export class DonorService {
       ),
     )
 
+    const totalCount = donors.length > 0 ? Number(donors[0].totalCount ?? 0) : 0
     const items = donors.map((donor) => ({
-      ...donor,
-      donationCount: Number(donor.donationCount),
+      ...omit(donor, ['totalCount']),
+      donationCount: Number(donor.donationCount ?? 0),
       donationTotalAmount: donor.donationTotalAmount ?? 0,
-      // remove totalCount from each item
-      totalCount: undefined,
     }))
-    const totalCount = donors.length > 0 ? Number(donors[0].totalCount) : 0
 
     return { donors: nullsToUndefined(items), totalCount }
   }

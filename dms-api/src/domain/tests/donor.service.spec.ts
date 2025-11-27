@@ -4,15 +4,17 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { mockDeep, mockReset } from 'jest-mock-extended'
 
 import { DonorService } from '../services/donor.service'
-import { PrismaService } from '@/infrastructure'
+import { PrismaService, TypedSqlService } from '@/infrastructure'
 
 describe('DonorService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
+  const typedSqlServiceMock = mockDeep<TypedSqlService>()
   let donorService: DonorService
 
   beforeEach(async () => {
     jest.resetAllMocks()
     mockReset(prismaServiceMock)
+    mockReset(typedSqlServiceMock)
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
@@ -22,6 +24,10 @@ describe('DonorService', () => {
           provide: PrismaService,
           useValue: prismaServiceMock,
         },
+        {
+          provide: TypedSqlService,
+          useValue: typedSqlServiceMock,
+        },
       ],
     }).compile()
 
@@ -30,6 +36,8 @@ describe('DonorService', () => {
 
   it('should get donor list', async () => {
     prismaServiceMock.$queryRawTyped.mockResolvedValueOnce([])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    typedSqlServiceMock.getDonorListItem.mockResolvedValueOnce({} as any)
     await donorService.getFilteredList(
       { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
       { totalAmount: { gte: 10 } },

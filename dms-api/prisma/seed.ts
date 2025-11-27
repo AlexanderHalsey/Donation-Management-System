@@ -1,4 +1,6 @@
+import 'dotenv/config'
 import { PrismaClient } from './generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 import {
   buildMockDonationAssetTypeCreateManyInput,
@@ -10,7 +12,11 @@ import {
   buildMockPaymentModeCreateManyInput,
 } from './mocks'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+  }),
+})
 
 async function main() {
   const organisations = await prisma.organisation.createManyAndReturn({
