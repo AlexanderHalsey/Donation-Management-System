@@ -107,6 +107,20 @@ export interface DonationDto extends DonationListItemDto {
   donationAssetType: DonationAssetTypeRefDto
 }
 
+export type FileStatusDto = 'active' | 'draft'
+
+export interface FileMetadataDto {
+  id: string
+  uploadedAt: string
+  expiresAt?: string
+  storageKey?: string
+  name: string
+  size: number
+  mimeType: string
+  hash: string
+  status: FileStatusDto
+}
+
 /**
  * Generic pagination DTO
  * @template T - The type of the orderBy property
@@ -263,4 +277,12 @@ export interface DonationRequest {
   paymentModeId: string
   donationMethodId: string
   donationAssetTypeId: string
+}
+
+export interface FileUploadRequest {
+  file: unknown
+}
+
+export interface FileUploadResponse {
+  fileId: string
 }

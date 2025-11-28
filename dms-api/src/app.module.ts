@@ -1,7 +1,12 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import { DonationController, DonorController, RefsController } from '@/api/controllers'
+import {
+  DonationController,
+  DonorController,
+  FileController,
+  RefsController,
+} from '@/api/controllers'
 
 import {
   DonationAssetTypeConverter,
@@ -9,6 +14,7 @@ import {
   DonationMethodConverter,
   DonationTypeConverter,
   DonorConverter,
+  FileConverter,
   OrganisationConverter,
   PaymentModeConverter,
 } from '@/api/converters'
@@ -19,15 +25,16 @@ import {
   DonationService,
   DonationTypeService,
   DonorService,
+  FileService,
   OrganisationService,
   PaymentModeService,
 } from '@/domain'
 
-import { PrismaService, TypedSqlService } from '@/infrastructure'
+import { FileStorageService, PrismaService, TypedSqlService } from '@/infrastructure'
 
 @Module({
   imports: [ConfigModule.forRoot()],
-  controllers: [DonationController, DonorController, RefsController],
+  controllers: [DonationController, DonorController, FileController, RefsController],
   providers: [
     DonationAssetTypeConverter,
     DonationAssetTypeService,
@@ -39,6 +46,9 @@ import { PrismaService, TypedSqlService } from '@/infrastructure'
     DonationTypeService,
     DonorConverter,
     DonorService,
+    FileConverter,
+    FileService,
+    FileStorageService,
     OrganisationConverter,
     OrganisationService,
     PaymentModeConverter,
