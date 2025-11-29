@@ -57,7 +57,7 @@ export class TypedSqlService {
     // In development, ensure SQL files are generated to prevent runtime surprises
     if (process.env.NODE_ENV !== 'production') {
       try {
-        require.resolve('../../prisma/generated/prisma/sql')
+        require.resolve('../../../prisma/generated/prisma/sql')
       } catch (error) {
         throw new BadRequestException(
           `❌ TypedSQL files not found!\n\n` +
@@ -75,7 +75,7 @@ export class TypedSqlService {
       try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore - Module may not exist during build, handled by try/catch
-        this.typedSqlModule = await import('../../prisma/generated/prisma/sql')
+        this.typedSqlModule = await import('../../../prisma/generated/prisma/sql')
       } catch (error) {
         throw new BadRequestException(
           `SQL functions not available. Make sure to run "npx prisma generate --sql" first. Error: ${error}`,

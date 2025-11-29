@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { ScheduleModule } from '@nestjs/schedule'
 
 import {
   DonationController,
@@ -32,8 +33,10 @@ import {
 
 import { FileStorageService, PrismaService, TypedSqlService } from '@/infrastructure'
 
+import { FileCleanupTask } from '@/infrastructure/tasks'
+
 @Module({
-  imports: [ConfigModule.forRoot()],
+  imports: [ConfigModule.forRoot(), ScheduleModule.forRoot()],
   controllers: [DonationController, DonorController, FileController, RefsController],
   providers: [
     DonationAssetTypeConverter,
@@ -46,6 +49,7 @@ import { FileStorageService, PrismaService, TypedSqlService } from '@/infrastruc
     DonationTypeService,
     DonorConverter,
     DonorService,
+    FileCleanupTask,
     FileConverter,
     FileService,
     FileStorageService,

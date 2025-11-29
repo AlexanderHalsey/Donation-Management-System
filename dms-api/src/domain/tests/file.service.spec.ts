@@ -186,4 +186,41 @@ describe('FileService', () => {
       expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
     })
   })
+
+  describe('cleanupExpiredDrafts', () => {
+    it('should delete expired draft files', async () => {
+      const expiredDrafts: FileMetadata[] = [
+        {
+          id: 'expired-file-1',
+          storageKey: 'storage-key-1',
+          status: 'DRAFT',
+          uploadedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          expiresAt: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
+          name: 'expired-file-1.txt',
+          size: 2048,
+          mimeType: 'text/plain',
+          hash: 'hash-1',
+        },
+        {
+          id: 'expired-file-2',
+          storageKey: 'storage-key-2',
+          status: 'DRAFT',
+          uploadedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+          expiresAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+          name: 'expired-file-2.txt',
+          size: 4096,
+          mimeType: 'text/plain',
+          hash: 'hash-2',
+        },
+      ]
+
+      prismaServiceMock.fileMetadata.findMany.mockResolvedValueOnce(expiredDrafts)
+      fileService.deleteFile = jest.fn().mockResolvedValueOnce(undefined)
+      fileService.deleteFile = jest.fn().mockResolvedValueOnce(undefined)
+      await fileService.cleanupExpiredDrafts()
+
+      expect(prismaServiceMock.fileMetadata.findMany).toHaveBeenCalledTimes(1)
+      expect(fileService.deleteFile).toHaveBeenCalledTimes(expiredDrafts.length)
+    })
+  })
 })

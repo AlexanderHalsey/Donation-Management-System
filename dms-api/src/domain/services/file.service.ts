@@ -102,4 +102,20 @@ export class FileService {
   computeHash(buffer: Buffer): string {
     return createHash('sha256').update(buffer).digest('hex')
   }
+
+  async cleanupExpiredDrafts(): Promise<number> {
+    const expiredDrafts = await this.prisma.fileMetadata.findMany({
+      where: {
+        status: 'DRAFT',
+        expiresAt: { lt: new Date() },
+      },
+      select: { id: true },
+    })
+
+    for (const draft of expiredDrafts) {
+      await this.deleteFile(draft.id)
+    }
+
+    return expiredDrafts.length
+  }
 }
