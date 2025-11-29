@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import type * as runtime from '@prisma/client/runtime/client'
 
 export interface GetDonorListItemResult {
@@ -26,6 +26,10 @@ type GetDonorListItemFunction = (
   offset: number,
 ) => runtime.TypedSql<unknown[], GetDonorListItemResult>
 
+type TypedSqlModule = {
+  getDonorListItem: GetDonorListItemFunction
+}
+
 /**
  * TypedSqlService - Dynamic wrapper for Prisma generated SQL functions
  *
@@ -47,16 +51,15 @@ type GetDonorListItemFunction = (
  */
 @Injectable()
 export class TypedSqlService {
-  private typedSqlFunctions: { getDonorListItem: GetDonorListItemFunction } | null = null
+  private typedSqlModule: TypedSqlModule | null = null
 
   constructor() {
     // In development, ensure SQL files are generated to prevent runtime surprises
     if (process.env.NODE_ENV !== 'production') {
       try {
-        // Use the exact same path that the dynamic import uses
         require.resolve('../../prisma/generated/prisma/sql')
       } catch (error) {
-        throw new Error(
+        throw new BadRequestException(
           `❌ TypedSQL files not found!\n\n` +
             `You must generate SQL types before running the dev server:\n` +
             `  npx prisma generate --sql\n\n` +
@@ -67,29 +70,26 @@ export class TypedSqlService {
     }
   }
 
-  private async loadSqlFunctions(): Promise<{ getDonorListItem: GetDonorListItemFunction }> {
-    if (!this.typedSqlFunctions) {
+  private async loadSqlModule(): Promise<TypedSqlModule> {
+    if (!this.typedSqlModule) {
       try {
-        // Try relative path from dist to the generated files
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore - Module may not exist during build, handled by try/catch
-        const typedSqlModule = await import('../../prisma/generated/prisma/sql')
-        this.typedSqlFunctions = typedSqlModule
+        this.typedSqlModule = await import('../../prisma/generated/prisma/sql')
       } catch (error) {
-        throw new Error(
+        throw new BadRequestException(
           `SQL functions not available. Make sure to run "npx prisma generate --sql" first. Error: ${error}`,
         )
       }
     }
-    return this.typedSqlFunctions!
+    return this.typedSqlModule
   }
 
   async getDonorListItem(
     ...args: Parameters<GetDonorListItemFunction>
   ): Promise<ReturnType<GetDonorListItemFunction>> {
-    const typedSql = await this.loadSqlFunctions()
+    const typedSql = await this.loadSqlModule()
 
-    // Return the function result directly for use with $queryRawTyped
     return typedSql.getDonorListItem(...args)
   }
 }

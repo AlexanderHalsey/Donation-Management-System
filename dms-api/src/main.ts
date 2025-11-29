@@ -1,6 +1,8 @@
-import { NestFactory } from '@nestjs/core'
+import { HttpAdapterHost, NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+
+import { PrismaClientExceptionFilter } from './api/filters'
 
 import { json } from 'express'
 
@@ -26,6 +28,9 @@ async function bootstrap() {
   const config = new DocumentBuilder().setTitle('DMS API').setVersion('1.0').build()
   const documentFactory = () => SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, documentFactory)
+
+  const { httpAdapter } = app.get<HttpAdapterHost>(HttpAdapterHost)
+  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter))
 
   await app.listen(process.env.PORT ?? 3000)
 }

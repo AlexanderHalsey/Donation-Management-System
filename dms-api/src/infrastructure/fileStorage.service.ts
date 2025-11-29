@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
@@ -27,10 +27,9 @@ export class FileStorageService {
     try {
       await fs.access(filePath)
     } catch {
-      throw new Error(`File not found: ${filePath}`)
+      throw new BadRequestException('File not found')
     }
-    const fileBuffer = await fs.readFile(filePath)
-    return fileBuffer
+    return await fs.readFile(filePath)
   }
 
   async deleteFile(filePath: string): Promise<void> {
@@ -40,7 +39,7 @@ export class FileStorageService {
     try {
       await fs.access(filePath)
     } catch {
-      throw new Error(`File not found: ${filePath}`)
+      throw new BadRequestException('File not found')
     }
     await fs.unlink(filePath)
   }

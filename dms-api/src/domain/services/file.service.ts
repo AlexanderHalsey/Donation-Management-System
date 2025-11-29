@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { createHash } from 'crypto'
 import { nullsToUndefined } from '@shared/utils'
@@ -63,14 +63,16 @@ export class FileService {
       where: { id: fileId },
     })
 
-    if (!fileMetadata.storageKey) throw new Error('File storage key not found')
-    if (fileMetadata.status !== 'ACTIVE') throw new Error('File is not active')
+    if (!fileMetadata.storageKey) throw new BadRequestException('File storage key not found')
+    if (fileMetadata.status !== 'ACTIVE') throw new BadRequestException('File is not active')
 
     const buffer = await this.fileStorageService.downloadFile(fileMetadata.storageKey)
 
     const downloadedHash = this.computeHash(buffer)
     if (downloadedHash !== fileMetadata.hash) {
-      throw new Error('File integrity check failed - file may be corrupted or tampered with')
+      throw new BadRequestException(
+        'File integrity check failed - file may be corrupted or tampered with',
+      )
     }
 
     return {
@@ -89,7 +91,7 @@ export class FileService {
         select: { storageKey: true, status: true },
       })
 
-      if (!fileMetadata.storageKey) throw new Error('File storage key not found')
+      if (!fileMetadata.storageKey) throw new BadRequestException('File storage key not found')
 
       await this.fileStorageService.deleteFile(fileMetadata.storageKey)
 
