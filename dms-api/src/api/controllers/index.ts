@@ -1,4 +1,5 @@
 export * from './donation-asset-type.controller'
+export * from './donation-method.controller'
 export * from './donation.controller'
 export * from './donor.controller'
 export * from './file.controller'

@@ -1,5 +1,5 @@
 <template>
-  <Page title="Liste des natures de dons" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page title="Liste des natures de don" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
       <Btn to="/donation-asset-types/create" icon="add" color="primary" class="q-mr-sm">
         Nouveau
@@ -28,7 +28,7 @@ import type { Breadcrumb } from '@/types'
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'donation-asset-type-list',
-    label: 'Liste des natures de dons',
+    label: 'Liste des natures de don',
     icon: 'category',
   },
 ]

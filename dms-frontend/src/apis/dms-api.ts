@@ -14,6 +14,7 @@ import {
 
 import type { DonationFormData } from '@/features/donations'
 import type { DonationAssetTypeFormData } from '@/features/donationAssetTypes'
+import type { DonationMethodFormData } from '@/features/donationMethods'
 
 import type {
   GetDonationAssetTypeListResponse,
@@ -21,6 +22,7 @@ import type {
   GetDonationListRequest,
   GetDonationListResponse,
   GetDonationMethodListResponse,
+  GetDonationMethodResponse,
   GetDonationResponse,
   GetDonationTypeListResponse,
   GetDonorListRequest,
@@ -99,7 +101,7 @@ export const getDonationAssetTypes = async (): Promise<DonationAssetType[]> => {
 
 export const getDonationMethods = async (): Promise<DonationMethod[]> => {
   const response = await withClient((client) =>
-    client.get<GetDonationMethodListResponse>('/refs/donation-methods'),
+    client.get<GetDonationMethodListResponse>('/donation-methods'),
   )
   return response.donationMethods.map(convertDtoToDonationMethod)
 }
@@ -202,4 +204,37 @@ export const disableDonationAssetType = async (
     client.put<GetDonationAssetTypeResponse>(`donation-asset-types/${donationAssetTypeId}/disable`),
   )
   return convertDtoToDonationAssetType(response.donationAssetType)
+}
+
+export const getDonationMethod = async (donationMethodId: string): Promise<DonationMethod> => {
+  const response = await withClient((client) =>
+    client.get<GetDonationMethodResponse>(`donation-methods/${donationMethodId}`),
+  )
+  return convertDtoToDonationMethod(response.donationMethod)
+}
+
+export const postDonationMethod = async (
+  formData: DonationMethodFormData,
+): Promise<DonationMethod> => {
+  const response = await withClient((client) =>
+    client.post<GetDonationMethodResponse>('donation-methods', formData),
+  )
+  return convertDtoToDonationMethod(response.donationMethod)
+}
+
+export const putDonationMethod = async (
+  donationMethodId: string,
+  formData: DonationMethodFormData,
+): Promise<DonationMethod> => {
+  const response = await withClient((client) =>
+    client.put<GetDonationMethodResponse>(`donation-methods/${donationMethodId}`, formData),
+  )
+  return convertDtoToDonationMethod(response.donationMethod)
+}
+
+export const disableDonationMethod = async (donationMethodId: string): Promise<DonationMethod> => {
+  const response = await withClient((client) =>
+    client.put<GetDonationMethodResponse>(`donation-methods/${donationMethodId}/disable`),
+  )
+  return convertDtoToDonationMethod(response.donationMethod)
 }

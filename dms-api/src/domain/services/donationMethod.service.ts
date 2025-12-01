@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common'
 
 import { PrismaService } from '@/infrastructure'
 
-import { DonationMethod } from '@shared/models'
+import type { DonationMethod } from '@shared/models'
+import type { DonationMethodRequest } from '@/api/dtos'
 
 @Injectable()
 export class DonationMethodService {
@@ -10,5 +11,45 @@ export class DonationMethodService {
 
   async getAll(): Promise<DonationMethod[]> {
     return this.prisma.donationMethod.findMany()
+  }
+
+  async getById(id: string): Promise<DonationMethod> {
+    return this.prisma.donationMethod.findUniqueOrThrow({ where: { id } })
+  }
+
+  async create(request: DonationMethodRequest): Promise<DonationMethod> {
+    return this.prisma.$transaction(async (tx) => {
+      const donationMethod = await tx.donationMethod.create({ data: request })
+      if (request.isDefault) {
+        await tx.donationMethod.updateMany({
+          where: { id: { not: donationMethod.id } },
+          data: { isDefault: false },
+        })
+      }
+      return donationMethod
+    })
+  }
+
+  async update(id: string, request: DonationMethodRequest): Promise<DonationMethod> {
+    return this.prisma.$transaction(async (tx) => {
+      const donationMethod = await tx.donationMethod.update({
+        where: { id },
+        data: request,
+      })
+      if (request.isDefault) {
+        await tx.donationMethod.updateMany({
+          where: { id: { not: id } },
+          data: { isDefault: false },
+        })
+      }
+      return donationMethod
+    })
+  }
+
+  async disable(id: string): Promise<DonationMethod> {
+    return this.prisma.donationMethod.update({
+      where: { id },
+      data: { isDisabled: true },
+    })
   }
 }

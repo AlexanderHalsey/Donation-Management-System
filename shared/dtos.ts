@@ -39,12 +39,10 @@ export interface DonationTypeDto extends DonationTypeRefDto {
   organisationId: string
 }
 
-export interface DonationMethodRefDto {
+export interface DonationMethodDto {
   id: string
   name: string
-}
-
-export interface DonationMethodDto extends DonationMethodRefDto {
+  isDisabled: boolean
   createdAt: string
   updatedAt: string
   isDefault: boolean
@@ -101,7 +99,7 @@ export interface DonationListItemDto {
 
 export interface DonationDto extends DonationListItemDto {
   createdAt: string
-  donationMethod: DonationMethodRefDto
+  donationMethod: DonationMethodDto
   donationAssetType: DonationAssetTypeDto
 }
 
@@ -150,7 +148,7 @@ export interface DonationListSortOrder {
   paymentMode?: PaymentModeRefSortOrder
   organisation?: OrganisationRefSortOrder
   donationType?: DonationTypeRefSortOrder
-  donationMethod?: DonationMethodRefSortOrder
+  donationMethod?: DonationMethodSortOrder
   donationAssetType?: DonationAssetTypeSortOrder
   donor?: DonorRefSortOrder
 }
@@ -165,7 +163,7 @@ export interface DonorListSortOrder extends DonorRefSortOrder {
 export interface PaymentModeRefSortOrder extends NameSortOrder {}
 export interface OrganisationRefSortOrder extends NameSortOrder {}
 export interface DonationTypeRefSortOrder extends NameSortOrder {}
-export interface DonationMethodRefSortOrder extends NameSortOrder {}
+export interface DonationMethodSortOrder extends NameSortOrder {}
 export interface DonationAssetTypeSortOrder extends NameSortOrder {}
 export interface DonorRefSortOrder {
   lastName?: SortOrder
@@ -270,6 +268,10 @@ export interface GetDonationAssetTypeResponse {
   donationAssetType: DonationAssetTypeDto
 }
 
+export interface GetDonationMethodResponse {
+  donationMethod: DonationMethodDto
+}
+
 export interface DonationRequest {
   donorId: string
   donatedAt: string
@@ -282,6 +284,11 @@ export interface DonationRequest {
 }
 
 export interface DonationAssetTypeRequest {
+  name: string
+  isDefault: boolean
+}
+
+export interface DonationMethodRequest {
   name: string
   isDefault: boolean
 }

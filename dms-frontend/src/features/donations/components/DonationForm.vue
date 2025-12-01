@@ -90,7 +90,7 @@
         @update:model-value="updatePaymentMode"
       />
     </FormField>
-    <FormField name="donationMethodId" label="Méthode de don">
+    <FormField name="donationMethodId" label="Forme de don">
       <Select
         :id="'donationMethodId'"
         :model-value="donationMethod"

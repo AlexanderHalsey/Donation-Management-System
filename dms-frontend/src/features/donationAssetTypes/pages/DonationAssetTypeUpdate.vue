@@ -50,7 +50,7 @@ import type { Breadcrumb } from '@/types'
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'donation-asset-type-list',
-    label: 'Liste des natures de dons',
+    label: 'Liste des natures de don',
     to: '/donation-asset-types',
     icon: 'category',
   },
@@ -90,7 +90,7 @@ const deleteDonationAssetType = async () => {
 const loading = ref(true)
 const working = ref(false)
 onMounted(async () => {
-  await Promise.all([donationAssetTypeStore.fetchDonationAssetType(donationAssetTypeId.value)])
+  await donationAssetTypeStore.fetchDonationAssetType(donationAssetTypeId.value)
   loading.value = false
 })
 </script>

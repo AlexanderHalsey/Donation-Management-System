@@ -36,7 +36,7 @@ const BASIC_INCLUDE_FIELDS = {
 
 const FULL_INCLUDE_FIELDS = {
   ...BASIC_INCLUDE_FIELDS,
-  donationMethod: BASIC_REF_FIELDS,
+  donationMethod: true,
   donationAssetType: true,
 } as const
 

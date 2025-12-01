@@ -1,9 +1,7 @@
-export interface DonationMethodRef {
+export interface DonationMethod {
   id: string
   name: string
-}
-
-export interface DonationMethod extends DonationMethodRef {
+  isDisabled: boolean
   createdAt: Date
   updatedAt: Date
   isDefault: boolean

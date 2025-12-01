@@ -67,6 +67,21 @@ const router = createRouter({
           component: () =>
             import('@/features/donationAssetTypes/pages/DonationAssetTypeUpdate.vue'),
         },
+        {
+          path: 'donation-methods',
+          name: 'donation-methods',
+          component: () => import('@/features/donationMethods/pages/DonationMethodList.vue'),
+        },
+        {
+          path: 'donation-methods/create',
+          name: 'donation-method-create',
+          component: () => import('@/features/donationMethods/pages/DonationMethodCreate.vue'),
+        },
+        {
+          path: 'donation-methods/:id',
+          name: 'donation-method-update',
+          component: () => import('@/features/donationMethods/pages/DonationMethodUpdate.vue'),
+        },
       ],
     },
     {

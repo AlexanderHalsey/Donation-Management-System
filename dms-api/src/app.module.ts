@@ -5,10 +5,11 @@ import { ScheduleModule } from '@nestjs/schedule'
 import {
   DonationAssetTypeController,
   DonationController,
+  DonationMethodController,
   DonorController,
   FileController,
   RefsController,
-} from '@/api/controllers'
+} from './api/controllers'
 
 import {
   DonationAssetTypeConverter,
@@ -41,6 +42,7 @@ import { FileCleanupTask } from '@/infrastructure/tasks'
   controllers: [
     DonationAssetTypeController,
     DonationController,
+    DonationMethodController,
     DonorController,
     FileController,
     RefsController,

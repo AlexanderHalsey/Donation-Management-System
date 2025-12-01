@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { getDonationMethods } from '@/apis/dms-api'
@@ -9,6 +9,10 @@ export const useDonationMethodListStore = defineStore('donationMethodList', () =
   const donationMethodList = ref<DonationMethod[]>([])
   const initialized = ref(false)
 
+  const activeDonationMethodList = computed(() =>
+    donationMethodList.value.filter((method) => !method.isDisabled),
+  )
+
   const fetchDonationMethods = async () => {
     if (!initialized.value) {
       donationMethodList.value = await getDonationMethods()
@@ -17,6 +21,7 @@ export const useDonationMethodListStore = defineStore('donationMethodList', () =
   }
 
   return {
+    activeDonationMethodList,
     fetchDonationMethods,
     initialized,
     donationMethodList,

@@ -50,12 +50,12 @@
         @scroll="setMenuScrollVisible"
       >
         <div v-for="group of menuItems" :key="group.group">
-          <div v-if="group.label" class="q-mt-lg">
-            <div class="text-grey-7 q-ml-lg">
-              {{ group.label }}
-            </div>
-          </div>
           <QList padding class="menu-list q-pt-md q-mx-md">
+            <div v-if="group.label" class="q-mt-md">
+              <div class="text-grey-7 q-ml-md">
+                {{ group.label }}
+              </div>
+            </div>
             <QItem
               v-for="(menuItem, index) of group.items"
               :key="index"
@@ -112,7 +112,10 @@ const menuItems: {
   {
     group: 'admin',
     label: 'Admin',
-    items: [{ label: 'Natures de dons', icon: 'category', to: '/donation-asset-types' }],
+    items: [
+      { label: 'Formes de don', icon: 'shape_line', to: '/donation-methods' },
+      { label: 'Natures de don', icon: 'category', to: '/donation-asset-types' },
+    ],
   },
 ]
 

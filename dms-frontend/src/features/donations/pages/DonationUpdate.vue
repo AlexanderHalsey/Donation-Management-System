@@ -77,7 +77,7 @@ const organisations = computed(() => organisationListStore.organisationRefList)
 const donationTypes = computed(() => donationTypeListStore.donationTypeList)
 const paymentModes = computed(() => paymentModeListStore.paymentModeList)
 const donationAssetTypes = computed(() => donationAssetTypeListStore.activeDonationAssetTypeList)
-const donationMethods = computed(() => donationMethodListStore.donationMethodList)
+const donationMethods = computed(() => donationMethodListStore.activeDonationMethodList)
 
 const donationForm = ref<InstanceType<typeof DonationForm> | null>(null)
 const deleteDonationDialog = ref<InstanceType<typeof DeleteDonationDialog> | null>(null)

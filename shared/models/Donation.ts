@@ -1,5 +1,5 @@
 import type { DonationAssetType } from './DonationAssetType'
-import type { DonationMethodRef } from './DonationMethod'
+import type { DonationMethod } from './DonationMethod'
 import type { DonationTypeRef } from './DonationType'
 import type { DonorRef } from './Donor'
 import type { BoolFilter, DateTimeFilter, FloatFilter, UuidFilter } from './Filters'
@@ -22,7 +22,7 @@ export interface DonationListItem {
 
 export interface Donation extends DonationListItem {
   createdAt: Date
-  donationMethod: DonationMethodRef
+  donationMethod: DonationMethod
   donationAssetType: DonationAssetType
 }
 
