@@ -1,9 +1,7 @@
-export interface PaymentModeRef {
+export interface PaymentMode {
   id: string
   name: string
-}
-
-export interface PaymentMode extends PaymentModeRef {
   createdAt: Date
   updatedAt: Date
+  isDisabled: boolean
 }

@@ -1,13 +1,11 @@
 import { NameSortOrder } from './sort-order.dto'
 
-export class PaymentModeRefDto {
+export class PaymentModeDto {
   id: string
   name: string
-}
-
-export class PaymentModeDto {
+  isDisabled: boolean
   createdAt: string
   updatedAt: string
 }
 
-export class PaymentModeRefSortOrder extends NameSortOrder {}
+export class PaymentModeSortOrder extends NameSortOrder {}

@@ -10,6 +10,7 @@ import {
   buildMockPaymentModes,
   type DonationAssetTypeFormDataMock,
   type DonationMethodFormDataMock,
+  type PaymentModeFormDataMock,
   type DonationListFilterMock,
   type DonorListFilterMock,
   type DonationFormDataMock,
@@ -23,9 +24,11 @@ declare global {
       mockCreateDonation(formData: DonationFormDataMock): Chainable<Subject>
       mockCreateDonationAssetType(formData: DonationAssetTypeFormDataMock): Chainable<Subject>
       mockCreateDonationMethod(formData: DonationMethodFormDataMock): Chainable<Subject>
+      mockCreatePaymentMode(formData: PaymentModeFormDataMock): Chainable<Subject>
       mockDeleteDonation(): Chainable<Subject>
       mockDisableDonationAssetType(donationAssetTypeId: string): Chainable<Subject>
       mockDisableDonationMethod(donationMethodId: string): Chainable<Subject>
+      mockDisablePaymentMode(paymentModeId: string): Chainable<Subject>
       mockDonation(index: number): Chainable<Subject>
       mockDonationAssetType(index: number): Chainable<Subject>
       mockDonationAssetTypeList(): Chainable<Subject>
@@ -43,6 +46,7 @@ declare global {
       mockDonor(index: number): Chainable<Subject>
       mockDonorRefList(): Chainable<Subject>
       mockOrganisationRefList(): Chainable<Subject>
+      mockPaymentMode(index: number): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
       mockUpdateDonation(donationId: string, formData: DonationFormDataMock): Chainable<Subject>
       mockUpdateDonationAssetType(
@@ -52,6 +56,10 @@ declare global {
       mockUpdateDonationMethod(
         donationMethodId: string,
         formData: DonationMethodFormDataMock,
+      ): Chainable<Subject>
+      mockUpdatePaymentMode(
+        paymentModeId: string,
+        formData: PaymentModeFormDataMock,
       ): Chainable<Subject>
     }
   }
@@ -74,7 +82,7 @@ Cypress.Commands.add('mockOrganisationRefList', () => {
 })
 
 Cypress.Commands.add('mockPaymentModeList', () => {
-  cy.intercept('GET', `${MOCK_API_HOST}/refs/payment-modes`, {
+  cy.intercept('GET', `${MOCK_API_HOST}/payment-modes`, {
     statusCode: 200,
     body: {
       paymentModes,
@@ -244,6 +252,64 @@ Cypress.Commands.add('mockDisableDonationMethod', (donationMethodId: string) => 
       },
     },
   }).as('disableDonationMethod')
+})
+
+Cypress.Commands.add('mockPaymentMode', (index: number) => {
+  const paymentMode = paymentModes[index]
+  cy.intercept('GET', `${MOCK_API_HOST}/payment-modes/*`, {
+    statusCode: 200,
+    body: {
+      paymentMode,
+    },
+  }).as('getPaymentMode')
+})
+
+Cypress.Commands.add('mockCreatePaymentMode', (formData: PaymentModeFormDataMock) => {
+  cy.intercept('POST', `${MOCK_API_HOST}/payment-modes`, {
+    statusCode: 201,
+    body: {
+      paymentMode: {
+        id: 'new-payment-mode-id',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDisabled: false,
+        ...formData,
+      },
+    },
+  }).as('createPaymentMode')
+})
+
+Cypress.Commands.add(
+  'mockUpdatePaymentMode',
+  (paymentModeId: string, formData: PaymentModeFormDataMock) => {
+    cy.intercept('PUT', `${MOCK_API_HOST}/payment-modes/${paymentModeId}`, {
+      statusCode: 200,
+      body: {
+        paymentMode: {
+          id: paymentModeId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isDisabled: false,
+          ...formData,
+        },
+      },
+    }).as('updatePaymentMode')
+  },
+)
+
+Cypress.Commands.add('mockDisablePaymentMode', (paymentModeId: string) => {
+  cy.intercept('PUT', `${MOCK_API_HOST}/payment-modes/${paymentModeId}/disable`, {
+    statusCode: 200,
+    body: {
+      paymentMode: {
+        id: paymentModeId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        name: 'Disabled Payment Mode',
+        isDisabled: true,
+      },
+    },
+  }).as('disablePaymentMode')
 })
 
 Cypress.Commands.add(

@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common'
 import { formatISO } from 'date-fns'
 import { omit } from 'es-toolkit'
 
-import { PaymentModeDto } from '../dtos'
-import { PaymentMode } from '@shared/models'
+import type { PaymentModeDto } from '@shared/dtos'
+import type { PaymentMode } from '@shared/models'
 
 @Injectable()
 export class PaymentModeConverter {

@@ -1,11 +1,9 @@
-export interface PaymentModeRefDto {
+export interface PaymentModeDto {
   id: string
   name: string
-}
-
-export interface PaymentModeDto extends PaymentModeRefDto {
   createdAt: string
   updatedAt: string
+  isDisabled: boolean
 }
 
 export interface OrganisationRefDto {
@@ -90,7 +88,7 @@ export interface DonationListItemDto {
   updatedAt: string
   donatedAt: string
   amount: number
-  paymentMode: PaymentModeRefDto
+  paymentMode: PaymentModeDto
   organisation: OrganisationRefDto
   donationType: DonationTypeRefDto
   donor: DonorRefDto
@@ -145,7 +143,7 @@ export interface DonationListSortOrder {
   updatedAt?: SortOrder
   donatedAt?: SortOrder
   amount?: SortOrder
-  paymentMode?: PaymentModeRefSortOrder
+  paymentMode?: PaymentModeSortOrder
   organisation?: OrganisationRefSortOrder
   donationType?: DonationTypeRefSortOrder
   donationMethod?: DonationMethodSortOrder
@@ -160,7 +158,7 @@ export interface DonorListSortOrder extends DonorRefSortOrder {
   email?: SortOrder
 }
 
-export interface PaymentModeRefSortOrder extends NameSortOrder {}
+export interface PaymentModeSortOrder extends NameSortOrder {}
 export interface OrganisationRefSortOrder extends NameSortOrder {}
 export interface DonationTypeRefSortOrder extends NameSortOrder {}
 export interface DonationMethodSortOrder extends NameSortOrder {}
@@ -272,6 +270,10 @@ export interface GetDonationMethodResponse {
   donationMethod: DonationMethodDto
 }
 
+export interface GetPaymentModeResponse {
+  paymentMode: PaymentModeDto
+}
+
 export interface DonationRequest {
   donorId: string
   donatedAt: string
@@ -291,6 +293,10 @@ export interface DonationAssetTypeRequest {
 export interface DonationMethodRequest {
   name: string
   isDefault: boolean
+}
+
+export interface PaymentModeRequest {
+  name: string
 }
 
 export interface FileUploadRequest {

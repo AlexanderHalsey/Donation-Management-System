@@ -1,7 +1,8 @@
 model PaymentMode {
-  id        String     @id @default(uuid()) @db.Uuid
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  name      String
-  donations Donation[]
+  id         String     @id @default(uuid()) @db.Uuid
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  name       String
+  isDisabled Boolean    @default(false)
+  donations  Donation[]
 }

@@ -6,7 +6,7 @@ import { OrganisationRefDto, OrganisationRefSortOrder } from './organisation.dto
 import { DonationTypeRefDto, DonationTypeRefSortOrder } from './donation-type.dto'
 import { DonationMethodDto, DonationMethodSortOrder } from './donation-method.dto'
 import { DonationAssetTypeDto, DonationAssetTypeSortOrder } from './donation-asset-type.dto'
-import { PaymentModeRefDto, PaymentModeRefSortOrder } from './payment-mode.dto'
+import { PaymentModeDto, PaymentModeSortOrder } from './payment-mode.dto'
 import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
 
 import { SortOrderEnum, SortOrder } from './sort-order.dto'
@@ -16,7 +16,7 @@ export class DonationListItemDto {
   updatedAt: string
   donatedAt: string
   amount: number
-  paymentMode: PaymentModeRefDto
+  paymentMode: PaymentModeDto
   organisation: OrganisationRefDto
   donationType: DonationTypeRefDto
   donor: DonorRefDto
@@ -45,10 +45,10 @@ export class DonationListSortOrder {
   @IsEnum(SortOrderEnum)
   amount?: SortOrder
 
-  @ApiProperty({ type: PaymentModeRefSortOrder, required: false })
+  @ApiProperty({ type: PaymentModeSortOrder, required: false })
   @ValidateNested()
-  @Type(() => PaymentModeRefSortOrder)
-  paymentMode?: PaymentModeRefSortOrder
+  @Type(() => PaymentModeSortOrder)
+  paymentMode?: PaymentModeSortOrder
 
   @ApiProperty({ type: OrganisationRefSortOrder, required: false })
   @ValidateNested()

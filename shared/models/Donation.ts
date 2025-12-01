@@ -5,7 +5,7 @@ import type { DonorRef } from './Donor'
 import type { BoolFilter, DateTimeFilter, FloatFilter, UuidFilter } from './Filters'
 import type { OrganisationRef } from './Organisation'
 import type { Pagination, PaginationRequest } from './Pagination'
-import type { PaymentModeRef } from './PaymentMode'
+import type { PaymentMode } from './PaymentMode'
 import type { DonationListSortOrder } from './SortOrder'
 
 export interface DonationListItem {
@@ -13,7 +13,7 @@ export interface DonationListItem {
   updatedAt: Date
   donatedAt: Date
   amount: number
-  paymentMode: PaymentModeRef
+  paymentMode: PaymentMode
   organisation: OrganisationRef
   donationType: DonationTypeRef
   donor: DonorRef

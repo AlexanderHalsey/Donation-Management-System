@@ -8,6 +8,7 @@ import {
   DonationMethodController,
   DonorController,
   FileController,
+  PaymentModeController,
   RefsController,
 } from './api/controllers'
 
@@ -45,6 +46,7 @@ import { FileCleanupTask } from '@/infrastructure/tasks'
     DonationMethodController,
     DonorController,
     FileController,
+    PaymentModeController,
     RefsController,
   ],
   providers: [

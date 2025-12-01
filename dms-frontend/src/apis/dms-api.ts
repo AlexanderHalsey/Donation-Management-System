@@ -15,6 +15,7 @@ import {
 import type { DonationFormData } from '@/features/donations'
 import type { DonationAssetTypeFormData } from '@/features/donationAssetTypes'
 import type { DonationMethodFormData } from '@/features/donationMethods'
+import type { PaymentModeFormData } from '@/features/paymentModes'
 
 import type {
   GetDonationAssetTypeListResponse,
@@ -31,6 +32,7 @@ import type {
   GetDonorResponse,
   GetOrganisationRefListResponse,
   GetPaymentModeListResponse,
+  GetPaymentModeResponse,
 } from '@shared/dtos'
 import type {
   Donation,
@@ -76,13 +78,6 @@ export const getOrganisationRefs = async (): Promise<OrganisationRef[]> => {
     client.get<GetOrganisationRefListResponse>('/refs/organisations'),
   )
   return response.organisationRefs
-}
-
-export const getPaymentModes = async (): Promise<PaymentMode[]> => {
-  const response = await withClient((client) =>
-    client.get<GetPaymentModeListResponse>('/refs/payment-modes'),
-  )
-  return response.paymentModes.map(convertDtoToPaymentMode)
 }
 
 export const getDonationTypes = async (): Promise<DonationType[]> => {
@@ -237,4 +232,42 @@ export const disableDonationMethod = async (donationMethodId: string): Promise<D
     client.put<GetDonationMethodResponse>(`donation-methods/${donationMethodId}/disable`),
   )
   return convertDtoToDonationMethod(response.donationMethod)
+}
+
+export const getPaymentModes = async (): Promise<PaymentMode[]> => {
+  const response = await withClient((client) =>
+    client.get<GetPaymentModeListResponse>('/payment-modes'),
+  )
+  return response.paymentModes.map(convertDtoToPaymentMode)
+}
+
+export const getPaymentMode = async (paymentModeId: string): Promise<PaymentMode> => {
+  const response = await withClient((client) =>
+    client.get<GetPaymentModeResponse>(`payment-modes/${paymentModeId}`),
+  )
+  return convertDtoToPaymentMode(response.paymentMode)
+}
+
+export const postPaymentMode = async (formData: PaymentModeFormData): Promise<PaymentMode> => {
+  const response = await withClient((client) =>
+    client.post<GetPaymentModeResponse>('payment-modes', formData),
+  )
+  return convertDtoToPaymentMode(response.paymentMode)
+}
+
+export const putPaymentMode = async (
+  paymentModeId: string,
+  formData: PaymentModeFormData,
+): Promise<PaymentMode> => {
+  const response = await withClient((client) =>
+    client.put<GetPaymentModeResponse>(`payment-modes/${paymentModeId}`, formData),
+  )
+  return convertDtoToPaymentMode(response.paymentMode)
+}
+
+export const disablePaymentMode = async (paymentModeId: string): Promise<PaymentMode> => {
+  const response = await withClient((client) =>
+    client.put<GetPaymentModeResponse>(`payment-modes/${paymentModeId}/disable`),
+  )
+  return convertDtoToPaymentMode(response.paymentMode)
 }

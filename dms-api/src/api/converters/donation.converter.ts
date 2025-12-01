@@ -5,6 +5,7 @@ import { omit } from 'es-toolkit'
 
 import { DonationAssetTypeConverter } from './donationAssetType.converter'
 import { DonationMethodConverter } from './donationMethod.converter'
+import { PaymentModeConverter } from './paymentMode.converter'
 
 import { DonationDto, DonationListItemDto } from '../dtos'
 import { Donation, DonationListItem } from '@shared/models'
@@ -13,6 +14,7 @@ export class DonationConverter {
   constructor(
     private readonly donationAssetTypeConverter: DonationAssetTypeConverter,
     private readonly donationMethodConverter: DonationMethodConverter,
+    private readonly paymentModeConverter: PaymentModeConverter,
   ) {}
 
   convertDonationListItemToDto(donation: DonationListItem): DonationListItemDto {
@@ -20,6 +22,7 @@ export class DonationConverter {
       ...omit(donation, ['updatedAt', 'donatedAt']),
       updatedAt: formatISO(donation.updatedAt),
       donatedAt: formatISO(donation.donatedAt),
+      paymentMode: this.paymentModeConverter.convertPaymentModeToDto(donation.paymentMode),
     }
   }
 
@@ -29,6 +32,7 @@ export class DonationConverter {
       updatedAt: formatISO(donation.updatedAt),
       createdAt: formatISO(donation.createdAt),
       donatedAt: formatISO(donation.donatedAt),
+      paymentMode: this.paymentModeConverter.convertPaymentModeToDto(donation.paymentMode),
       donationMethod: this.donationMethodConverter.convertDonationMethodToDto(
         donation.donationMethod,
       ),

@@ -23,7 +23,7 @@ const BASIC_REF_FIELDS = {
 const BASIC_INCLUDE_FIELDS = {
   donationType: BASIC_REF_FIELDS,
   organisation: BASIC_REF_FIELDS,
-  paymentMode: BASIC_REF_FIELDS,
+  paymentMode: true,
   donor: {
     select: {
       id: true,
