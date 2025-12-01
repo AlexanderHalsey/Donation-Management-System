@@ -2,6 +2,11 @@ import { v4 } from 'uuid'
 
 import type { DonationType, Organisation } from '@shared/models'
 
+export type DonationTypeFormDataMock = {
+  name: string
+  organisationId: string
+}
+
 export function buildMockDonationTypes(organisations: Organisation[]): DonationType[] {
   return Array.from({ length: 10 }).map((_, index) => ({
     id: v4(),
@@ -9,5 +14,6 @@ export function buildMockDonationTypes(organisations: Organisation[]): DonationT
     updatedAt: new Date(2024, 1, index + 1),
     name: `Donation Type ${index + 1}`,
     organisationId: organisations[index % organisations.length].id,
+    isDisabled: false,
   }))
 }

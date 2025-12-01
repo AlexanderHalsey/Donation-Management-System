@@ -3,6 +3,7 @@ import { omit } from 'es-toolkit'
 
 import { convertDtoToDonationAssetType } from './donationAssetType'
 import { convertDtoToDonationMethod } from './donationMethod'
+import { convertDtoToDonationType } from './donationType'
 import { convertDtoToPaymentMode } from './paymentMode'
 
 import type { DonationFormData } from '@/features/donations'
@@ -14,6 +15,7 @@ export const convertDtoToDonationListItem = (dto: DonationListItemDto): Donation
     ...dto,
     updatedAt: parseISO(dto.updatedAt),
     donatedAt: parseISO(dto.donatedAt),
+    donationType: convertDtoToDonationType(dto.donationType),
     paymentMode: convertDtoToPaymentMode(dto.paymentMode),
   }
 }
@@ -24,6 +26,7 @@ export const convertDtoToDonation = (dto: DonationDto): Donation => {
     createdAt: parseISO(dto.createdAt),
     updatedAt: parseISO(dto.updatedAt),
     donatedAt: parseISO(dto.donatedAt),
+    donationType: convertDtoToDonationType(dto.donationType),
     paymentMode: convertDtoToPaymentMode(dto.paymentMode),
     donationMethod: convertDtoToDonationMethod(dto.donationMethod),
     donationAssetType: convertDtoToDonationAssetType(dto.donationAssetType),

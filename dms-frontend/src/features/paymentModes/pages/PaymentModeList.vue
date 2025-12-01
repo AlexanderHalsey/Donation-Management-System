@@ -36,7 +36,7 @@ const $q = useQuasar()
 const paymentModeListStore = usePaymentModeListStore()
 const paymentModeStore = usePaymentModeStore()
 
-const paymentModeList = computed(() => paymentModeListStore.paymentModeList)
+const paymentModeList = computed(() => paymentModeListStore.activePaymentModeList)
 
 const loading = ref(true)
 const working = ref(false)

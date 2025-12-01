@@ -36,7 +36,7 @@ const $q = useQuasar()
 const donationMethodListStore = useDonationMethodListStore()
 const donationMethodStore = useDonationMethodStore()
 
-const donationMethodList = computed(() => donationMethodListStore.donationMethodList)
+const donationMethodList = computed(() => donationMethodListStore.activeDonationMethodList)
 
 const loading = ref(true)
 const working = ref(false)

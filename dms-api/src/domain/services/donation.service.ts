@@ -13,16 +13,14 @@ import {
 } from '@shared/models'
 import { DonationRequest } from '@/api/dtos'
 
-const BASIC_REF_FIELDS = {
-  select: {
-    id: true,
-    name: true,
-  },
-} as const
-
 const BASIC_INCLUDE_FIELDS = {
-  donationType: BASIC_REF_FIELDS,
-  organisation: BASIC_REF_FIELDS,
+  donationType: true,
+  organisation: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
   paymentMode: true,
   donor: {
     select: {

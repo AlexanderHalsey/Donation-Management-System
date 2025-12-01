@@ -4,6 +4,7 @@ model DonationType {
   updatedAt      DateTime     @updatedAt
   name           String
   organisationId String       @db.Uuid
+  isDisabled     Boolean      @default(false)
   donations      Donation[]
   organisation   Organisation @relation(fields: [organisationId], references: [id])
 }

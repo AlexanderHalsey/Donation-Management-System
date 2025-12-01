@@ -26,15 +26,13 @@ export interface OrganisationDto extends OrganisationRefDto {
   signatureUrl?: string
 }
 
-export interface DonationTypeRefDto {
+export interface DonationTypeDto {
   id: string
   name: string
-}
-
-export interface DonationTypeDto extends DonationTypeRefDto {
   createdAt: string
   updatedAt: string
   organisationId: string
+  isDisabled: boolean
 }
 
 export interface DonationMethodDto {
@@ -90,7 +88,7 @@ export interface DonationListItemDto {
   amount: number
   paymentMode: PaymentModeDto
   organisation: OrganisationRefDto
-  donationType: DonationTypeRefDto
+  donationType: DonationTypeDto
   donor: DonorRefDto
   taxReceiptId?: string
 }
@@ -145,7 +143,7 @@ export interface DonationListSortOrder {
   amount?: SortOrder
   paymentMode?: PaymentModeSortOrder
   organisation?: OrganisationRefSortOrder
-  donationType?: DonationTypeRefSortOrder
+  donationType?: DonationTypeSortOrder
   donationMethod?: DonationMethodSortOrder
   donationAssetType?: DonationAssetTypeSortOrder
   donor?: DonorRefSortOrder
@@ -160,7 +158,7 @@ export interface DonorListSortOrder extends DonorRefSortOrder {
 
 export interface PaymentModeSortOrder extends NameSortOrder {}
 export interface OrganisationRefSortOrder extends NameSortOrder {}
-export interface DonationTypeRefSortOrder extends NameSortOrder {}
+export interface DonationTypeSortOrder extends NameSortOrder {}
 export interface DonationMethodSortOrder extends NameSortOrder {}
 export interface DonationAssetTypeSortOrder extends NameSortOrder {}
 export interface DonorRefSortOrder {
@@ -274,6 +272,10 @@ export interface GetPaymentModeResponse {
   paymentMode: PaymentModeDto
 }
 
+export interface GetDonationTypeResponse {
+  donationType: DonationTypeDto
+}
+
 export interface DonationRequest {
   donorId: string
   donatedAt: string
@@ -297,6 +299,11 @@ export interface DonationMethodRequest {
 
 export interface PaymentModeRequest {
   name: string
+}
+
+export interface DonationTypeRequest {
+  name: string
+  organisationId: string
 }
 
 export interface FileUploadRequest {

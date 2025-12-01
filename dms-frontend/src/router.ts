@@ -97,6 +97,21 @@ const router = createRouter({
           name: 'payment-mode-update',
           component: () => import('@/features/paymentModes/pages/PaymentModeUpdate.vue'),
         },
+        {
+          path: 'donation-types',
+          name: 'donation-types',
+          component: () => import('@/features/donationTypes/pages/DonationTypeList.vue'),
+        },
+        {
+          path: 'donation-types/create',
+          name: 'donation-type-create',
+          component: () => import('@/features/donationTypes/pages/DonationTypeCreate.vue'),
+        },
+        {
+          path: 'donation-types/:donationTypeId',
+          name: 'donation-type-edit',
+          component: () => import('@/features/donationTypes/pages/DonationTypeUpdate.vue'),
+        },
       ],
     },
     {

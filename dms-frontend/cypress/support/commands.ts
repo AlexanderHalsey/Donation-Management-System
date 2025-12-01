@@ -10,6 +10,7 @@ import {
   buildMockPaymentModes,
   type DonationAssetTypeFormDataMock,
   type DonationMethodFormDataMock,
+  type DonationTypeFormDataMock,
   type PaymentModeFormDataMock,
   type DonationListFilterMock,
   type DonorListFilterMock,
@@ -24,10 +25,12 @@ declare global {
       mockCreateDonation(formData: DonationFormDataMock): Chainable<Subject>
       mockCreateDonationAssetType(formData: DonationAssetTypeFormDataMock): Chainable<Subject>
       mockCreateDonationMethod(formData: DonationMethodFormDataMock): Chainable<Subject>
+      mockCreateDonationType(formData: DonationTypeFormDataMock): Chainable<Subject>
       mockCreatePaymentMode(formData: PaymentModeFormDataMock): Chainable<Subject>
       mockDeleteDonation(): Chainable<Subject>
       mockDisableDonationAssetType(donationAssetTypeId: string): Chainable<Subject>
       mockDisableDonationMethod(donationMethodId: string): Chainable<Subject>
+      mockDisableDonationType(donationTypeId: string): Chainable<Subject>
       mockDisablePaymentMode(paymentModeId: string): Chainable<Subject>
       mockDonation(index: number): Chainable<Subject>
       mockDonationAssetType(index: number): Chainable<Subject>
@@ -38,6 +41,7 @@ declare global {
         filter?: DonationListFilterMock,
       ): Chainable<Subject>
       mockDonationMethodList(): Chainable<Subject>
+      mockDonationType(index: number): Chainable<Subject>
       mockDonationTypeList(): Chainable<Subject>
       mockDonorList(
         pagination?: DonorListPaginationRequest,
@@ -56,6 +60,10 @@ declare global {
       mockUpdateDonationMethod(
         donationMethodId: string,
         formData: DonationMethodFormDataMock,
+      ): Chainable<Subject>
+      mockUpdateDonationType(
+        donationTypeId: string,
+        formData: DonationTypeFormDataMock,
       ): Chainable<Subject>
       mockUpdatePaymentMode(
         paymentModeId: string,
@@ -88,15 +96,6 @@ Cypress.Commands.add('mockPaymentModeList', () => {
       paymentModes,
     },
   }).as('getPaymentModeList')
-})
-
-Cypress.Commands.add('mockDonationTypeList', () => {
-  cy.intercept('GET', `${MOCK_API_HOST}/refs/donation-types`, {
-    statusCode: 200,
-    body: {
-      donationTypes,
-    },
-  }).as('getDonationTypeList')
 })
 
 Cypress.Commands.add('mockDonorRefList', () => {
@@ -310,6 +309,74 @@ Cypress.Commands.add('mockDisablePaymentMode', (paymentModeId: string) => {
       },
     },
   }).as('disablePaymentMode')
+})
+
+Cypress.Commands.add('mockDonationType', (index: number) => {
+  const donationType = donationTypes[index]
+  cy.intercept('GET', `${MOCK_API_HOST}/donation-types/*`, {
+    statusCode: 200,
+    body: {
+      donationType,
+    },
+  }).as('getDonationType')
+})
+
+Cypress.Commands.add('mockDonationTypeList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/donation-types`, {
+    statusCode: 200,
+    body: {
+      donationTypes,
+    },
+  }).as('getDonationTypeList')
+})
+
+Cypress.Commands.add('mockCreateDonationType', (formData: DonationTypeFormDataMock) => {
+  cy.intercept('POST', `${MOCK_API_HOST}/donation-types`, {
+    statusCode: 201,
+    body: {
+      donationType: {
+        id: 'new-donation-type-id',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDisabled: false,
+        ...formData,
+      },
+    },
+  }).as('createDonationType')
+})
+
+Cypress.Commands.add(
+  'mockUpdateDonationType',
+  (donationTypeId: string, formData: DonationTypeFormDataMock) => {
+    cy.intercept('PUT', `${MOCK_API_HOST}/donation-types/${donationTypeId}`, {
+      statusCode: 200,
+      body: {
+        donationType: {
+          id: donationTypeId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isDisabled: false,
+          ...formData,
+        },
+      },
+    }).as('updateDonationType')
+  },
+)
+
+Cypress.Commands.add('mockDisableDonationType', (donationTypeId: string) => {
+  cy.intercept('PUT', `${MOCK_API_HOST}/donation-types/${donationTypeId}/disable`, {
+    statusCode: 200,
+    body: {
+      donationType: {
+        id: donationTypeId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        name: 'Disabled Donation Type',
+        organisationId: 'some-org-id',
+        isDisabled: true,
+      },
+    },
+  }).as('disableDonationType')
 })
 
 Cypress.Commands.add(

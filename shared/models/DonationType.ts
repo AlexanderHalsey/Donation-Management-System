@@ -1,10 +1,8 @@
-export interface DonationTypeRef {
+export interface DonationType {
   id: string
   name: string
-}
-
-export interface DonationType extends DonationTypeRef {
   createdAt: Date
   updatedAt: Date
   organisationId: string
+  isDisabled: boolean
 }

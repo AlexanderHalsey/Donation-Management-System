@@ -4,7 +4,7 @@ export interface DonationListSortOrder {
   amount?: SortOrder
   paymentMode?: PaymentModeSortOrder
   organisation?: OrganisationRefSortOrder
-  donationType?: DonationTypeRefSortOrder
+  donationType?: DonationTypeSortOrder
   donationMethod?: DonationMethodSortOrder
   donationAssetType?: DonationAssetTypeSortOrder
   donor?: DonorSummaryRefSortOrder
@@ -19,7 +19,7 @@ export interface DonorListSortOrder extends DonorSummaryRefSortOrder {
 
 export interface PaymentModeSortOrder extends NameSortOrder {}
 export interface OrganisationRefSortOrder extends NameSortOrder {}
-export interface DonationTypeRefSortOrder extends NameSortOrder {}
+export interface DonationTypeSortOrder extends NameSortOrder {}
 export interface DonationMethodSortOrder extends NameSortOrder {}
 export interface DonationAssetTypeSortOrder extends NameSortOrder {}
 export interface DonorSummaryRefSortOrder {

@@ -3,7 +3,7 @@ import { IsEnum, IsOptional, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 
 import { OrganisationRefDto, OrganisationRefSortOrder } from './organisation.dto'
-import { DonationTypeRefDto, DonationTypeRefSortOrder } from './donation-type.dto'
+import { DonationTypeDto, DonationTypeSortOrder } from './donation-type.dto'
 import { DonationMethodDto, DonationMethodSortOrder } from './donation-method.dto'
 import { DonationAssetTypeDto, DonationAssetTypeSortOrder } from './donation-asset-type.dto'
 import { PaymentModeDto, PaymentModeSortOrder } from './payment-mode.dto'
@@ -18,7 +18,7 @@ export class DonationListItemDto {
   amount: number
   paymentMode: PaymentModeDto
   organisation: OrganisationRefDto
-  donationType: DonationTypeRefDto
+  donationType: DonationTypeDto
   donor: DonorRefDto
   taxReceiptId?: string
 }
@@ -55,10 +55,10 @@ export class DonationListSortOrder {
   @Type(() => OrganisationRefSortOrder)
   organisation?: OrganisationRefSortOrder
 
-  @ApiProperty({ type: DonationTypeRefSortOrder, required: false })
+  @ApiProperty({ type: DonationTypeSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationTypeRefSortOrder)
-  donationType?: DonationTypeRefSortOrder
+  @Type(() => DonationTypeSortOrder)
+  donationType?: DonationTypeSortOrder
 
   @ApiProperty({ type: DonationMethodSortOrder, required: false })
   @ValidateNested()

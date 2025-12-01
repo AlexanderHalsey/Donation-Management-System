@@ -1,6 +1,6 @@
 import type { DonationAssetType } from './DonationAssetType'
 import type { DonationMethod } from './DonationMethod'
-import type { DonationTypeRef } from './DonationType'
+import type { DonationType } from './DonationType'
 import type { DonorRef } from './Donor'
 import type { BoolFilter, DateTimeFilter, FloatFilter, UuidFilter } from './Filters'
 import type { OrganisationRef } from './Organisation'
@@ -15,7 +15,7 @@ export interface DonationListItem {
   amount: number
   paymentMode: PaymentMode
   organisation: OrganisationRef
-  donationType: DonationTypeRef
+  donationType: DonationType
   donor: DonorRef
   taxReceiptId?: string
 }
