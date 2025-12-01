@@ -8,10 +8,10 @@
         data-cy="delete-donation"
         @click="deleteDonationDialog?.open()"
       >
-        Supprimer le don
+        Supprimer
       </Btn>
       <Btn color="primary" icon="edit" data-cy="update-donation" @click="donationForm?.validate()">
-        Mettre à jour le don
+        Mettre à jour
       </Btn>
     </template>
     <DonationForm

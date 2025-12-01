@@ -1,7 +1,7 @@
 <template>
-  <Page title="Liste des dons" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page title="Liste des dons" :breadcrumbs="breadcrumbs" :loading="loading" :working="working">
     <template #actions>
-      <Btn to="/donations/create" icon="add" color="primary" class="q-mr-sm"> Nouveau don </Btn>
+      <Btn to="/donations/create" icon="add" color="primary" class="q-mr-sm"> Nouveau </Btn>
       <DonationListFilter
         :filter="filter"
         :organisations="organisations"

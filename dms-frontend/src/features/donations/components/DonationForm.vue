@@ -103,7 +103,7 @@
         @update:model-value="updateDonationMethod"
       />
     </FormField>
-    <FormField name="donationAssetTypeId" label="Type d'actif du don">
+    <FormField name="donationAssetTypeId" label="Nature du don">
       <Select
         :id="'donationAssetTypeId'"
         :model-value="donationAssetType"

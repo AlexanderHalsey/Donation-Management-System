@@ -2,7 +2,7 @@
   <Page title="Nouveau don" :breadcrumbs="breadcrumbs" :loading="loading" :working="working">
     <template #actions>
       <Btn color="primary" icon="add" @click="donationForm?.validate()" data-cy="create-donation">
-        Créer le don
+        Créer
       </Btn>
     </template>
     <DonationForm
