@@ -6,7 +6,7 @@ export const getDonationFormSchema = (donationTypeOptions: DonationType[]) => {
     .object({
       donorId: z.string().uuid(),
       donatedAt: z.date(),
-      amount: z.number(),
+      amount: z.number().gt(0),
       organisationId: z.string().uuid(),
       donationTypeId: z.string().uuid(),
       paymentModeId: z.string().uuid(),
