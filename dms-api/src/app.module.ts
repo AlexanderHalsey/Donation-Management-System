@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 
 import {
+  DonationAssetTypeController,
   DonationController,
   DonorController,
   FileController,
@@ -37,7 +38,13 @@ import { FileCleanupTask } from '@/infrastructure/tasks'
 
 @Module({
   imports: [ConfigModule.forRoot(), ScheduleModule.forRoot()],
-  controllers: [DonationController, DonorController, FileController, RefsController],
+  controllers: [
+    DonationAssetTypeController,
+    DonationController,
+    DonorController,
+    FileController,
+    RefsController,
+  ],
   providers: [
     DonationAssetTypeConverter,
     DonationAssetTypeService,

@@ -1,4 +1,4 @@
-import type { DonationAssetTypeRef } from './DonationAssetType'
+import type { DonationAssetType } from './DonationAssetType'
 import type { DonationMethodRef } from './DonationMethod'
 import type { DonationTypeRef } from './DonationType'
 import type { DonorRef } from './Donor'
@@ -23,7 +23,7 @@ export interface DonationListItem {
 export interface Donation extends DonationListItem {
   createdAt: Date
   donationMethod: DonationMethodRef
-  donationAssetType: DonationAssetTypeRef
+  donationAssetType: DonationAssetType
 }
 
 export type DonationListPaginationRequest = PaginationRequest<DonationListSortOrder>

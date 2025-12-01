@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { getDonationAssetTypes } from '@/apis/dms-api'
@@ -9,6 +9,10 @@ export const useDonationAssetTypeListStore = defineStore('donationAssetTypeList'
   const donationAssetTypeList = ref<DonationAssetType[]>([])
   const initialized = ref(false)
 
+  const activeDonationAssetTypeList = computed(() =>
+    donationAssetTypeList.value.filter((type) => !type.isDisabled),
+  )
+
   const fetchDonationAssetTypes = async () => {
     if (!initialized.value) {
       donationAssetTypeList.value = await getDonationAssetTypes()
@@ -17,8 +21,8 @@ export const useDonationAssetTypeListStore = defineStore('donationAssetTypeList'
   }
 
   return {
-    fetchDonationAssetTypes,
-    initialized,
+    activeDonationAssetTypeList,
     donationAssetTypeList,
+    fetchDonationAssetTypes,
   }
 })

@@ -49,26 +49,32 @@
         style="height: calc(100% - 51px)"
         @scroll="setMenuScrollVisible"
       >
-        <QList padding class="menu-list q-pt-md q-mx-md">
-          <QItem
-            v-for="(menuItem, index) of menuItems"
-            :key="index"
-            clickable
-            v-ripple
-            :to="menuItem.to"
-            :active="$route.path.startsWith(menuItem.to)"
-            class="q-my-sm"
-            active-class="bg-primary text-white shadow-2"
-          >
-            <QItemSection avatar>
-              <QIcon :name="menuItem.icon" />
-            </QItemSection>
-
-            <QItemSection>
-              {{ menuItem.label }}
-            </QItemSection>
-          </QItem>
-        </QList>
+        <div v-for="group of menuItems" :key="group.group">
+          <div v-if="group.label" class="q-mt-lg">
+            <div class="text-grey-7 q-ml-lg">
+              {{ group.label }}
+            </div>
+          </div>
+          <QList padding class="menu-list q-pt-md q-mx-md">
+            <QItem
+              v-for="(menuItem, index) of group.items"
+              :key="index"
+              clickable
+              v-ripple
+              :to="menuItem.to"
+              :active="$route.path.startsWith(menuItem.to)"
+              class="q-my-sm"
+              active-class="bg-primary text-white shadow-2"
+            >
+              <QItemSection avatar>
+                <QIcon :name="menuItem.icon" />
+              </QItemSection>
+              <QItemSection>
+                {{ menuItem.label }}
+              </QItemSection>
+            </QItem>
+          </QList>
+        </div>
       </QScrollArea>
     </QDrawer>
 
@@ -90,10 +96,24 @@ import type { Breadcrumb, MenuItem } from '@/types'
 
 const $q = useQuasar()
 
-const menuItems: MenuItem[] = [
-  { label: 'Tableau de bord', icon: 'speed', to: '/dashboard' },
-  { label: 'Dons', icon: 'volunteer_activism', to: '/donations' },
-  { label: 'Donateurs', icon: 'group', to: '/donors' },
+const menuItems: {
+  group: string
+  label?: string
+  items: MenuItem[]
+}[] = [
+  {
+    group: 'main',
+    items: [
+      { label: 'Tableau de bord', icon: 'speed', to: '/dashboard' },
+      { label: 'Dons', icon: 'volunteer_activism', to: '/donations' },
+      { label: 'Donateurs', icon: 'group', to: '/donors' },
+    ],
+  },
+  {
+    group: 'admin',
+    label: 'Admin',
+    items: [{ label: 'Natures de dons', icon: 'category', to: '/donation-asset-types' }],
+  },
 ]
 
 const breadcrumbs = ref<Breadcrumb[]>([])

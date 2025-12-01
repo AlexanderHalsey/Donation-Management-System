@@ -8,6 +8,7 @@ import {
   buildMockDonors,
   buildMockOrganisations,
   buildMockPaymentModes,
+  type DonationAssetTypeFormDataMock,
   type DonationListFilterMock,
   type DonorListFilterMock,
   type DonationFormDataMock,
@@ -19,8 +20,11 @@ declare global {
   namespace Cypress {
     interface Chainable<Subject> {
       mockCreateDonation(formData: DonationFormDataMock): Chainable<Subject>
+      mockCreateDonationAssetType(formData: DonationAssetTypeFormDataMock): Chainable<Subject>
       mockDeleteDonation(): Chainable<Subject>
+      mockDisableDonationAssetType(donationAssetTypeId: string): Chainable<Subject>
       mockDonation(index: number): Chainable<Subject>
+      mockDonationAssetType(index: number): Chainable<Subject>
       mockDonationAssetTypeList(): Chainable<Subject>
       mockDonationList(
         pagination?: DonationListPaginationRequest,
@@ -37,6 +41,10 @@ declare global {
       mockOrganisationRefList(): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
       mockUpdateDonation(donationId: string, formData: DonationFormDataMock): Chainable<Subject>
+      mockUpdateDonationAssetType(
+        donationAssetTypeId: string,
+        formData: DonationAssetTypeFormDataMock,
+      ): Chainable<Subject>
     }
   }
 }
@@ -95,12 +103,71 @@ Cypress.Commands.add('mockDonor', (index: number) => {
 })
 
 Cypress.Commands.add('mockDonationAssetTypeList', () => {
-  cy.intercept('GET', `${MOCK_API_HOST}/refs/donation-asset-types`, {
+  cy.intercept('GET', `${MOCK_API_HOST}/donation-asset-types`, {
     statusCode: 200,
     body: {
       donationAssetTypes,
     },
   }).as('getDonationAssetTypeList')
+})
+
+Cypress.Commands.add('mockDonationAssetType', (index: number) => {
+  const donationAssetType = donationAssetTypes[index]
+  cy.intercept('GET', `${MOCK_API_HOST}/donation-asset-types/*`, {
+    statusCode: 200,
+    body: {
+      donationAssetType,
+    },
+  }).as('getDonationAssetType')
+})
+
+Cypress.Commands.add('mockCreateDonationAssetType', (formData: DonationAssetTypeFormDataMock) => {
+  cy.intercept('POST', `${MOCK_API_HOST}/donation-asset-types`, {
+    statusCode: 201,
+    body: {
+      donationAssetType: {
+        id: 'new-donation-asset-type-id',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDisabled: false,
+        ...formData,
+      },
+    },
+  }).as('createDonationAssetType')
+})
+
+Cypress.Commands.add(
+  'mockUpdateDonationAssetType',
+  (donationAssetTypeId: string, formData: DonationAssetTypeFormDataMock) => {
+    cy.intercept('PUT', `${MOCK_API_HOST}/donation-asset-types/${donationAssetTypeId}`, {
+      statusCode: 200,
+      body: {
+        donationAssetType: {
+          id: donationAssetTypeId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isDisabled: false,
+          ...formData,
+        },
+      },
+    }).as('updateDonationAssetType')
+  },
+)
+
+Cypress.Commands.add('mockDisableDonationAssetType', (donationAssetTypeId: string) => {
+  cy.intercept('PUT', `${MOCK_API_HOST}/donation-asset-types/${donationAssetTypeId}/disable`, {
+    statusCode: 200,
+    body: {
+      donationAssetType: {
+        id: donationAssetTypeId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        name: 'Disabled Donation Asset Type',
+        isDefault: false,
+        isDisabled: true,
+      },
+    },
+  }).as('disableDonationAssetType')
 })
 
 Cypress.Commands.add('mockDonationMethodList', () => {

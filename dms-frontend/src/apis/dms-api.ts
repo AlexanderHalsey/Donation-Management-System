@@ -13,9 +13,11 @@ import {
 } from './converters'
 
 import type { DonationFormData } from '@/features/donations'
+import type { DonationAssetTypeFormData } from '@/features/donationAssetTypes'
 
 import type {
   GetDonationAssetTypeListResponse,
+  GetDonationAssetTypeResponse,
   GetDonationListRequest,
   GetDonationListResponse,
   GetDonationMethodListResponse,
@@ -90,7 +92,7 @@ export const getDonationTypes = async (): Promise<DonationType[]> => {
 
 export const getDonationAssetTypes = async (): Promise<DonationAssetType[]> => {
   const response = await withClient((client) =>
-    client.get<GetDonationAssetTypeListResponse>('/refs/donation-asset-types'),
+    client.get<GetDonationAssetTypeListResponse>('/donation-asset-types'),
   )
   return response.donationAssetTypes.map(convertDtoToDonationAssetType)
 }
@@ -160,4 +162,44 @@ export const putDonation = async (
 
 export const deleteDonation = async (donationId: string): Promise<void> => {
   await withClient((client) => client.delete<void>(`/donations/${donationId}`))
+}
+
+export const getDonationAssetType = async (
+  donationAssetTypeId: string,
+): Promise<DonationAssetType> => {
+  const response = await withClient((client) =>
+    client.get<GetDonationAssetTypeResponse>(`donation-asset-types/${donationAssetTypeId}`),
+  )
+  return convertDtoToDonationAssetType(response.donationAssetType)
+}
+
+export const postDonationAssetType = async (
+  formData: DonationAssetTypeFormData,
+): Promise<DonationAssetType> => {
+  const response = await withClient((client) =>
+    client.post<GetDonationAssetTypeResponse>('donation-asset-types', formData),
+  )
+  return convertDtoToDonationAssetType(response.donationAssetType)
+}
+
+export const putDonationAssetType = async (
+  donationAssetTypeId: string,
+  formData: DonationAssetTypeFormData,
+): Promise<DonationAssetType> => {
+  const response = await withClient((client) =>
+    client.put<GetDonationAssetTypeResponse>(
+      `donation-asset-types/${donationAssetTypeId}`,
+      formData,
+    ),
+  )
+  return convertDtoToDonationAssetType(response.donationAssetType)
+}
+
+export const disableDonationAssetType = async (
+  donationAssetTypeId: string,
+): Promise<DonationAssetType> => {
+  const response = await withClient((client) =>
+    client.put<GetDonationAssetTypeResponse>(`donation-asset-types/${donationAssetTypeId}/disable`),
+  )
+  return convertDtoToDonationAssetType(response.donationAssetType)
 }

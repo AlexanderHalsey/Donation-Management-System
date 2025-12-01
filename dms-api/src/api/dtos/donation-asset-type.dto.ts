@@ -1,14 +1,12 @@
 import { NameSortOrder } from './sort-order.dto'
 
-export class DonationAssetTypeRefDto {
+export class DonationAssetTypeDto {
   id: string
   name: string
-}
-
-export class DonationAssetTypeDto extends DonationAssetTypeRefDto {
+  isDisabled: boolean
   createdAt: string
   updatedAt: string
   isDefault: boolean
 }
 
-export class DonationAssetTypeRefSortOrder extends NameSortOrder {}
+export class DonationAssetTypeSortOrder extends NameSortOrder {}

@@ -5,7 +5,7 @@ import { Type } from 'class-transformer'
 import { OrganisationRefDto, OrganisationRefSortOrder } from './organisation.dto'
 import { DonationTypeRefDto, DonationTypeRefSortOrder } from './donation-type.dto'
 import { DonationMethodRefDto, DonationMethodRefSortOrder } from './donation-method.dto'
-import { DonationAssetTypeRefDto, DonationAssetTypeRefSortOrder } from './donation-asset-type.dto'
+import { DonationAssetTypeDto, DonationAssetTypeSortOrder } from './donation-asset-type.dto'
 import { PaymentModeRefDto, PaymentModeRefSortOrder } from './payment-mode.dto'
 import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
 
@@ -26,7 +26,7 @@ export class DonationListItemDto {
 export class DonationDto extends DonationListItemDto {
   createdAt: string
   donationMethod: DonationMethodRefDto
-  donationAssetType: DonationAssetTypeRefDto
+  donationAssetType: DonationAssetTypeDto
 }
 
 export class DonationListSortOrder {
@@ -65,10 +65,10 @@ export class DonationListSortOrder {
   @Type(() => DonationMethodRefSortOrder)
   donationMethod?: DonationMethodRefSortOrder
 
-  @ApiProperty({ type: DonationAssetTypeRefSortOrder, required: false })
+  @ApiProperty({ type: DonationAssetTypeSortOrder, required: false })
   @ValidateNested()
-  @Type(() => DonationAssetTypeRefSortOrder)
-  donationAssetType?: DonationAssetTypeRefSortOrder
+  @Type(() => DonationAssetTypeSortOrder)
+  donationAssetType?: DonationAssetTypeSortOrder
 
   @ApiProperty({ type: DonorRefSortOrder, required: false })
   @ValidateNested()

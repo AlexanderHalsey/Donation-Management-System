@@ -9,5 +9,11 @@ export function buildMockDonationAssetTypes(): DonationAssetType[] {
     updatedAt: new Date(2024, 1, index + 1),
     name: `Donation Asset Type ${index + 1}`,
     isDefault: index === 0,
+    isDisabled: false,
   }))
+}
+
+export type DonationAssetTypeFormDataMock = {
+  name: string
+  isDefault: boolean
 }

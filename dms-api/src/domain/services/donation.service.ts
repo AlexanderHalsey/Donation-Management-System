@@ -37,7 +37,7 @@ const BASIC_INCLUDE_FIELDS = {
 const FULL_INCLUDE_FIELDS = {
   ...BASIC_INCLUDE_FIELDS,
   donationMethod: BASIC_REF_FIELDS,
-  donationAssetType: BASIC_REF_FIELDS,
+  donationAssetType: true,
 } as const
 
 const BASIC_OMIT_FIELDS = {

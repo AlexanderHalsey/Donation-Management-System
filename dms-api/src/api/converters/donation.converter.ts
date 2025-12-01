@@ -3,11 +3,13 @@ import { Injectable } from '@nestjs/common'
 import { formatISO } from 'date-fns'
 import { omit } from 'es-toolkit'
 
+import { DonationAssetTypeConverter } from './donationAssetType.converter'
+
 import { DonationDto, DonationListItemDto } from '../dtos'
 import { Donation, DonationListItem } from '@shared/models'
 @Injectable()
 export class DonationConverter {
-  constructor() {}
+  constructor(private readonly donationAssetTypeConverter: DonationAssetTypeConverter) {}
 
   convertDonationListItemToDto(donation: DonationListItem): DonationListItemDto {
     return {
@@ -24,7 +26,9 @@ export class DonationConverter {
       createdAt: formatISO(donation.createdAt),
       donatedAt: formatISO(donation.donatedAt),
       donationMethod: donation.donationMethod,
-      donationAssetType: donation.donationAssetType,
+      donationAssetType: this.donationAssetTypeConverter.convertDonationAssetTypeToDto(
+        donation.donationAssetType,
+      ),
     }
   }
 }

@@ -1,4 +1,5 @@
 export * from './donation'
+export * from './donationAssetType'
 export * from './donationAssetTypeList'
 export * from './donationList'
 export * from './donationMethodList'

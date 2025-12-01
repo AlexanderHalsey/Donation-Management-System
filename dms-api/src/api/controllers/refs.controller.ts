@@ -2,7 +2,6 @@ import { Controller, Get } from '@nestjs/common'
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import {
-  DonationAssetTypeService,
   DonationMethodService,
   DonationTypeService,
   DonorService,
@@ -10,15 +9,9 @@ import {
   PaymentModeService,
 } from '@/domain'
 
-import {
-  DonationAssetTypeConverter,
-  DonationMethodConverter,
-  DonationTypeConverter,
-  PaymentModeConverter,
-} from '../converters'
+import { DonationMethodConverter, DonationTypeConverter, PaymentModeConverter } from '../converters'
 
 import {
-  GetDonationAssetTypeListResponse,
   GetDonationMethodListResponse,
   GetDonationTypeListResponse,
   GetDonorRefListResponse,
@@ -35,8 +28,6 @@ export class RefsController {
     private readonly paymentModeService: PaymentModeService,
     private readonly paymentModeConverter: PaymentModeConverter,
     private readonly donorService: DonorService,
-    private readonly donationAssetTypeService: DonationAssetTypeService,
-    private readonly donationAssetTypeConverter: DonationAssetTypeConverter,
     private readonly donationMethodService: DonationMethodService,
     private readonly donationMethodConverter: DonationMethodConverter,
   ) {}
@@ -101,20 +92,6 @@ export class RefsController {
     return {
       donationMethods: donationMethods.map((donationMethod) =>
         this.donationMethodConverter.convertDonationMethodToDto(donationMethod),
-      ),
-    }
-  }
-
-  @Get('donation-asset-types')
-  @ApiOperation({ summary: 'Get donation asset type refs' })
-  @ApiResponse({ status: 200, type: [GetDonationAssetTypeListResponse] })
-  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
-  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
-  async getDonationAssetTypes(): Promise<GetDonationAssetTypeListResponse> {
-    const donationAssetTypes = await this.donationAssetTypeService.getAll()
-    return {
-      donationAssetTypes: donationAssetTypes.map((donationAssetType) =>
-        this.donationAssetTypeConverter.convertDonationAssetTypeToDto(donationAssetType),
       ),
     }
   }

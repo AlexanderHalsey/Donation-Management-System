@@ -50,12 +50,10 @@ export interface DonationMethodDto extends DonationMethodRefDto {
   isDefault: boolean
 }
 
-export interface DonationAssetTypeRefDto {
+export interface DonationAssetTypeDto {
   id: string
   name: string
-}
-
-export interface DonationAssetTypeDto extends DonationAssetTypeRefDto {
+  isDisabled: boolean
   createdAt: string
   updatedAt: string
   isDefault: boolean
@@ -104,7 +102,7 @@ export interface DonationListItemDto {
 export interface DonationDto extends DonationListItemDto {
   createdAt: string
   donationMethod: DonationMethodRefDto
-  donationAssetType: DonationAssetTypeRefDto
+  donationAssetType: DonationAssetTypeDto
 }
 
 export type FileStatusDto = 'active' | 'draft'
@@ -153,7 +151,7 @@ export interface DonationListSortOrder {
   organisation?: OrganisationRefSortOrder
   donationType?: DonationTypeRefSortOrder
   donationMethod?: DonationMethodRefSortOrder
-  donationAssetType?: DonationAssetTypeRefSortOrder
+  donationAssetType?: DonationAssetTypeSortOrder
   donor?: DonorRefSortOrder
 }
 
@@ -168,7 +166,7 @@ export interface PaymentModeRefSortOrder extends NameSortOrder {}
 export interface OrganisationRefSortOrder extends NameSortOrder {}
 export interface DonationTypeRefSortOrder extends NameSortOrder {}
 export interface DonationMethodRefSortOrder extends NameSortOrder {}
-export interface DonationAssetTypeRefSortOrder extends NameSortOrder {}
+export interface DonationAssetTypeSortOrder extends NameSortOrder {}
 export interface DonorRefSortOrder {
   lastName?: SortOrder
 }
@@ -268,6 +266,10 @@ export interface GetDonorResponse {
   donor: DonorDto
 }
 
+export interface GetDonationAssetTypeResponse {
+  donationAssetType: DonationAssetTypeDto
+}
+
 export interface DonationRequest {
   donorId: string
   donatedAt: string
@@ -277,6 +279,11 @@ export interface DonationRequest {
   paymentModeId: string
   donationMethodId: string
   donationAssetTypeId: string
+}
+
+export interface DonationAssetTypeRequest {
+  name: string
+  isDefault: boolean
 }
 
 export interface FileUploadRequest {
