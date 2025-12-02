@@ -18,13 +18,21 @@ export class DonationTypeService {
   }
 
   async create(request: DonationTypeRequest): Promise<DonationType> {
-    return this.prisma.donationType.create({ data: request })
+    return this.prisma.donationType.create({
+      data: {
+        name: request.name,
+        organisationId: request.organisationId,
+      },
+    })
   }
 
   async update(id: string, request: DonationTypeRequest): Promise<DonationType> {
     return this.prisma.donationType.update({
       where: { id },
-      data: request,
+      data: {
+        name: request.name,
+        organisationId: request.organisationId,
+      },
     })
   }
 

@@ -19,7 +19,12 @@ export class DonationAssetTypeService {
 
   async create(request: DonationAssetTypeRequest): Promise<DonationAssetType> {
     return this.prisma.$transaction(async (tx) => {
-      const donationAssetType = await tx.donationAssetType.create({ data: request })
+      const donationAssetType = await tx.donationAssetType.create({
+        data: {
+          name: request.name,
+          isDefault: request.isDefault,
+        },
+      })
       if (request.isDefault) {
         await tx.donationAssetType.updateMany({
           where: { id: { not: donationAssetType.id } },
@@ -34,7 +39,10 @@ export class DonationAssetTypeService {
     return this.prisma.$transaction(async (tx) => {
       const donationAssetType = await tx.donationAssetType.update({
         where: { id },
-        data: request,
+        data: {
+          name: request.name,
+          isDefault: request.isDefault,
+        },
       })
       if (request.isDefault) {
         await tx.donationAssetType.updateMany({

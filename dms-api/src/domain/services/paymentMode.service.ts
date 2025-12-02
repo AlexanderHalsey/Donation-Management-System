@@ -18,13 +18,19 @@ export class PaymentModeService {
   }
 
   async create(request: PaymentModeRequest): Promise<PaymentMode> {
-    return this.prisma.paymentMode.create({ data: request })
+    return this.prisma.paymentMode.create({
+      data: {
+        name: request.name,
+      },
+    })
   }
 
   async update(id: string, request: PaymentModeRequest): Promise<PaymentMode> {
     return this.prisma.paymentMode.update({
       where: { id },
-      data: request,
+      data: {
+        name: request.name,
+      },
     })
   }
 

@@ -37,14 +37,40 @@ export class OrganisationService {
   }
 
   async create(request: OrganisationRequest): Promise<Organisation> {
-    const organisation = await this.prisma.organisation.create({ data: request })
+    const organisation = await this.prisma.organisation.create({
+      data: {
+        name: request.name,
+        title: request.title,
+        address: request.address,
+        locality: request.locality,
+        postCode: request.postCode,
+        logoUrl: request.logoUrl,
+        object: request.object,
+        objectDescription: request.objectDescription,
+        signatoryName: request.signatoryName,
+        signatoryPosition: request.signatoryPosition,
+        signatureUrl: request.signatureUrl,
+      },
+    })
     return nullsToUndefined(organisation)
   }
 
   async update(id: string, request: OrganisationRequest): Promise<Organisation> {
     const organisation = await this.prisma.organisation.update({
       where: { id },
-      data: request,
+      data: {
+        name: request.name,
+        title: request.title,
+        address: request.address,
+        locality: request.locality,
+        postCode: request.postCode,
+        logoUrl: request.logoUrl,
+        object: request.object,
+        objectDescription: request.objectDescription,
+        signatoryName: request.signatoryName,
+        signatoryPosition: request.signatoryPosition,
+        signatureUrl: request.signatureUrl,
+      },
     })
     return nullsToUndefined(organisation)
   }

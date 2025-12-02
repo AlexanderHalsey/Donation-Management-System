@@ -19,7 +19,12 @@ export class DonationMethodService {
 
   async create(request: DonationMethodRequest): Promise<DonationMethod> {
     return this.prisma.$transaction(async (tx) => {
-      const donationMethod = await tx.donationMethod.create({ data: request })
+      const donationMethod = await tx.donationMethod.create({
+        data: {
+          name: request.name,
+          isDefault: request.isDefault,
+        },
+      })
       if (request.isDefault) {
         await tx.donationMethod.updateMany({
           where: { id: { not: donationMethod.id } },
@@ -34,7 +39,10 @@ export class DonationMethodService {
     return this.prisma.$transaction(async (tx) => {
       const donationMethod = await tx.donationMethod.update({
         where: { id },
-        data: request,
+        data: {
+          name: request.name,
+          isDefault: request.isDefault,
+        },
       })
       if (request.isDefault) {
         await tx.donationMethod.updateMany({
