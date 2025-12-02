@@ -32,6 +32,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
+import { AxiosError } from 'axios'
+
 import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
 
@@ -67,7 +69,18 @@ const deletePaymentModeDialog = ref<InstanceType<typeof DeletePaymentModeDialog>
 
 const updatePaymentMode = async (formData: PaymentModeFormData) => {
   working.value = true
-  await paymentModeStore.updatePaymentMode(paymentModeId.value, formData)
+  try {
+    await paymentModeStore.updatePaymentMode(paymentModeId.value, formData)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response?.status === 409) {
+      $q.notify({
+        type: 'negative',
+        message: 'Un mode de paiement avec ce nom existe déjà. Veuillez en choisir un autre.',
+      })
+    }
+    working.value = false
+    throw error
+  }
   working.value = false
   $q.notify({ type: 'positive', message: 'Le mode de paiement a été mis à jour avec succès.' })
   await router.push({ name: 'payment-modes' })

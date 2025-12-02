@@ -36,6 +36,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
+import { AxiosError } from 'axios'
+
 import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
 
@@ -73,7 +75,18 @@ const deleteDonationAssetTypeDialog = ref<InstanceType<
 
 const updateDonationAssetType = async (formData: DonationAssetTypeFormData) => {
   working.value = true
-  await donationAssetTypeStore.updateDonationAssetType(donationAssetTypeId.value, formData)
+  try {
+    await donationAssetTypeStore.updateDonationAssetType(donationAssetTypeId.value, formData)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response?.status === 409) {
+      $q.notify({
+        type: 'negative',
+        message: 'Une nature de don avec ce nom existe déjà. Veuillez en choisir une autre.',
+      })
+    }
+    working.value = false
+    throw error
+  }
   working.value = false
   $q.notify({ type: 'positive', message: 'La nature du don a été mise à jour avec succès.' })
   await router.push({ name: 'donation-asset-types' })

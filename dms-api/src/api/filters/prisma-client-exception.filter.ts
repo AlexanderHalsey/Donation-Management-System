@@ -18,6 +18,16 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
         })
         break
       }
+      case 'P2002': {
+        const status = HttpStatus.CONFLICT
+        response.status(status).json({
+          statusCode: status,
+          message: `Unique constraint failed`,
+          fields:
+            exception.meta?.['driverAdapterError']?.['cause']?.['constraint']?.['fields'] ?? [],
+        })
+        break
+      }
       default:
         super.catch(exception, host)
         break

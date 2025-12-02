@@ -23,6 +23,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
+import { AxiosError } from 'axios'
+
 import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
 import OrganisationForm from '../components/OrganisationForm.vue'
@@ -52,7 +54,18 @@ const working = ref(false)
 
 const createOrganisation = async (formData: OrganisationFormData) => {
   working.value = true
-  await organisationStore.createOrganisation(formData)
+  try {
+    await organisationStore.createOrganisation(formData)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response?.status === 409) {
+      $q.notify({
+        type: 'negative',
+        message: 'Une organisation avec ce nom existe déjà. Veuillez en choisir un autre.',
+      })
+    }
+    working.value = false
+    throw error
+  }
   working.value = false
   $q.notify({ type: 'positive', message: "L'organisation a été créée avec succès." })
   await router.push({ name: 'organisations' })

@@ -23,6 +23,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
+import { AxiosError } from 'axios'
+
 import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
 import DonationMethodForm from '../components/DonationMethodForm.vue'
@@ -52,7 +54,18 @@ const donationMethodForm = ref<InstanceType<typeof DonationMethodForm> | null>(n
 
 const createDonationMethod = async (formData: DonationMethodFormData) => {
   working.value = true
-  await donationMethodStore.createDonationMethod(formData)
+  try {
+    await donationMethodStore.createDonationMethod(formData)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response?.status === 409) {
+      $q.notify({
+        type: 'negative',
+        message: 'Une forme de don avec ce nom existe déjà. Veuillez en choisir une autre.',
+      })
+    }
+    working.value = false
+    throw error
+  }
   working.value = false
   $q.notify({ type: 'positive', message: 'La forme de don a été créée avec succès.' })
   await router.push({ name: 'donation-methods' })

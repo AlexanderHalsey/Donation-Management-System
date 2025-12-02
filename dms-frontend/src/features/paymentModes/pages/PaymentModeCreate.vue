@@ -23,6 +23,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
+import { AxiosError } from 'axios'
+
 import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
 import PaymentModeForm from '../components/PaymentModeForm.vue'
@@ -52,7 +54,18 @@ const paymentModeForm = ref<InstanceType<typeof PaymentModeForm> | null>(null)
 
 const createPaymentMode = async (formData: PaymentModeFormData) => {
   working.value = true
-  await paymentModeStore.createPaymentMode(formData)
+  try {
+    await paymentModeStore.createPaymentMode(formData)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response?.status === 409) {
+      $q.notify({
+        type: 'negative',
+        message: 'Un mode de paiement avec ce nom existe déjà. Veuillez en choisir un autre.',
+      })
+    }
+    working.value = false
+    throw error
+  }
   working.value = false
   $q.notify({ type: 'positive', message: 'Le mode de paiement a été créé avec succès.' })
   await router.push({ name: 'payment-modes' })

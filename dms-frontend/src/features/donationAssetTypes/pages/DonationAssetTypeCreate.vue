@@ -23,6 +23,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
+import { AxiosError } from 'axios'
+
 import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
 import DonationAssetTypeForm from '../components/DonationAssetTypeForm.vue'
@@ -52,7 +54,18 @@ const donationAssetTypeForm = ref<InstanceType<typeof DonationAssetTypeForm> | n
 
 const createDonationAssetType = async (formData: DonationAssetTypeFormData) => {
   working.value = true
-  await donationAssetTypeStore.createDonationAssetType(formData)
+  try {
+    await donationAssetTypeStore.createDonationAssetType(formData)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response?.status === 409) {
+      $q.notify({
+        type: 'negative',
+        message: 'Une nature de don avec ce nom existe déjà. Veuillez en choisir une autre.',
+      })
+    }
+    working.value = false
+    throw error
+  }
   working.value = false
   $q.notify({ type: 'positive', message: 'La nature du don a été créée avec succès.' })
   await router.push({ name: 'donation-asset-types' })

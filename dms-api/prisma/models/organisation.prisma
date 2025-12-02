@@ -2,7 +2,7 @@ model Organisation {
   id                String         @id @default(uuid()) @db.Uuid
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
-  name              String
+  name              String         @unique
   title             String?
   address           String?
   locality          String?
