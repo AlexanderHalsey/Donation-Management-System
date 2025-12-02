@@ -59,7 +59,7 @@ const donationAssetTypeListStore = useDonationAssetTypeListStore()
 const donationMethodListStore = useDonationMethodListStore()
 
 const donors = computed(() => donorListStore.activeDonorRefList)
-const organisations = computed(() => organisationListStore.organisationRefList)
+const organisations = computed(() => organisationListStore.activeOrganisationRefList)
 const donationTypes = computed(() => donationTypeListStore.donationTypeList)
 const paymentModes = computed(() => paymentModeListStore.paymentModeList)
 const donationAssetTypes = computed(() => donationAssetTypeListStore.activeDonationAssetTypeList)

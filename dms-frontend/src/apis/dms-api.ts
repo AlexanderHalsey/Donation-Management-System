@@ -9,6 +9,7 @@ import {
   convertDtoToDonationType,
   convertDtoToDonor,
   convertDtoToDonorListItem,
+  convertDtoToOrganisation,
   convertDtoToPaymentMode,
 } from './converters'
 
@@ -16,6 +17,7 @@ import type { DonationFormData } from '@/features/donations'
 import type { DonationAssetTypeFormData } from '@/features/donationAssetTypes'
 import type { DonationMethodFormData } from '@/features/donationMethods'
 import type { DonationTypeFormData } from '@/features/donationTypes'
+import type { OrganisationFormData } from '@/features/organisations'
 import type { PaymentModeFormData } from '@/features/paymentModes'
 
 import type {
@@ -32,7 +34,9 @@ import type {
   GetDonorListResponse,
   GetDonorRefListResponse,
   GetDonorResponse,
+  GetOrganisationListResponse,
   GetOrganisationRefListResponse,
+  GetOrganisationResponse,
   GetPaymentModeListResponse,
   GetPaymentModeResponse,
 } from '@shared/dtos'
@@ -51,6 +55,7 @@ import type {
   DonorListPagination,
   DonorListPaginationRequest,
   DonorRef,
+  Organisation,
   OrganisationRef,
   PaymentMode,
 } from '@shared/models'
@@ -77,7 +82,7 @@ export const getDonations = async (
 
 export const getOrganisationRefs = async (): Promise<OrganisationRef[]> => {
   const response = await withClient((client) =>
-    client.get<GetOrganisationRefListResponse>('/refs/organisations'),
+    client.get<GetOrganisationRefListResponse>('/organisations/refs'),
   )
   return response.organisationRefs
 }
@@ -303,4 +308,42 @@ export const disableDonationType = async (donationTypeId: string): Promise<Donat
     client.put<GetDonationTypeResponse>(`donation-types/${donationTypeId}/disable`),
   )
   return convertDtoToDonationType(response.donationType)
+}
+
+export const getOrganisations = async (): Promise<Organisation[]> => {
+  const response = await withClient((client) =>
+    client.get<GetOrganisationListResponse>('/organisations'),
+  )
+  return response.organisations.map(convertDtoToOrganisation)
+}
+
+export const getOrganisation = async (organisationId: string): Promise<Organisation> => {
+  const response = await withClient((client) =>
+    client.get<GetOrganisationResponse>(`organisations/${organisationId}`),
+  )
+  return convertDtoToOrganisation(response.organisation)
+}
+
+export const postOrganisation = async (formData: OrganisationFormData): Promise<Organisation> => {
+  const response = await withClient((client) =>
+    client.post<GetOrganisationResponse>('organisations', formData),
+  )
+  return convertDtoToOrganisation(response.organisation)
+}
+
+export const putOrganisation = async (
+  organisationId: string,
+  formData: OrganisationFormData,
+): Promise<Organisation> => {
+  const response = await withClient((client) =>
+    client.put<GetOrganisationResponse>(`organisations/${organisationId}`, formData),
+  )
+  return convertDtoToOrganisation(response.organisation)
+}
+
+export const disableOrganisation = async (organisationId: string): Promise<Organisation> => {
+  const response = await withClient((client) =>
+    client.put<GetOrganisationResponse>(`organisations/${organisationId}/disable`),
+  )
+  return convertDtoToOrganisation(response.organisation)
 }

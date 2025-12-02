@@ -112,6 +112,21 @@ const router = createRouter({
           name: 'donation-type-edit',
           component: () => import('@/features/donationTypes/pages/DonationTypeUpdate.vue'),
         },
+        {
+          path: 'organisations',
+          name: 'organisations',
+          component: () => import('@/features/organisations/pages/OrganisationList.vue'),
+        },
+        {
+          path: 'organisations/create',
+          name: 'organisation-create',
+          component: () => import('@/features/organisations/pages/OrganisationCreate.vue'),
+        },
+        {
+          path: 'organisations/:organisationId',
+          name: 'organisation-edit',
+          component: () => import('@/features/organisations/pages/OrganisationUpdate.vue'),
+        },
       ],
     },
     {

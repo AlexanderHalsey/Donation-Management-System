@@ -1,6 +1,7 @@
 export type OrganisationRef = {
   id: string
   name: string
+  isDisabled: boolean
 }
 
 export interface Organisation extends OrganisationRef {

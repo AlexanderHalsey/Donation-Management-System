@@ -13,6 +13,7 @@ model Organisation {
   signatoryName     String?
   signatoryPosition String?
   signatureUrl      String?
+  isDisabled        Boolean        @default(false)
   donations         Donation[]
   donationTypes     DonationType[]
 }

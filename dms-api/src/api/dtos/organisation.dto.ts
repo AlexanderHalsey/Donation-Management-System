@@ -3,6 +3,7 @@ import { NameSortOrder } from './sort-order.dto'
 export class OrganisationRefDto {
   id: string
   name: string
+  isDisabled: boolean
 }
 export class OrganisationDto extends OrganisationRefDto {
   createdAt: string

@@ -19,6 +19,7 @@ const BASIC_INCLUDE_FIELDS = {
     select: {
       id: true,
       name: true,
+      isDisabled: true,
     },
   },
   paymentMode: true,

@@ -11,6 +11,7 @@ import {
   type DonationAssetTypeFormDataMock,
   type DonationMethodFormDataMock,
   type DonationTypeFormDataMock,
+  type OrganisationFormDataMock,
   type PaymentModeFormDataMock,
   type DonationListFilterMock,
   type DonorListFilterMock,
@@ -49,7 +50,15 @@ declare global {
       ): Chainable<Subject>
       mockDonor(index: number): Chainable<Subject>
       mockDonorRefList(): Chainable<Subject>
+      mockOrganisation(index: number): Chainable<Subject>
+      mockOrganisationList(): Chainable<Subject>
       mockOrganisationRefList(): Chainable<Subject>
+      mockCreateOrganisation(formData: OrganisationFormDataMock): Chainable<Subject>
+      mockUpdateOrganisation(
+        organisationId: string,
+        formData: OrganisationFormDataMock,
+      ): Chainable<Subject>
+      mockDisableOrganisation(organisationId: string): Chainable<Subject>
       mockPaymentMode(index: number): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
       mockUpdateDonation(donationId: string, formData: DonationFormDataMock): Chainable<Subject>
@@ -81,12 +90,78 @@ const donationAssetTypes = buildMockDonationAssetTypes()
 const donors = buildMockDonors()
 
 Cypress.Commands.add('mockOrganisationRefList', () => {
-  cy.intercept('GET', `${MOCK_API_HOST}/refs/organisations`, {
+  cy.intercept('GET', `${MOCK_API_HOST}/organisations/refs`, {
     statusCode: 200,
     body: {
       organisationRefs: organisations,
     },
   }).as('getOrganisationRefList')
+})
+
+Cypress.Commands.add('mockOrganisation', (index: number) => {
+  cy.intercept('GET', `${MOCK_API_HOST}/organisations/*`, {
+    statusCode: 200,
+    body: {
+      organisation: organisations[index],
+    },
+  }).as('getOrganisation')
+})
+
+Cypress.Commands.add('mockOrganisationList', () => {
+  cy.intercept('GET', `${MOCK_API_HOST}/organisations`, {
+    statusCode: 200,
+    body: {
+      organisations: organisations,
+    },
+  }).as('getOrganisationList')
+})
+
+Cypress.Commands.add('mockCreateOrganisation', (formData: OrganisationFormDataMock) => {
+  cy.intercept('POST', `${MOCK_API_HOST}/organisations`, {
+    statusCode: 201,
+    body: {
+      organisation: {
+        id: 'new-organisation-id',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDisabled: false,
+        ...formData,
+      },
+    },
+  }).as('createOrganisation')
+})
+
+Cypress.Commands.add(
+  'mockUpdateOrganisation',
+  (organisationId: string, formData: OrganisationFormDataMock) => {
+    cy.intercept('PUT', `${MOCK_API_HOST}/organisations/${organisationId}`, {
+      statusCode: 200,
+      body: {
+        organisation: {
+          id: organisationId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isDisabled: false,
+          ...formData,
+        },
+      },
+    }).as('updateOrganisation')
+  },
+)
+
+Cypress.Commands.add('mockDisableOrganisation', (organisationId: string) => {
+  cy.intercept('PUT', `${MOCK_API_HOST}/organisations/${organisationId}/disable`, {
+    statusCode: 200,
+    body: {
+      organisation: {
+        id: organisationId,
+        isDisabled: true,
+        name: 'Disabled Organisation',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    },
+  }).as('disableOrganisation')
 })
 
 Cypress.Commands.add('mockPaymentModeList', () => {

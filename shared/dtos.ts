@@ -9,6 +9,7 @@ export interface PaymentModeDto {
 export interface OrganisationRefDto {
   id: string
   name: string
+  isDisabled: boolean
 }
 
 export interface OrganisationDto extends OrganisationRefDto {
@@ -226,6 +227,28 @@ export interface GetDonorListRequest {
 export interface GetDonorListResponse {
   donors: DonorListItemDto[]
   pagination: DonorListPagination
+}
+
+export interface GetOrganisationListResponse {
+  organisations: OrganisationDto[]
+}
+
+export interface GetOrganisationResponse {
+  organisation: OrganisationDto
+}
+
+export interface OrganisationRequest {
+  name: string
+  title?: string
+  address?: string
+  locality?: string
+  postCode?: string
+  logoUrl?: string
+  object?: string
+  objectDescription?: string
+  signatoryName?: string
+  signatoryPosition?: string
+  signatureUrl?: string
 }
 
 export interface GetOrganisationRefListResponse {

@@ -113,6 +113,7 @@ const menuItems: {
     group: 'admin',
     label: 'Admin',
     items: [
+      { label: 'Organisations', icon: 'account_balance', to: '/organisations' },
       { label: 'Types de don', icon: 'volunteer_activism', to: '/donation-types' },
       { label: 'Modes de paiement', icon: 'point_of_sale', to: '/payment-modes' },
       { label: 'Formes de don', icon: 'shape_line', to: '/donation-methods' },
