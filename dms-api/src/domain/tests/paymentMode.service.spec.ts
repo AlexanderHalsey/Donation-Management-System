@@ -88,4 +88,17 @@ describe('PaymentModeService', () => {
       data: { isDisabled: true },
     })
   })
+
+  it('should delete non-attached disabled payment modes', async () => {
+    prismaServiceMock.paymentMode.deleteMany.mockResolvedValueOnce({ count: 2 })
+
+    await paymentModeService.cleanupNonAttachedDisabled()
+
+    expect(prismaServiceMock.paymentMode.deleteMany).toHaveBeenCalledWith({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  })
 })

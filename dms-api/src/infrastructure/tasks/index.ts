@@ -1,1 +1,6 @@
+export * from './donation-asset-type-cleanup.task'
+export * from './donation-method-cleanup.task'
+export * from './donation-type-cleanup.task'
 export * from './file-cleanup.task'
+export * from './organisation-cleanup.task'
+export * from './payment-mode-cleanup.task'

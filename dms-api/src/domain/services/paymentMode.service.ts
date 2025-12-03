@@ -40,4 +40,13 @@ export class PaymentModeService {
       data: { isDisabled: true },
     })
   }
+
+  async cleanupNonAttachedDisabled(): Promise<void> {
+    await this.prisma.paymentMode.deleteMany({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  }
 }

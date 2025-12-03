@@ -38,7 +38,14 @@ import {
 
 import { FileStorageService, PrismaService, TypedSqlService } from '@/infrastructure'
 
-import { FileCleanupTask } from '@/infrastructure/tasks'
+import {
+  DonationAssetTypeCleanupTask,
+  DonationMethodCleanupTask,
+  DonationTypeCleanupTask,
+  FileCleanupTask,
+  OrganisationCleanupTask,
+  PaymentModeCleanupTask,
+} from '@/infrastructure/tasks'
 
 @Module({
   imports: [ConfigModule.forRoot(), ScheduleModule.forRoot()],
@@ -54,12 +61,15 @@ import { FileCleanupTask } from '@/infrastructure/tasks'
     RefsController,
   ],
   providers: [
+    DonationAssetTypeCleanupTask,
     DonationAssetTypeConverter,
     DonationAssetTypeService,
     DonationConverter,
+    DonationMethodCleanupTask,
     DonationMethodConverter,
     DonationMethodService,
     DonationService,
+    DonationTypeCleanupTask,
     DonationTypeConverter,
     DonationTypeService,
     DonorConverter,
@@ -68,8 +78,10 @@ import { FileCleanupTask } from '@/infrastructure/tasks'
     FileConverter,
     FileService,
     FileStorageService,
+    OrganisationCleanupTask,
     OrganisationConverter,
     OrganisationService,
+    PaymentModeCleanupTask,
     PaymentModeConverter,
     PaymentModeService,
     PrismaService,

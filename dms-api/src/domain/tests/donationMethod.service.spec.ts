@@ -144,4 +144,17 @@ describe('DonationMethodService', () => {
       data: { isDisabled: true },
     })
   })
+
+  it('should delete non-attached disabled methods', async () => {
+    prismaServiceMock.donationMethod.deleteMany.mockResolvedValueOnce({ count: 2 })
+
+    await donationMethodService.cleanupNonAttachedDisabled()
+
+    expect(prismaServiceMock.donationMethod.deleteMany).toHaveBeenCalledWith({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  })
 })

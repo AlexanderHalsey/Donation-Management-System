@@ -41,7 +41,7 @@ describe('DonationTypeService', () => {
   it('should get donation type by ID', async () => {
     const id = 'donation-type-id-123'
     const mockDonationType = mockDeep<DonationType>()
-    prismaServiceMock.donationType.findUniqueOrThrow.mockResolvedValueOnce(mockDonationType as any)
+    prismaServiceMock.donationType.findUniqueOrThrow.mockResolvedValueOnce(mockDonationType)
 
     await donationTypeService.getById(id)
 
@@ -56,7 +56,7 @@ describe('DonationTypeService', () => {
       organisationId: 'organisation-id-123',
     }
     const createdDonationType = mockDeep<DonationType>({ id: 'new-donation-type-id-123' })
-    prismaServiceMock.donationType.create.mockResolvedValueOnce(createdDonationType as any)
+    prismaServiceMock.donationType.create.mockResolvedValueOnce(createdDonationType)
 
     await donationTypeService.create(request)
 
@@ -69,7 +69,7 @@ describe('DonationTypeService', () => {
       name: 'Updated Donation Type',
       organisationId: 'organisation-id-456',
     }
-    prismaServiceMock.donationType.update.mockResolvedValueOnce(mockDeep<DonationType>() as any)
+    prismaServiceMock.donationType.update.mockResolvedValueOnce(mockDeep<DonationType>())
 
     await donationTypeService.update(id, request)
 
@@ -81,13 +81,26 @@ describe('DonationTypeService', () => {
 
   it('should disable donation type', async () => {
     const id = 'donation-type-id-123'
-    prismaServiceMock.donationType.update.mockResolvedValueOnce(mockDeep<DonationType>() as any)
+    prismaServiceMock.donationType.update.mockResolvedValueOnce(mockDeep<DonationType>())
 
     await donationTypeService.disable(id)
 
     expect(prismaServiceMock.donationType.update).toHaveBeenCalledWith({
       where: { id },
       data: { isDisabled: true },
+    })
+  })
+
+  it('should delete non-attached disabled donation types', async () => {
+    prismaServiceMock.donationType.deleteMany.mockResolvedValueOnce({ count: 2 })
+
+    await donationTypeService.cleanupNonAttachedDisabled()
+
+    expect(prismaServiceMock.donationType.deleteMany).toHaveBeenCalledWith({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
     })
   })
 })

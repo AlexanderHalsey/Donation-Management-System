@@ -60,4 +60,13 @@ export class DonationAssetTypeService {
       data: { isDisabled: true },
     })
   }
+
+  async cleanupNonAttachedDisabled(): Promise<void> {
+    await this.prisma.donationAssetType.deleteMany({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  }
 }

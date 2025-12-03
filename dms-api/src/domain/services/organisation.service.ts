@@ -82,4 +82,13 @@ export class OrganisationService {
     })
     return nullsToUndefined(organisation)
   }
+
+  async cleanupNonAttachedDisabled(): Promise<void> {
+    await this.prisma.organisation.deleteMany({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  }
 }

@@ -150,4 +150,17 @@ describe('DonationAssetTypeService', () => {
       data: { isDisabled: true },
     })
   })
+
+  it('should delete non-attached disabled asset types', async () => {
+    prismaServiceMock.donationAssetType.deleteMany.mockResolvedValueOnce({ count: 2 })
+
+    await donationAssetTypeService.cleanupNonAttachedDisabled()
+
+    expect(prismaServiceMock.donationAssetType.deleteMany).toHaveBeenCalledWith({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  })
 })

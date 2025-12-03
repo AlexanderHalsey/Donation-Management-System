@@ -104,4 +104,17 @@ describe('OrganisationService', () => {
       data: { isDisabled: true },
     })
   })
+
+  it('should delete non-attached disabled organisations', async () => {
+    prismaServiceMock.organisation.deleteMany.mockResolvedValueOnce({ count: 2 })
+
+    await organisationService.cleanupNonAttachedDisabled()
+
+    expect(prismaServiceMock.organisation.deleteMany).toHaveBeenCalledWith({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  })
 })
