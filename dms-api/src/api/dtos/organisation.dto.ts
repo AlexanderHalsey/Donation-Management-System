@@ -1,3 +1,4 @@
+import { FileMetadataDto } from './file-metadata.dto'
 import { NameSortOrder } from './sort-order.dto'
 
 export class OrganisationRefDto {
@@ -12,12 +13,12 @@ export class OrganisationDto extends OrganisationRefDto {
   address?: string
   locality?: string
   postCode?: string
-  logoUrl?: string
+  logo?: FileMetadataDto
   object?: string
   objectDescription?: string
   signatoryName?: string
   signatoryPosition?: string
-  signatureUrl?: string
+  signature?: FileMetadataDto
 }
 
 export class OrganisationRefSortOrder extends NameSortOrder {}

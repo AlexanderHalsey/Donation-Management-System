@@ -1,5 +1,7 @@
 import { v4 } from 'uuid'
 
+import { buildMockFile } from './file'
+
 import type { Organisation } from '@shared/models'
 
 export type OrganisationFormDataMock = {
@@ -8,12 +10,12 @@ export type OrganisationFormDataMock = {
   address?: string
   locality?: string
   postCode?: string
-  logoUrl?: string
+  logoId?: string
   object?: string
   objectDescription?: string
   signatoryName?: string
   signatoryPosition?: string
-  signatureUrl?: string
+  signatureId?: string
 }
 
 export function buildMockOrganisations(): Organisation[] {
@@ -26,12 +28,12 @@ export function buildMockOrganisations(): Organisation[] {
     address: `Address ${index + 1}`,
     locality: `Locality ${index + 1}`,
     postCode: `PostCode ${index + 1}`,
-    logoUrl: `http://example.com/logo${index + 1}.png`,
+    logo: index === 0 ? buildMockFile({ name: 'logo.png' }) : undefined,
     object: `Object ${index + 1}`,
     objectDescription: `Object Description ${index + 1}`,
     signatoryName: `Signatory Name ${index + 1}`,
     signatoryPosition: `Signatory Position ${index + 1}`,
-    signatureUrl: `http://example.com/signature${index + 1}.png`,
+    signature: index === 0 ? buildMockFile({ name: 'signature.webp' }) : undefined,
     isDisabled: false,
   }))
 }

@@ -1,3 +1,5 @@
+import { v4 } from 'uuid'
+
 describe('Organisation Update', () => {
   beforeEach(() => {
     cy.mockOrganisation(0)
@@ -15,12 +17,12 @@ describe('Organisation Update', () => {
     cy.get(formField).eq(2).find('.q-field input').should('have.value', 'Address 1')
     cy.get(formField).eq(3).find('.q-field input').should('have.value', 'Locality 1')
     cy.get(formField).eq(4).find('.q-field input').should('have.value', 'PostCode 1')
-    // logoUrl field is commented out
+    cy.get(formField).eq(5).find('.q-field .q-chip').should('contain.text', 'logo.png')
     cy.get(formField).eq(6).find('.q-field input').should('have.value', 'Object 1')
     cy.get(formField).eq(7).find('.q-field textarea').should('have.value', 'Object Description 1')
     cy.get(formField).eq(8).find('.q-field input').should('have.value', 'Signatory Name 1')
     cy.get(formField).eq(9).find('.q-field input').should('have.value', 'Signatory Position 1')
-    // signatureUrl field is commented out
+    cy.get(formField).eq(10).find('.q-field .q-chip').should('contain.text', 'signature.webp')
   })
   it('should show validation errors', () => {
     cy.visit('/organisations/organisation-id-1')
@@ -57,7 +59,12 @@ describe('Organisation Update', () => {
     cy.get(formField).eq(4).find('input').clear()
     cy.get(formField).eq(4).find('input').type('75002')
 
-    // logoUrl field is commented out - skip it
+    cy.mockUploadImage()
+    // Change logo
+    cy.get(formField)
+      .eq(5)
+      .find('input[type="file"]')
+      .selectFile('cypress/fixtures/img/signature.webp', { force: true })
 
     // Change object
     cy.get(formField).eq(6).find('input').clear()
@@ -75,7 +82,12 @@ describe('Organisation Update', () => {
     cy.get(formField).eq(9).find('input').clear()
     cy.get(formField).eq(9).find('input').type('Director')
 
-    // signatureUrl field is commented out - skip it
+    cy.mockUploadImage()
+    // Change signature
+    cy.get(formField)
+      .eq(10)
+      .find('input[type="file"]')
+      .selectFile('cypress/fixtures/img/logo.png', { force: true })
 
     cy.mockOrganisationList()
     cy.mockUpdateOrganisation('organisation-id-1', {
@@ -84,10 +96,12 @@ describe('Organisation Update', () => {
       address: '456 Updated Street',
       locality: 'Updated City',
       postCode: '75002',
+      logoId: v4(),
       object: 'Updated Object',
       objectDescription: 'Updated description for this organisation.',
       signatoryName: 'Jane Smith',
       signatoryPosition: 'Director',
+      signatureId: v4(),
     })
     cy.get(updateOrganisationBtn).click()
 

@@ -1,3 +1,5 @@
+import { FileMetadata } from './File'
+
 export type OrganisationRef = {
   id: string
   name: string
@@ -11,10 +13,10 @@ export interface Organisation extends OrganisationRef {
   address?: string
   locality?: string
   postCode?: string
-  logoUrl?: string
+  logo?: FileMetadata
   object?: string
   objectDescription?: string
   signatoryName?: string
   signatoryPosition?: string
-  signatureUrl?: string
+  signature?: FileMetadata
 }

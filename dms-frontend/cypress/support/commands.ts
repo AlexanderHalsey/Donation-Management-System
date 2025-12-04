@@ -6,6 +6,7 @@ import {
   buildMockDonationMethods,
   buildMockDonationTypes,
   buildMockDonors,
+  buildMockImage,
   buildMockOrganisations,
   buildMockPaymentModes,
   type DonationAssetTypeFormDataMock,
@@ -78,6 +79,7 @@ declare global {
         paymentModeId: string,
         formData: PaymentModeFormDataMock,
       ): Chainable<Subject>
+      mockUploadImage(): Chainable<Subject>
     }
   }
 }
@@ -574,6 +576,13 @@ Cypress.Commands.add('mockDeleteDonation', () => {
   cy.intercept('DELETE', `${MOCK_API_HOST}/donations/*`, {
     statusCode: 204,
   }).as('deleteDonation')
+})
+
+Cypress.Commands.add('mockUploadImage', () => {
+  cy.intercept('POST', `${MOCK_API_HOST}/files/upload-image`, {
+    statusCode: 201,
+    body: buildMockImage(),
+  })
 })
 
 export {}

@@ -19,12 +19,12 @@ export interface OrganisationDto extends OrganisationRefDto {
   address?: string
   locality?: string
   postCode?: string
-  logoUrl?: string
+  logo?: FileMetadataDto
   object?: string
   objectDescription?: string
   signatoryName?: string
   signatoryPosition?: string
-  signatureUrl?: string
+  signature?: FileMetadataDto
 }
 
 export interface DonationTypeDto {
@@ -243,12 +243,12 @@ export interface OrganisationRequest {
   address?: string
   locality?: string
   postCode?: string
-  logoUrl?: string
+  logoId?: string
   object?: string
   objectDescription?: string
   signatoryName?: string
   signatoryPosition?: string
-  signatureUrl?: string
+  signatureId?: string
 }
 
 export interface GetOrganisationRefListResponse {

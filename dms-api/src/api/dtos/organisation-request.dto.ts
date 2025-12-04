@@ -29,7 +29,7 @@ export class OrganisationRequest {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  logoUrl?: string
+  logoId?: string
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -54,5 +54,5 @@ export class OrganisationRequest {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  signatureUrl?: string
+  signatureId?: string
 }

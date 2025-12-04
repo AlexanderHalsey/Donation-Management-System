@@ -28,6 +28,22 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
         })
         break
       }
+      case 'P2003': {
+        const status = HttpStatus.BAD_REQUEST
+        response.status(status).json({
+          statusCode: status,
+          message: 'Invalid reference to related resource',
+        })
+        break
+      }
+      case 'P2014': {
+        const status = HttpStatus.BAD_REQUEST
+        response.status(status).json({
+          statusCode: status,
+          message: 'Invalid ID provided',
+        })
+        break
+      }
       default:
         super.catch(exception, host)
         break

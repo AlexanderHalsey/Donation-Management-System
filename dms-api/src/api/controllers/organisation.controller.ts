@@ -25,7 +25,7 @@ export class OrganisationController {
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
   @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
   async getOrganisations(): Promise<GetOrganisationListResponse> {
-    const organisations = await this.organisationService.getAll()
+    const organisations = await this.organisationService.getAllActive()
     return {
       organisations: organisations.map((organisation) =>
         this.organisationConverter.convertOrganisationToDto(organisation),

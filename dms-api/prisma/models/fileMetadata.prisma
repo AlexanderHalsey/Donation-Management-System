@@ -1,13 +1,15 @@
 model FileMetadata {
-  id         String     @id @default(uuid()) @db.Uuid
-  uploadedAt DateTime   @default(now())
-  expiresAt  DateTime?
-  storageKey String?
-  name       String
-  size       Int
-  mimeType   String
-  hash       String
-  status     FileStatus @default(DRAFT)
+  id                    String        @id @default(uuid()) @db.Uuid
+  uploadedAt            DateTime      @default(now())
+  expiresAt             DateTime?
+  storageKey            String?
+  name                  String
+  size                  Int
+  mimeType              String
+  hash                  String
+  status                FileStatus    @default(DRAFT)
+  organisationLogo      Organisation? @relation("OrganisationLogo")
+  organisationSignature Organisation? @relation("OrganisationSignature")
 }
 
 enum FileStatus {

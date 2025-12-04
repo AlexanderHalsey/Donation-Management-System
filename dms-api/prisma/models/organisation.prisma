@@ -7,13 +7,15 @@ model Organisation {
   address           String?
   locality          String?
   postCode          String?
-  logoUrl           String?
+  logoId            String?        @unique @db.Uuid
   object            String?
   objectDescription String?
   signatoryName     String?
   signatoryPosition String?
-  signatureUrl      String?
+  signatureId       String?        @unique @db.Uuid
   isDisabled        Boolean        @default(false)
   donations         Donation[]
   donationTypes     DonationType[]
+  logo              FileMetadata?  @relation("OrganisationLogo", fields: [logoId], references: [id])
+  signature         FileMetadata?  @relation("OrganisationSignature", fields: [signatureId], references: [id])
 }

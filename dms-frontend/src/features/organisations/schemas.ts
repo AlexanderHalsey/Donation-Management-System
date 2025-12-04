@@ -6,10 +6,10 @@ export const organisationFormSchema = z.object({
   address: z.string().optional(),
   locality: z.string().optional(),
   postCode: z.string().optional(),
-  // logoUrl: z.string().url().optional().or(z.literal('')),
+  logoId: z.string().uuid().optional(),
   object: z.string().max(255).optional(),
   objectDescription: z.string().optional(),
   signatoryName: z.string().max(255).optional(),
   signatoryPosition: z.string().max(255).optional(),
-  // signatureUrl: z.string().url().optional().or(z.literal('')),
+  signatureId: z.string().uuid().optional(),
 })

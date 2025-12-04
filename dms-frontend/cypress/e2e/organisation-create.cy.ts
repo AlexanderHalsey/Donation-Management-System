@@ -1,3 +1,5 @@
+import { v4 } from 'uuid'
+
 describe('Organisation Create', () => {
   const createOrganisationBtn = '[data-cy="create-organisation"]'
   const formField = '[data-cy="form-field"]'
@@ -9,12 +11,12 @@ describe('Organisation Create', () => {
     cy.get(formField).eq(2).find('.q-field input').should('have.value', '') // address
     cy.get(formField).eq(3).find('.q-field input').should('have.value', '') // locality
     cy.get(formField).eq(4).find('.q-field input').should('have.value', '') // postCode
-    // logoUrl field is commented out in form
+    cy.get(formField).eq(5).find('.q-field input').should('have.value', '') // logoId
     cy.get(formField).eq(6).find('.q-field input').should('have.value', '') // object
     cy.get(formField).eq(7).find('.q-field textarea').should('have.value', '') // objectDescription
     cy.get(formField).eq(8).find('.q-field input').should('have.value', '') // signatoryName
     cy.get(formField).eq(9).find('.q-field input').should('have.value', '') // signatoryPosition
-    // signatureUrl field is commented out in form
+    cy.get(formField).eq(10).find('.q-field input').should('have.value', '') // signatureId
   })
   it('should show validation errors', () => {
     cy.visit('/organisations/create')
@@ -26,7 +28,7 @@ describe('Organisation Create', () => {
       .eq(0)
       .should('have.text', 'Obligatoire')
   })
-  it.only('should allow filling in various fields', () => {
+  it('should allow filling in various fields', () => {
     cy.visit('/organisations/create')
 
     // Enter name (required)
@@ -44,16 +46,21 @@ describe('Organisation Create', () => {
     // Enter post code
     cy.get(formField).eq(4).find('input').type('75001')
 
-    // logoUrl field is commented out - skip it
+    // Upload logo
+    cy.mockUploadImage()
+    cy.get(formField)
+      .eq(5)
+      .find('input[type="file"]')
+      .selectFile('cypress/fixtures/img/logo.png', { force: true })
 
     // Enter object
-    cy.get(formField).eq(6).find('input').type('Charitable Organization')
+    cy.get(formField).eq(6).find('input').type('Charitable Organisation')
 
     // Enter object description
     cy.get(formField)
       .eq(7)
       .find('textarea')
-      .type('A charitable organization focused on helping the community.')
+      .type('A charitable organisation focused on helping the community.')
 
     // Enter signatory name
     cy.get(formField).eq(8).find('input').type('John Doe')
@@ -61,7 +68,12 @@ describe('Organisation Create', () => {
     // Enter signatory position
     cy.get(formField).eq(9).find('input').type('President')
 
-    // signatureUrl field is commented out - skip it
+    // Upload signature
+    cy.mockUploadImage()
+    cy.get(formField)
+      .eq(10)
+      .find('input[type="file"]')
+      .selectFile('cypress/fixtures/img/signature.webp', { force: true })
 
     cy.mockOrganisationList()
     cy.mockCreateOrganisation({
@@ -70,10 +82,12 @@ describe('Organisation Create', () => {
       address: '123 Main Street',
       locality: 'Paris',
       postCode: '75001',
-      object: 'Charitable Organization',
-      objectDescription: 'A charitable organization focused on helping the community.',
+      logoId: v4(),
+      object: 'Charitable Organisation',
+      objectDescription: 'A charitable organisation focused on helping the community.',
       signatoryName: 'John Doe',
       signatoryPosition: 'President',
+      signatureId: v4(),
     })
     cy.get(createOrganisationBtn).click()
 

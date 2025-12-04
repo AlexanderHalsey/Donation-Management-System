@@ -9,6 +9,7 @@ import {
   buildMockDonationTypeCreateManyInput,
   buildMockDonorCreateManyInput,
   buildMockOrganisationCreateManyInput,
+  buildMockOrganisationFiles,
   buildMockPaymentModeCreateManyInput,
 } from './mocks'
 
@@ -19,8 +20,27 @@ const prisma = new PrismaClient({
 })
 
 async function main() {
+  const organisationFiles = await prisma.fileMetadata.createManyAndReturn({
+    data: buildMockOrganisationFiles(),
+    select: { id: true, name: true },
+  })
+
+  const getOrganisationFileId = (type: 'logo' | 'signature') => {
+    return organisationFiles.find(
+      (file) => file.name === `${type}.${type === 'logo' ? 'png' : 'webp'}`,
+    )?.id
+  }
+
   const organisations = await prisma.organisation.createManyAndReturn({
-    data: new Array(3).fill(null).map((_, index) => buildMockOrganisationCreateManyInput(index)),
+    data: new Array(3)
+      .fill(null)
+      .map((_, index) =>
+        buildMockOrganisationCreateManyInput(
+          index,
+          index === 0 ? getOrganisationFileId('logo') : undefined,
+          index === 0 ? getOrganisationFileId('signature') : undefined,
+        ),
+      ),
   })
 
   const paymentModes = await prisma.paymentMode.createManyAndReturn({

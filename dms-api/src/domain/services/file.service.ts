@@ -6,6 +6,7 @@ import { omit } from 'es-toolkit'
 
 import { FileStorageService, PrismaService } from '@/infrastructure'
 
+import type { FileMetadata as PrismaFileMetadata } from '@generated/prisma/client'
 import type { FileMetadata } from '@shared/models'
 
 @Injectable()
@@ -80,10 +81,7 @@ export class FileService {
 
     return {
       buffer,
-      metadata: nullsToUndefined({
-        ...omit(fileMetadata, ['status']),
-        status: fileMetadata.status.toLowerCase() as FileMetadata['status'],
-      }),
+      metadata: this.transformToFileMetadataModel(fileMetadata),
     }
   }
 
@@ -104,6 +102,13 @@ export class FileService {
 
   computeHash(buffer: Buffer): string {
     return createHash('sha256').update(buffer).digest('hex')
+  }
+
+  transformToFileMetadataModel(fileMetadata: PrismaFileMetadata): FileMetadata {
+    return nullsToUndefined({
+      ...omit(fileMetadata, ['status']),
+      status: fileMetadata.status.toLowerCase() as FileMetadata['status'],
+    })
   }
 
   async cleanupExpiredDrafts(): Promise<number> {
