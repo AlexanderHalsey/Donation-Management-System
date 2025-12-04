@@ -1,6 +1,5 @@
 import {
   Controller,
-  Delete,
   Get,
   Param,
   ParseFilePipeBuilder,
@@ -15,16 +14,11 @@ import { FileInterceptor } from '@nestjs/platform-express'
 
 import { FileService } from '@/domain'
 
-import { FileConverter } from '../converters'
-
-import { FileUploadRequest, FileUploadResponseDto } from '../dtos'
+import { FileUploadRequest, FileUploadResponse } from '../dtos'
 
 @Controller('files')
 export class FileController {
-  constructor(
-    private readonly fileService: FileService,
-    private readonly fileConverter: FileConverter,
-  ) {}
+  constructor(private readonly fileService: FileService) {}
 
   @Post('upload-image')
   @ApiOperation({ summary: 'Upload a draft file' })
@@ -34,19 +28,19 @@ export class FileController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'Image to upload (jpg, jpeg, png, gif, bmp)',
+    description: 'Image to upload (jpg, jpeg, png, gif, bmp, webp)',
     type: FileUploadRequest,
   })
   async uploadImage(
     @UploadedFile(
       new ParseFilePipeBuilder()
-        .addFileTypeValidator({ fileType: /(jpg|jpeg|png|gif|bmp)$/ })
+        .addFileTypeValidator({ fileType: /(jpg|jpeg|png|gif|bmp|webp)$/ })
         .addMaxSizeValidator({ maxSize: 10 ** 6 }) // 1 MB
         .build(),
     )
     file: Express.Multer.File,
-  ): Promise<FileUploadResponseDto> {
-    return { id: await this.fileService.uploadDraftFile(file) }
+  ): Promise<FileUploadResponse> {
+    return { id: await this.fileService.uploadFile(file, 'DRAFT') }
   }
 
   @Get(':fileId')
@@ -59,14 +53,5 @@ export class FileController {
     res.setHeader('Content-Type', metadata.mimeType)
     res.setHeader('Content-Disposition', `attachment; filename="${metadata.name}"`)
     res.send(buffer)
-  }
-
-  @Delete(':fileId')
-  @ApiOperation({ summary: 'Delete a file by ID' })
-  @ApiResponse({ status: 200, description: 'File deleted successfully' })
-  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
-  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
-  async deleteFile(@Param('fileId') fileId: string): Promise<void> {
-    await this.fileService.deleteFile(fileId)
   }
 }

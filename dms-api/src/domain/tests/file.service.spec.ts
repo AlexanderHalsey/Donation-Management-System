@@ -49,7 +49,7 @@ describe('FileService', () => {
     stream: new Readable(),
   }
 
-  describe('uploadDraftFile', () => {
+  describe('uploadFile', () => {
     it('should upload a draft file and return its ID', async () => {
       prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
         return cb(prismaServiceMock)
@@ -59,10 +59,29 @@ describe('FileService', () => {
       fileStorageServiceMock.uploadFile.mockResolvedValueOnce('storage-key-123')
       prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
-      const fileId = await fileService.uploadDraftFile(mockFile)
+      const fileId = await fileService.uploadFile(mockFile, 'DRAFT')
 
       expect(fileId).toBeDefined()
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.expiresAt).toBeTruthy()
+      expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
+    })
+
+    it('should upload an active file and return its ID', async () => {
+      prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
+        return cb(prismaServiceMock)
+      })
+      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
+      prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce(null)
+      fileStorageServiceMock.uploadFile.mockResolvedValueOnce('storage-key-456')
+      prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
+
+      const fileId = await fileService.uploadFile(mockFile, 'ACTIVE')
+
+      expect(fileId).toBeDefined()
+      expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.expiresAt).toBeNull()
       expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
     })
@@ -77,7 +96,7 @@ describe('FileService', () => {
       } as FileMetadata)
       prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
-      const fileId = await fileService.uploadDraftFile(mockFile)
+      const fileId = await fileService.uploadFile(mockFile, 'DRAFT')
 
       expect(fileId).toBeDefined()
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)

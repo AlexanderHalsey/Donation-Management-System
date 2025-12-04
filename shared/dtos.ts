@@ -334,5 +334,5 @@ export interface FileUploadRequest {
 }
 
 export interface FileUploadResponse {
-  fileId: string
+  id: string
 }

@@ -39,6 +39,7 @@ import type {
   GetOrganisationResponse,
   GetPaymentModeListResponse,
   GetPaymentModeResponse,
+  FileUploadResponse,
 } from '@shared/dtos'
 import type {
   Donation,
@@ -346,4 +347,23 @@ export const disableOrganisation = async (organisationId: string): Promise<Organ
     client.put<GetOrganisationResponse>(`organisations/${organisationId}/disable`),
   )
   return convertDtoToOrganisation(response.organisation)
+}
+
+export const uploadImage = async (file: File): Promise<FileUploadResponse> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return await withClient((client) =>
+    client.post<FileUploadResponse>('/files/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  )
+}
+
+export const downloadFile = async (fileId: string): Promise<Blob> => {
+  return await withClient((client) =>
+    client.get<Blob>(`/files/${fileId}`, {
+      responseType: 'blob',
+    }),
+  )
 }

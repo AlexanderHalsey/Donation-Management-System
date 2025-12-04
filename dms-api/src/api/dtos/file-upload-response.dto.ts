@@ -1,3 +1,3 @@
-export class FileUploadResponseDto {
+export class FileUploadResponse {
   id: string
 }

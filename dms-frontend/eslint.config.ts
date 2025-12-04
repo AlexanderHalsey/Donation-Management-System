@@ -49,7 +49,7 @@ export default defineConfigWithVueTs(
       ...baseRules,
       ...baseTypeScriptRules,
       // Frontend-specific overrides
-      'no-console': 'warn',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'vue/multi-word-component-names': 'off',
     },
   },

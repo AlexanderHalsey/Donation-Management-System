@@ -15,17 +15,20 @@ export class FileService {
     private readonly fileStorageService: FileStorageService,
   ) {}
 
-  async uploadDraftFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: Express.Multer.File, status: 'DRAFT' | 'ACTIVE'): Promise<string> {
     const hash = this.computeHash(file.buffer)
 
     return await this.prisma.$transaction(async (tx) => {
       const fileMetadata = await tx.fileMetadata.create({
         data: {
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Expires in 24 hours
+          expiresAt:
+            status === 'DRAFT'
+              ? new Date(Date.now() + 24 * 60 * 60 * 1000) // Expires in 24 hours if draft
+              : null,
           name: file.originalname,
           size: file.size,
           mimeType: file.mimetype,
-          status: 'DRAFT',
+          status,
           hash,
         },
         select: { id: true },
@@ -85,10 +88,10 @@ export class FileService {
   }
 
   async deleteFile(fileId: string): Promise<void> {
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       const fileMetadata = await tx.fileMetadata.findUniqueOrThrow({
         where: { id: fileId },
-        select: { storageKey: true, status: true },
+        select: { storageKey: true },
       })
 
       if (!fileMetadata.storageKey) throw new BadRequestException('File storage key not found')
