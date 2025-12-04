@@ -11,7 +11,6 @@ import {
   FileController,
   OrganisationController,
   PaymentModeController,
-  RefsController,
 } from './api/controllers'
 
 import {
@@ -58,7 +57,6 @@ import {
     FileController,
     OrganisationController,
     PaymentModeController,
-    RefsController,
   ],
   providers: [
     DonationAssetTypeCleanupTask,

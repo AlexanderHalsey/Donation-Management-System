@@ -176,7 +176,7 @@ Cypress.Commands.add('mockPaymentModeList', () => {
 })
 
 Cypress.Commands.add('mockDonorRefList', () => {
-  cy.intercept('GET', `${MOCK_API_HOST}/refs/donors`, {
+  cy.intercept('GET', `${MOCK_API_HOST}/donors/refs`, {
     statusCode: 200,
     body: {
       donorRefs: donors,

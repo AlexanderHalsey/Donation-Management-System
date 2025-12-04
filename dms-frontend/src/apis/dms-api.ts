@@ -110,7 +110,7 @@ export const getDonationMethods = async (): Promise<DonationMethod[]> => {
 }
 
 export const getDonorRefs = async (): Promise<DonorRef[]> => {
-  const response = await withClient((client) => client.get<GetDonorRefListResponse>('/refs/donors'))
+  const response = await withClient((client) => client.get<GetDonorRefListResponse>('/donors/refs'))
   return response.donorRefs
 }
 
