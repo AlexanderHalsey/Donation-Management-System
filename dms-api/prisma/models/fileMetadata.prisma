@@ -10,6 +10,7 @@ model FileMetadata {
   status                FileStatus    @default(DRAFT)
   organisationLogo      Organisation? @relation("OrganisationLogo")
   organisationSignature Organisation? @relation("OrganisationSignature")
+  taxReceipt            TaxReceipt?   @relation("TaxReceipt")
 }
 
 enum FileStatus {

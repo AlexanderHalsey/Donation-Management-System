@@ -107,6 +107,7 @@ const menuItems: {
       { label: 'Tableau de bord', icon: 'speed', to: '/dashboard' },
       { label: 'Dons', icon: 'volunteer_activism', to: '/donations' },
       { label: 'Donateurs', icon: 'group', to: '/donors' },
+      { label: 'Reçus fiscaux', icon: 'receipt_long', to: '/tax-receipts' },
     ],
   },
   {

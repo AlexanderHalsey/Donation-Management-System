@@ -6,7 +6,7 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { DonationTypeService } from '../services/donationType.service'
 import { PrismaService } from '@/infrastructure'
 
-import type { DonationType } from '@shared/models'
+import type { DonationType } from '@generated/prisma/client'
 
 describe('DonationTypeService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()

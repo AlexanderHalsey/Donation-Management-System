@@ -15,7 +15,7 @@
       <slot :name="slot" v-bind="scope || {}"></slot>
     </template>
     <template v-if="modelValue" #after>
-      <Btn flat icon="download" @click="downloadFile" style="padding: 8px" />
+      <Btn flat icon="open_in_browser" @click="viewFile" style="padding: 8px" />
     </template>
     <QChip v-if="modelValue" :removable="!isUploading" @remove="uploadFile(undefined)">
       <QAvatar>
@@ -36,7 +36,7 @@ import { AxiosError } from 'axios'
 
 import Btn from '@/components/ui/Btn.vue'
 
-import { uploadImage, downloadFile as _downloadFile } from '@/apis/dms-api'
+import { uploadImage } from '@/apis/dms-api'
 
 import type { QFileProps } from 'quasar'
 
@@ -110,22 +110,10 @@ const uploadFile = async (newFile?: File) => {
   }
 }
 
-const downloadFile = async () => {
+const viewFile = async () => {
   if (!props.modelValue) return
-  try {
-    const blob = await _downloadFile(props.modelValue.id)
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.setAttribute('href', url)
-    link.setAttribute('download', props.modelValue.name)
-    document.body.appendChild(link)
-    link.click()
-    link.parentNode?.removeChild(link)
-    window.URL.revokeObjectURL(url)
-  } catch (err: unknown) {
-    console.error('File download failed', err)
-    internalError.value = 'File download failed. Please try again.'
-  }
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+  window.open(`${apiBaseUrl}/files/${props.modelValue.id}`, '_blank')
 }
 </script>
 

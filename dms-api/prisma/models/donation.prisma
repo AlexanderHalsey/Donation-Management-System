@@ -17,4 +17,5 @@ model Donation {
   donor               Donor             @relation(fields: [donorId], references: [id])
   organisation        Organisation      @relation(fields: [organisationId], references: [id])
   paymentMode         PaymentMode       @relation(fields: [paymentModeId], references: [id])
+  taxReceipt          TaxReceipt?       @relation(fields: [taxReceiptId], references: [id])
 }

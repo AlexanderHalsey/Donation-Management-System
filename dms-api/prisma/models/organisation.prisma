@@ -1,21 +1,22 @@
 model Organisation {
-  id                String         @id @default(uuid()) @db.Uuid
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  name              String         @unique
-  title             String?
-  address           String?
-  locality          String?
-  postCode          String?
-  logoId            String?        @unique @db.Uuid
-  object            String?
-  objectDescription String?
-  signatoryName     String?
-  signatoryPosition String?
-  signatureId       String?        @unique @db.Uuid
-  isDisabled        Boolean        @default(false)
-  donations         Donation[]
-  donationTypes     DonationType[]
-  logo              FileMetadata?  @relation("OrganisationLogo", fields: [logoId], references: [id])
-  signature         FileMetadata?  @relation("OrganisationSignature", fields: [signatureId], references: [id])
+  id                  String         @id @default(uuid()) @db.Uuid
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  name                String         @unique
+  title               String?
+  address             String?
+  locality            String?
+  postCode            String?
+  logoId              String?        @unique @db.Uuid
+  object              String?
+  objectDescription   String?
+  signatoryName       String?
+  signatoryPosition   String?
+  signatureId         String?        @unique @db.Uuid
+  isDisabled          Boolean        @default(false)
+  isTaxReceiptEnabled Boolean        @default(false)
+  donations           Donation[]
+  donationTypes       DonationType[]
+  logo                FileMetadata?  @relation("OrganisationLogo", fields: [logoId], references: [id])
+  signature           FileMetadata?  @relation("OrganisationSignature", fields: [signatureId], references: [id])
 }

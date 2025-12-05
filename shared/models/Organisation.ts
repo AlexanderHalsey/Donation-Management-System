@@ -1,4 +1,4 @@
-import { FileMetadata } from './File'
+import type { FileMetadata } from './File'
 
 export type OrganisationRef = {
   id: string

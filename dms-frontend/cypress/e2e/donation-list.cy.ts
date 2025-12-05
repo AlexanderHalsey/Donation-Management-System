@@ -148,6 +148,13 @@ describe('Donation List', () => {
       .within(() => {
         cy.get('td').eq(6).find('button').click() // Click action button
       })
+    cy.mockDonation(0)
+    cy.mockDonorRefList()
+    cy.mockOrganisationRefList()
+    cy.mockDonationTypeList()
+    cy.mockPaymentModeList()
+    cy.mockDonationAssetTypeList()
+    cy.mockDonationMethodList()
     cy.get('#q-portal--menu--1 .q-item').eq(0).click() // Click edit action
     cy.url().should('match', /\/donations\/[a-f0-9-]{36}$/)
   })

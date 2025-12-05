@@ -2,6 +2,8 @@ import 'dotenv/config'
 import { PrismaClient } from './generated/prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 
+import { groupBy } from 'es-toolkit'
+
 import {
   buildMockDonationAssetTypeCreateManyInput,
   buildMockDonationCreateManyInput,
@@ -11,6 +13,8 @@ import {
   buildMockOrganisationCreateManyInput,
   buildMockOrganisationFiles,
   buildMockPaymentModeCreateManyInput,
+  buildMockTaxReceiptCreateManyInput,
+  buildMockTaxReceiptPdfTemplateFile,
 } from './mocks'
 
 const prisma = new PrismaClient({
@@ -49,7 +53,7 @@ async function main() {
   })
 
   const donationTypes = await prisma.donationType.createManyAndReturn({
-    select: { id: true },
+    select: { id: true, isTaxReceiptEnabled: true },
     data: new Array(9).fill(null).map((_, index) =>
       buildMockDonationTypeCreateManyInput({
         index,
@@ -75,7 +79,7 @@ async function main() {
     data: new Array(300).fill(null).map((_, index) => buildMockDonorCreateManyInput(index)),
   })
 
-  await prisma.donation.createMany({
+  const donations = await prisma.donation.createManyAndReturn({
     data: new Array(1000).fill(null).map((_, index) =>
       buildMockDonationCreateManyInput({
         index,
@@ -85,6 +89,39 @@ async function main() {
         organisationId: organisations[index % organisations.length].id,
         paymentModeId: paymentModes[index % paymentModes.length].id,
         donorId: donors[Math.floor(Math.random() * donors.length)].id,
+      }),
+    ),
+  })
+
+  const eligibleDonations = groupBy(
+    donations.filter(
+      (donation) =>
+        organisations.find((org) => org.id === donation.organisationId)?.isTaxReceiptEnabled &&
+        donationTypes.find((dt) => dt.id === donation.donationTypeId)?.isTaxReceiptEnabled,
+    ),
+    (donation) => `${donation.donorId}-${donation.donatedAt.getFullYear()}`,
+  )
+
+  const taxReceiptTemplateFiles = await prisma.fileMetadata.createManyAndReturn({
+    data: Array(Object.values(eligibleDonations).length)
+      .fill(null)
+      .map(() => buildMockTaxReceiptPdfTemplateFile()),
+    select: { id: true },
+  })
+
+  await prisma.taxReceipt.createMany({
+    data: Object.values(eligibleDonations).map((donationGroup, index) =>
+      buildMockTaxReceiptCreateManyInput({
+        index,
+        fileId: taxReceiptTemplateFiles[index].id,
+        donorId: donationGroup[0].donorId,
+        // in reality an annual receipt can absolutely be for a single donation,
+        // but this helps us initialise a nice spread of both types in the seed data
+        type: donationGroup.length === 1 ? 'INDIVIDUAL' : 'ANNUAL',
+        createdAt:
+          donationGroup.length === 1
+            ? donationGroup[0].donatedAt
+            : new Date(donationGroup[0].donatedAt.getFullYear(), 3, 1),
       }),
     ),
   })

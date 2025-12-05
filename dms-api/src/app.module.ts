@@ -11,6 +11,7 @@ import {
   FileController,
   OrganisationController,
   PaymentModeController,
+  TaxReceiptController,
 } from './api/controllers'
 
 import {
@@ -22,6 +23,7 @@ import {
   FileConverter,
   OrganisationConverter,
   PaymentModeConverter,
+  TaxReceiptConverter,
 } from '@/api/converters'
 
 import {
@@ -33,6 +35,7 @@ import {
   FileService,
   OrganisationService,
   PaymentModeService,
+  TaxReceiptService,
 } from '@/domain'
 
 import { FileStorageService, PrismaService, TypedSqlService } from '@/infrastructure'
@@ -57,6 +60,7 @@ import {
     FileController,
     OrganisationController,
     PaymentModeController,
+    TaxReceiptController,
   ],
   providers: [
     DonationAssetTypeCleanupTask,
@@ -83,6 +87,8 @@ import {
     PaymentModeConverter,
     PaymentModeService,
     PrismaService,
+    TaxReceiptConverter,
+    TaxReceiptService,
     TypedSqlService,
   ],
 })

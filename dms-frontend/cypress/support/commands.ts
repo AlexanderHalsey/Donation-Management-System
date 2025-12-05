@@ -9,6 +9,7 @@ import {
   buildMockImage,
   buildMockOrganisations,
   buildMockPaymentModes,
+  buildMockTaxReceipts,
   type DonationAssetTypeFormDataMock,
   type DonationMethodFormDataMock,
   type DonationTypeFormDataMock,
@@ -17,8 +18,13 @@ import {
   type DonationListFilterMock,
   type DonorListFilterMock,
   type DonationFormDataMock,
+  type TaxReceiptListFilterMock,
 } from './mocks'
-import type { DonationListPaginationRequest, DonorListPaginationRequest } from '@shared/models'
+import type {
+  DonationListPaginationRequest,
+  DonorListPaginationRequest,
+  TaxReceiptListPaginationRequest,
+} from '@shared/models'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -62,6 +68,10 @@ declare global {
       mockDisableOrganisation(organisationId: string): Chainable<Subject>
       mockPaymentMode(index: number): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
+      mockTaxReceiptList(
+        pagination?: TaxReceiptListPaginationRequest,
+        filter?: TaxReceiptListFilterMock,
+      ): Chainable<Subject>
       mockUpdateDonation(donationId: string, formData: DonationFormDataMock): Chainable<Subject>
       mockUpdateDonationAssetType(
         donationAssetTypeId: string,
@@ -529,6 +539,33 @@ Cypress.Commands.add(
         },
       },
     }).as('getDonorList')
+  },
+)
+
+Cypress.Commands.add(
+  'mockTaxReceiptList',
+  (pagination?: TaxReceiptListPaginationRequest, filter?: TaxReceiptListFilterMock) => {
+    if (!pagination) {
+      pagination = {
+        page: 1,
+        pageSize: 10,
+        orderBy: { createdAt: 'desc' },
+      }
+    }
+    const taxReceipts = buildMockTaxReceipts(donors, pagination?.orderBy, filter)
+    cy.intercept('POST', `${MOCK_API_HOST}/tax-receipts/filtered-list`, {
+      statusCode: 200,
+      body: {
+        taxReceipts: taxReceipts.slice(
+          (pagination.page - 1) * pagination.pageSize,
+          pagination.page * pagination.pageSize,
+        ),
+        pagination: {
+          ...pagination,
+          totalCount: taxReceipts.length,
+        },
+      },
+    }).as('getTaxReceiptList')
   },
 )
 

@@ -1,7 +1,7 @@
 model Donor {
-  id             String     @id @default(uuid()) @db.Uuid
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id             String       @id @default(uuid()) @db.Uuid
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   externalId     Int
   civility       String
   lastName       String
@@ -15,7 +15,8 @@ model Donor {
   city           String?
   state          String?
   country        String?
-  isFacilitator  Boolean    @default(false)
-  isDisabled     Boolean    @default(false)
+  isFacilitator  Boolean      @default(false)
+  isDisabled     Boolean      @default(false)
   donations      Donation[]
+  taxReceipts    TaxReceipt[]
 }

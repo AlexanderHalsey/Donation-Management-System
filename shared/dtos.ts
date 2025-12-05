@@ -82,6 +82,24 @@ export interface DonorDto extends DonorListItemDto {
   isDisabled: boolean
 }
 
+export type TaxReceiptType = 'annual' | 'individual'
+
+export interface TaxReceiptListItemDto {
+  id: string
+  createdAt: string
+  updatedAt: string
+  receiptNumber: number
+  donor: DonorRefDto
+  type: TaxReceiptType
+  file: {
+    id: string
+    name: string
+  }
+  isCanceled: boolean
+  canceledAt?: string
+  canceledReason?: string
+}
+
 export interface DonationListItemDto {
   id: string
   updatedAt: string
@@ -138,6 +156,10 @@ export interface DonationListPagination extends PaginationDto<DonationListSortOr
 export interface DonorListPaginationRequest extends PaginationRequest<DonorListSortOrder> {}
 export interface DonorListPagination extends PaginationDto<DonorListSortOrder> {}
 
+export interface TaxReceiptListPaginationRequest
+  extends PaginationRequest<TaxReceiptListSortOrder> {}
+export interface TaxReceiptListPagination extends PaginationDto<TaxReceiptListSortOrder> {}
+
 export interface DonationListSortOrder {
   updatedAt?: SortOrder
   donatedAt?: SortOrder
@@ -157,11 +179,20 @@ export interface DonorListSortOrder extends DonorRefSortOrder {
   email?: SortOrder
 }
 
+export interface TaxReceiptListSortOrder {
+  donor?: DonorRefSortOrder
+  createdAt?: SortOrder
+  receiptNumber?: SortOrder
+  type?: SortOrder
+  file?: TaxReceiptFileSortOrder
+}
+
 export interface PaymentModeSortOrder extends NameSortOrder {}
 export interface OrganisationRefSortOrder extends NameSortOrder {}
 export interface DonationTypeSortOrder extends NameSortOrder {}
 export interface DonationMethodSortOrder extends NameSortOrder {}
 export interface DonationAssetTypeSortOrder extends NameSortOrder {}
+export interface TaxReceiptFileSortOrder extends NameSortOrder {}
 export interface DonorRefSortOrder {
   lastName?: SortOrder
 }
@@ -188,6 +219,17 @@ export interface DonorListFilter {
   id?: UuidFilter
   donatedAt?: DateTimeFilter
   totalAmount?: FloatFilter
+}
+
+export interface TaxReceiptListFilter {
+  donorId?: UuidFilter
+  createdAt?: DateTimeFilter
+  type?: TaxReceiptTypeFilter
+  isCanceled?: BoolFilter
+}
+
+export interface TaxReceiptTypeFilter {
+  equals?: TaxReceiptType
 }
 
 export interface UuidFilter {
@@ -227,6 +269,16 @@ export interface GetDonorListRequest {
 export interface GetDonorListResponse {
   donors: DonorListItemDto[]
   pagination: DonorListPagination
+}
+
+export interface GetTaxReceiptListRequest {
+  pagination: TaxReceiptListPaginationRequest
+  filter?: TaxReceiptListFilter
+}
+
+export interface GetTaxReceiptListResponse {
+  taxReceipts: TaxReceiptListItemDto[]
+  pagination: TaxReceiptListPagination
 }
 
 export interface GetOrganisationListResponse {

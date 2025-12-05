@@ -44,14 +44,14 @@ export class FileController {
   }
 
   @Get(':fileId')
-  @ApiOperation({ summary: 'Download a file by ID' })
-  @ApiResponse({ status: 200, description: 'File downloaded successfully' })
+  @ApiOperation({ summary: 'Serve a file by ID' })
+  @ApiResponse({ status: 200, description: 'File served successfully' })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
   @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
   async downloadFile(@Res() res: Response, @Param('fileId') fileId: string) {
     const { buffer, metadata } = await this.fileService.downloadFile(fileId)
     res.setHeader('Content-Type', metadata.mimeType)
-    res.setHeader('Content-Disposition', `attachment; filename="${metadata.name}"`)
+    res.setHeader('Content-Disposition', `inline; filename="${metadata.name}"`)
     res.send(buffer)
   }
 }

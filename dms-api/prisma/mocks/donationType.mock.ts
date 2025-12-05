@@ -22,4 +22,5 @@ export const buildMockDonationTypeCreateManyInput = ({
 }): DonationTypeCreateManyInput => ({
   name: DONATION_TYPE_NAMES[index],
   organisationId: organisation.id,
+  isTaxReceiptEnabled: index % 3 === 0,
 })

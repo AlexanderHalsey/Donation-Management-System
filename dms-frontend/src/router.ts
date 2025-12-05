@@ -51,6 +51,11 @@ const router = createRouter({
           component: () => import('@/features/donors/pages/DonorDetail.vue'),
         },
         {
+          path: 'tax-receipts',
+          name: 'tax-receipts',
+          component: () => import('@/features/taxReceipts/pages/TaxReceiptList.vue'),
+        },
+        {
           path: 'donation-asset-types',
           name: 'donation-asset-types',
           component: () => import('@/features/donationAssetTypes/pages/DonationAssetTypeList.vue'),

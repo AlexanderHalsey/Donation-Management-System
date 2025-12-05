@@ -11,6 +11,7 @@ import {
   convertDtoToDonorListItem,
   convertDtoToOrganisation,
   convertDtoToPaymentMode,
+  convertDtoToTaxReceiptListItem,
 } from './converters'
 
 import type { DonationFormData } from '@/features/donations'
@@ -39,6 +40,8 @@ import type {
   GetOrganisationResponse,
   GetPaymentModeListResponse,
   GetPaymentModeResponse,
+  GetTaxReceiptListRequest,
+  GetTaxReceiptListResponse,
   FileUploadResponse,
 } from '@shared/dtos'
 import type {
@@ -59,6 +62,10 @@ import type {
   Organisation,
   OrganisationRef,
   PaymentMode,
+  TaxReceiptListFilter,
+  TaxReceiptListItem,
+  TaxReceiptListPagination,
+  TaxReceiptListPaginationRequest,
 } from '@shared/models'
 
 export const getDonations = async (
@@ -144,6 +151,26 @@ export const getDonors = async (
 export const getDonor = async (donorId: string): Promise<Donor> => {
   const response = await withClient((client) => client.get<GetDonorResponse>(`/donors/${donorId}`))
   return convertDtoToDonor(response.donor)
+}
+
+export const getTaxReceipts = async (
+  pagination: TaxReceiptListPaginationRequest,
+  filter?: TaxReceiptListFilter,
+): Promise<{
+  taxReceipts: TaxReceiptListItem[]
+  pagination: TaxReceiptListPagination
+}> => {
+  const request: GetTaxReceiptListRequest = {
+    pagination,
+    filter,
+  }
+  const response = await withClient((client) =>
+    client.post<GetTaxReceiptListResponse>('/tax-receipts/filtered-list', request),
+  )
+  return {
+    taxReceipts: response.taxReceipts.map(convertDtoToTaxReceiptListItem),
+    pagination: response.pagination,
+  }
 }
 
 export const postDonation = async (formData: DonationFormData): Promise<Donation> => {
@@ -356,14 +383,6 @@ export const uploadImage = async (file: File): Promise<FileUploadResponse> => {
   return await withClient((client) =>
     client.post<FileUploadResponse>('/files/upload-image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-    }),
-  )
-}
-
-export const downloadFile = async (fileId: string): Promise<Blob> => {
-  return await withClient((client) =>
-    client.get<Blob>(`/files/${fileId}`, {
-      responseType: 'blob',
     }),
   )
 }

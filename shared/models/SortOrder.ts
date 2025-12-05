@@ -17,11 +17,20 @@ export interface DonorListSortOrder extends DonorSummaryRefSortOrder {
   email?: SortOrder
 }
 
+export interface TaxReceiptListSortOrder {
+  donor?: DonorSummaryRefSortOrder
+  createdAt?: SortOrder
+  receiptNumber?: SortOrder
+  type?: SortOrder
+  file?: TaxReceiptFileSortOrder
+}
+
 export interface PaymentModeSortOrder extends NameSortOrder {}
 export interface OrganisationRefSortOrder extends NameSortOrder {}
 export interface DonationTypeSortOrder extends NameSortOrder {}
 export interface DonationMethodSortOrder extends NameSortOrder {}
 export interface DonationAssetTypeSortOrder extends NameSortOrder {}
+export interface TaxReceiptFileSortOrder extends NameSortOrder {}
 export interface DonorSummaryRefSortOrder {
   lastName?: SortOrder
 }

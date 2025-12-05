@@ -4,6 +4,7 @@
     :options="options"
     type="checkbox"
     class="row"
+    style="padding-bottom: 20px"
     @update:model-value="updateModelValue"
   />
 </template>
