@@ -136,7 +136,28 @@ describe('Tax Receipt List', () => {
       })
   })
   it('should allow cancelling a tax receipt from the list', () => {
-    // TODO
+    cy.visit('/tax-receipts')
+    cy.wait('@getTaxReceiptList')
+    cy.get(taxReceiptListItem)
+      .eq(2)
+      .within(() => {
+        cy.get('td').eq(5).find('button').click()
+      })
+    cy.get('#q-portal--menu--1 .q-list').within(() => {
+      cy.get('.q-item').contains('Annuler').click()
+    })
+    cy.get('.q-dialog').within(() => {
+      cy.get('button').eq(1).contains('Confirmer').click()
+      cy.get('.q-field--error .q-field__bottom .q-field__messages')
+        .should('have.length', 1)
+        .should('have.text', 'Obligatoire')
+      cy.get('textarea').type('Duplicate tax receipt issued.')
+      cy.mockCancelTaxReceipt()
+      cy.mockTaxReceiptList()
+      cy.get('button').eq(1).contains('Confirmer').click()
+    })
+    cy.wait(['@cancelTaxReceipt', '@getTaxReceiptList'])
+    cy.get('.q-notification').should('contain.text', 'Le reçu fiscal a été annulé avec succès.')
   })
   describe('Filters', () => {
     const getFilterMenu = () => cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children()

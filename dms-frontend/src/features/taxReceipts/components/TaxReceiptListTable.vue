@@ -5,6 +5,7 @@
     :pagination="computedPagination"
     :loading="loading"
     row-key="id"
+    :table-row-class-fn="rowClassFn"
     data-cy="tax-receipt-list-table"
     @update:pagination="updatePagination"
   >
@@ -55,6 +56,7 @@ import type {
   TaxReceiptListPaginationRequest,
   TaxReceiptListSortOrder,
 } from '@shared/models'
+import type { CancelTaxReceiptFormData } from '../types'
 
 const props = defineProps({
   taxReceiptList: {
@@ -73,7 +75,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   'update:pagination': [pagination: TaxReceiptListPaginationRequest]
-  'cancel:taxReceipt': [taxReceiptId: string]
+  'cancel:taxReceipt': [formData: CancelTaxReceiptFormData]
 }>()
 
 const headers: QTableProps['columns'] = [
@@ -129,6 +131,10 @@ const headers: QTableProps['columns'] = [
     style: 'width: 50px',
   },
 ]
+
+const rowClassFn = (row: TaxReceiptListItem) => {
+  return row.isCanceled ? 'bg-red-2' : 'bg-white'
+}
 
 const computedPagination = computed<QTablePagination>(() => {
   const sortBy = Object.keys(props.pagination?.orderBy ?? {})?.[0] ?? null

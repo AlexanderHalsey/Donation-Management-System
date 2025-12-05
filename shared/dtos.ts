@@ -362,6 +362,10 @@ export interface DonationRequest {
   donationAssetTypeId: string
 }
 
+export interface CancelTaxReceiptRequest {
+  canceledReason: string
+}
+
 export interface DonationAssetTypeRequest {
   name: string
   isDefault: boolean

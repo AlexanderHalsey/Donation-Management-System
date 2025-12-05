@@ -22,6 +22,8 @@ import type { OrganisationFormData } from '@/features/organisations'
 import type { PaymentModeFormData } from '@/features/paymentModes'
 
 import type {
+  CancelTaxReceiptRequest,
+  FileUploadResponse,
   GetDonationAssetTypeListResponse,
   GetDonationAssetTypeResponse,
   GetDonationListRequest,
@@ -42,7 +44,6 @@ import type {
   GetPaymentModeResponse,
   GetTaxReceiptListRequest,
   GetTaxReceiptListResponse,
-  FileUploadResponse,
 } from '@shared/dtos'
 import type {
   Donation,
@@ -194,6 +195,14 @@ export const putDonation = async (
 
 export const deleteDonation = async (donationId: string): Promise<void> => {
   await withClient((client) => client.delete<void>(`/donations/${donationId}`))
+}
+
+export const cancelTaxReceipt = async (
+  taxReceiptId: string,
+  canceledReason: string,
+): Promise<void> => {
+  const request: CancelTaxReceiptRequest = { canceledReason }
+  await withClient((client) => client.put<void>(`/tax-receipts/${taxReceiptId}/cancel`, request))
 }
 
 export const getDonationAssetType = async (

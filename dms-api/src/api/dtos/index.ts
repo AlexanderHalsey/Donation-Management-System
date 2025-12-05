@@ -1,3 +1,4 @@
+export * from './cancel-tax-receipt-request.dto'
 export * from './donation-asset-type-request.dto'
 export * from './donation-asset-type.dto'
 export * from './donation-method-request.dto'

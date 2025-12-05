@@ -5,20 +5,23 @@
       <QItem
         clickable
         v-close-popup
-        class="text-red-8"
+        :class="taxReceipt.isCanceled ? 'text-primary' : 'text-red-8'"
         style="padding: 8px 12px; border-radius: 6px"
         @click="cancelTaxReceipt?.open()"
       >
         <QItemSection style="flex: unset">
-          <QIcon name="cancel" />
+          <QIcon :name="taxReceipt.isCanceled ? 'visibility' : 'cancel'" />
         </QItemSection>
-        <QItemSection> Annuler </QItemSection>
+        <QItemSection>
+          {{ taxReceipt.isCanceled ? "Afficher l'annulation" : 'Annuler' }}
+        </QItemSection>
       </QItem>
     </QList>
   </QMenu>
   <CancelTaxReceipt
     ref="cancelTaxReceipt"
-    @cancel:taxReceipt="$emit('cancel:taxReceipt', taxReceipt.id)"
+    :taxReceipt="taxReceipt"
+    @cancel:taxReceipt="$emit('cancel:taxReceipt', $event)"
   />
 </template>
 
@@ -29,6 +32,7 @@ import Btn from '@/components/ui/Btn.vue'
 import CancelTaxReceipt from './CancelTaxReceipt.vue'
 
 import type { TaxReceiptListItem } from '@shared/models'
+import type { CancelTaxReceiptFormData } from '../types'
 
 defineProps({
   taxReceipt: {
@@ -37,7 +41,7 @@ defineProps({
   },
 })
 defineEmits<{
-  'cancel:taxReceipt': [taxReceiptId: string]
+  'cancel:taxReceipt': [formData: CancelTaxReceiptFormData]
 }>()
 
 const cancelTaxReceipt = ref<InstanceType<typeof CancelTaxReceipt> | null>(null)

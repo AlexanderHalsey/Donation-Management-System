@@ -43,6 +43,7 @@ import type {
   TaxReceiptListFilter as TaxReceiptListFilterRequest,
   TaxReceiptListPaginationRequest,
 } from '@shared/models'
+import type { CancelTaxReceiptFormData } from '../types'
 
 const breadcrumbs: Breadcrumb[] = [
   { id: 'tax-receipt-list', label: 'Liste des reçus fiscaux', icon: 'receipt_long' },
@@ -84,9 +85,9 @@ const onFilterUpdate = async (filter?: TaxReceiptListFilterRequest) => {
   })
 }
 
-const cancelTaxReceipt = async (taxReceiptId: string) => {
+const cancelTaxReceipt = async (formData: CancelTaxReceiptFormData) => {
   working.value = true
-  await taxReceiptStore.cancel(taxReceiptId)
+  await taxReceiptStore.cancel(formData)
   working.value = false
   $q.notify({ type: 'positive', message: 'Le reçu fiscal a été annulé avec succès.' })
   // Refetch tax receipts to update the list

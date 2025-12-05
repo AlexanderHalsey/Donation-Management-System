@@ -30,6 +30,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable<Subject> {
+      mockCancelTaxReceipt(): Chainable<Subject>
       mockCreateDonation(formData: DonationFormDataMock): Chainable<Subject>
       mockCreateDonationAssetType(formData: DonationAssetTypeFormDataMock): Chainable<Subject>
       mockCreateDonationMethod(formData: DonationMethodFormDataMock): Chainable<Subject>
@@ -568,6 +569,13 @@ Cypress.Commands.add(
     }).as('getTaxReceiptList')
   },
 )
+
+Cypress.Commands.add('mockCancelTaxReceipt', () => {
+  cy.intercept('PUT', `${MOCK_API_HOST}/tax-receipts/*/cancel`, {
+    statusCode: 200,
+    body: null,
+  }).as('cancelTaxReceipt')
+})
 
 Cypress.Commands.add('mockCreateDonation', (formData: DonationFormDataMock) => {
   const donation = buildMockDonations(

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { omit } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -14,6 +14,7 @@ import type {
   TaxReceiptListFilter,
   TaxReceiptListPaginationRequest,
 } from '@shared/models'
+import { CancelTaxReceiptRequest } from '@/api/dtos'
 
 @Injectable()
 export class TaxReceiptService {
@@ -54,6 +55,17 @@ export class TaxReceiptService {
       taxReceipts: taxReceipts.map((taxReceipt) => this.convertTaxReceiptToModel(taxReceipt)),
       totalCount,
     }
+  }
+
+  async cancelTaxReceipt(id: string, request: CancelTaxReceiptRequest): Promise<void> {
+    const taxReceipt = await this.prisma.taxReceipt.findFirstOrThrow({ where: { id } })
+    if (taxReceipt.isCanceled) {
+      throw new BadRequestException('Tax receipt is already canceled')
+    }
+    await this.prisma.taxReceipt.update({
+      where: { id },
+      data: { isCanceled: true, canceledReason: request.canceledReason, canceledAt: new Date() },
+    })
   }
 
   convertTaxReceiptToModel(

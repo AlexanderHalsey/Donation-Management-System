@@ -152,7 +152,7 @@ const headers: QTableProps['columns'] = [
 
 const rowClassFn = (row: DonationListItem) => {
   if (row.taxReceiptId) {
-    return 'bg-green-3'
+    return 'bg-green-2'
   }
   return 'bg-white'
 }
