@@ -4,6 +4,7 @@ export type OrganisationRef = {
   id: string
   name: string
   isDisabled: boolean
+  isTaxReceiptEnabled: boolean
 }
 
 export interface Organisation extends OrganisationRef {

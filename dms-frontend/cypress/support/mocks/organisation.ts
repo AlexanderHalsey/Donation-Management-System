@@ -6,6 +6,7 @@ import type { Organisation } from '@shared/models'
 
 export type OrganisationFormDataMock = {
   name: string
+  isTaxReceiptEnabled: boolean
   title?: string
   address?: string
   locality?: string
@@ -24,6 +25,7 @@ export function buildMockOrganisations(): Organisation[] {
     createdAt: new Date(2024, 0, index + 1),
     updatedAt: new Date(2024, 1, index + 1),
     name: `Organisation ${index + 1}`,
+    isTaxReceiptEnabled: index % 2 === 0,
     title: `Title ${index + 1}`,
     address: `Address ${index + 1}`,
     locality: `Locality ${index + 1}`,

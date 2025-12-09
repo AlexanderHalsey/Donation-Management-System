@@ -5,6 +5,7 @@ export class OrganisationRefDto {
   id: string
   name: string
   isDisabled: boolean
+  isTaxReceiptEnabled: boolean
 }
 export class OrganisationDto extends OrganisationRefDto {
   createdAt: string

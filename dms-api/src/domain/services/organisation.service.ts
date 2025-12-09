@@ -42,6 +42,7 @@ export class OrganisationService {
         id: true,
         name: true,
         isDisabled: true,
+        isTaxReceiptEnabled: true,
       },
     })
   }
@@ -60,6 +61,7 @@ export class OrganisationService {
       const organisation = await tx.organisation.create({
         data: {
           name: request.name,
+          isTaxReceiptEnabled: request.isTaxReceiptEnabled,
           title: request.title,
           address: request.address,
           locality: request.locality,
@@ -78,7 +80,7 @@ export class OrganisationService {
       await Promise.all(
         [request.logoId, request.signatureId]
           .filter((fileId): fileId is string => !!fileId)
-          .map((fileId) => this.fileService.finalizeFile(fileId)),
+          .map((fileId) => this.fileService.activateFile(fileId)),
       )
 
       return this.transformToOrganisationModel(organisation)
@@ -99,7 +101,7 @@ export class OrganisationService {
 
       for (const { newFileId, existingFileId } of filesToUpdate) {
         if (newFileId && newFileId !== existingFileId) {
-          await this.fileService.finalizeFile(newFileId)
+          await this.fileService.activateFile(newFileId)
         }
         if (existingFileId && existingFileId !== newFileId) {
           await this.fileService.deleteFile(existingFileId)
@@ -110,6 +112,7 @@ export class OrganisationService {
         where: { id },
         data: {
           name: request.name,
+          isTaxReceiptEnabled: request.isTaxReceiptEnabled,
           title: request.title,
           address: request.address,
           locality: request.locality,
@@ -124,6 +127,13 @@ export class OrganisationService {
         include: { logo: true, signature: true },
         omit: { logoId: true, signatureId: true },
       })
+
+      if (!request.isTaxReceiptEnabled) {
+        await tx.donationType.updateMany({
+          where: { organisationId: id, isTaxReceiptEnabled: true },
+          data: { isTaxReceiptEnabled: false },
+        })
+      }
 
       return this.transformToOrganisationModel(organisation)
     })

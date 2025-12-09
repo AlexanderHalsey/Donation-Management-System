@@ -13,16 +13,17 @@ describe('Organisation Update', () => {
     cy.visit('/organisations/organisation-id-1')
     cy.wait(['@getOrganisation'])
     cy.get(formField).eq(0).find('.q-field input').should('have.value', 'Organisation 1')
-    cy.get(formField).eq(1).find('.q-field input').should('have.value', 'Title 1')
-    cy.get(formField).eq(2).find('.q-field input').should('have.value', 'Address 1')
-    cy.get(formField).eq(3).find('.q-field input').should('have.value', 'Locality 1')
-    cy.get(formField).eq(4).find('.q-field input').should('have.value', 'PostCode 1')
-    cy.get(formField).eq(5).find('.q-field .q-chip').should('contain.text', 'logo.png')
-    cy.get(formField).eq(6).find('.q-field input').should('have.value', 'Object 1')
-    cy.get(formField).eq(7).find('.q-field textarea').should('have.value', 'Object Description 1')
-    cy.get(formField).eq(8).find('.q-field input').should('have.value', 'Signatory Name 1')
-    cy.get(formField).eq(9).find('.q-field input').should('have.value', 'Signatory Position 1')
-    cy.get(formField).eq(10).find('.q-field .q-chip').should('contain.text', 'signature.webp')
+    cy.get(formField).eq(1).find('.q-checkbox').find('.q-checkbox__inner--truthy').should('exist')
+    cy.get(formField).eq(2).find('.q-field input').should('have.value', 'Title 1')
+    cy.get(formField).eq(3).find('.q-field input').should('have.value', 'Address 1')
+    cy.get(formField).eq(4).find('.q-field input').should('have.value', 'Locality 1')
+    cy.get(formField).eq(5).find('.q-field input').should('have.value', 'PostCode 1')
+    cy.get(formField).eq(6).find('.q-field .q-chip').should('contain.text', 'logo.png')
+    cy.get(formField).eq(7).find('.q-field input').should('have.value', 'Object 1')
+    cy.get(formField).eq(8).find('.q-field textarea').should('have.value', 'Object Description 1')
+    cy.get(formField).eq(9).find('.q-field input').should('have.value', 'Signatory Name 1')
+    cy.get(formField).eq(10).find('.q-field input').should('have.value', 'Signatory Position 1')
+    cy.get(formField).eq(11).find('.q-field .q-chip').should('contain.text', 'signature.webp')
   })
   it('should show validation errors', () => {
     cy.visit('/organisations/organisation-id-1')
@@ -44,54 +45,52 @@ describe('Organisation Update', () => {
     cy.get(formField).eq(0).find('input').type('Updated Organisation')
 
     // Change title
-    cy.get(formField).eq(1).find('input').clear()
-    cy.get(formField).eq(1).find('input').type('Updated Title')
+    cy.get(formField).eq(2).find('input').clear()
+    cy.get(formField).eq(2).find('input').type('Updated Title')
 
     // Change address
-    cy.get(formField).eq(2).find('input').clear()
-    cy.get(formField).eq(2).find('input').type('456 Updated Street')
-
-    // Change locality
     cy.get(formField).eq(3).find('input').clear()
-    cy.get(formField).eq(3).find('input').type('Updated City')
+    cy.get(formField).eq(3).find('input').type('456 Updated Street')
+    // Change locality
+    cy.get(formField).eq(4).find('input').clear()
+    cy.get(formField).eq(4).find('input').type('Updated City')
 
     // Change post code
-    cy.get(formField).eq(4).find('input').clear()
-    cy.get(formField).eq(4).find('input').type('75002')
-
+    cy.get(formField).eq(5).find('input').clear()
+    cy.get(formField).eq(5).find('input').type('75002')
     cy.mockUploadImage()
     // Change logo
     cy.get(formField)
-      .eq(5)
+      .eq(6)
       .find('input[type="file"]')
       .selectFile('cypress/fixtures/img/signature.webp', { force: true })
 
     // Change object
-    cy.get(formField).eq(6).find('input').clear()
-    cy.get(formField).eq(6).find('input').type('Updated Object')
+    cy.get(formField).eq(7).find('input').clear()
+    cy.get(formField).eq(7).find('input').type('Updated Object')
 
     // Change object description
-    cy.get(formField).eq(7).find('textarea').clear()
-    cy.get(formField).eq(7).find('textarea').type('Updated description for this organisation.')
+    cy.get(formField).eq(8).find('textarea').clear()
+    cy.get(formField).eq(8).find('textarea').type('Updated description for this organisation.')
 
     // Change signatory name
-    cy.get(formField).eq(8).find('input').clear()
-    cy.get(formField).eq(8).find('input').type('Jane Smith')
-
-    // Change signatory position
     cy.get(formField).eq(9).find('input').clear()
-    cy.get(formField).eq(9).find('input').type('Director')
+    cy.get(formField).eq(9).find('input').type('Jane Smith')
+    // Change signatory position
+    cy.get(formField).eq(10).find('input').clear()
+    cy.get(formField).eq(10).find('input').type('Director')
 
     cy.mockUploadImage()
     // Change signature
     cy.get(formField)
-      .eq(10)
+      .eq(11)
       .find('input[type="file"]')
       .selectFile('cypress/fixtures/img/logo.png', { force: true })
 
     cy.mockOrganisationList()
     cy.mockUpdateOrganisation('organisation-id-1', {
       name: 'Updated Organisation',
+      isTaxReceiptEnabled: true,
       title: 'Updated Title',
       address: '456 Updated Street',
       locality: 'Updated City',

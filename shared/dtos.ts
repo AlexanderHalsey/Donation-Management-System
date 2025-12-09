@@ -10,6 +10,7 @@ export interface OrganisationRefDto {
   id: string
   name: string
   isDisabled: boolean
+  isTaxReceiptEnabled: boolean
 }
 
 export interface OrganisationDto extends OrganisationRefDto {
@@ -34,6 +35,7 @@ export interface DonationTypeDto {
   updatedAt: string
   organisationId: string
   isDisabled: boolean
+  isTaxReceiptEnabled: boolean
 }
 
 export interface DonationMethodDto {
@@ -291,6 +293,7 @@ export interface GetOrganisationResponse {
 
 export interface OrganisationRequest {
   name: string
+  isTaxReceiptEnabled: boolean
   title?: string
   address?: string
   locality?: string
@@ -383,6 +386,7 @@ export interface PaymentModeRequest {
 export interface DonationTypeRequest {
   name: string
   organisationId: string
+  isTaxReceiptEnabled: boolean
 }
 
 export interface FileUploadRequest {

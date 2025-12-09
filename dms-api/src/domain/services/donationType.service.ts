@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -18,20 +18,42 @@ export class DonationTypeService {
   }
 
   async create(request: DonationTypeRequest): Promise<DonationType> {
+    const organisation = await this.prisma.organisation.findUniqueOrThrow({
+      where: { id: request.organisationId },
+    })
+
+    if (!organisation.isTaxReceiptEnabled && request.isTaxReceiptEnabled) {
+      throw new BadRequestException(
+        'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
+      )
+    }
+
     return this.prisma.donationType.create({
       data: {
         name: request.name,
         organisationId: request.organisationId,
+        isTaxReceiptEnabled: request.isTaxReceiptEnabled,
       },
     })
   }
 
   async update(id: string, request: DonationTypeRequest): Promise<DonationType> {
+    const organisation = await this.prisma.organisation.findUniqueOrThrow({
+      where: { id: request.organisationId },
+    })
+
+    if (!organisation.isTaxReceiptEnabled && request.isTaxReceiptEnabled) {
+      throw new BadRequestException(
+        'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
+      )
+    }
+
     return this.prisma.donationType.update({
       where: { id },
       data: {
         name: request.name,
         organisationId: request.organisationId,
+        isTaxReceiptEnabled: request.isTaxReceiptEnabled,
       },
     })
   }

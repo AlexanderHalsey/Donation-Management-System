@@ -6,7 +6,7 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { DonationTypeService } from '../services/donationType.service'
 import { PrismaService } from '@/infrastructure'
 
-import type { DonationType } from '@generated/prisma/client'
+import type { DonationType, Organisation } from '@generated/prisma/client'
 
 describe('DonationTypeService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -54,8 +54,12 @@ describe('DonationTypeService', () => {
     const request = {
       name: 'New Donation Type',
       organisationId: 'organisation-id-123',
+      isTaxReceiptEnabled: true,
     }
     const createdDonationType = mockDeep<DonationType>({ id: 'new-donation-type-id-123' })
+    prismaServiceMock.organisation.findUniqueOrThrow.mockResolvedValueOnce(
+      mockDeep<Organisation>({ isTaxReceiptEnabled: true }),
+    )
     prismaServiceMock.donationType.create.mockResolvedValueOnce(createdDonationType)
 
     await donationTypeService.create(request)
@@ -63,12 +67,31 @@ describe('DonationTypeService', () => {
     expect(prismaServiceMock.donationType.create).toHaveBeenCalledWith({ data: request })
   })
 
+  it('should throw error when creating donation type with tax receipts enabled under an organisation with tax receipts disabled', async () => {
+    const request = {
+      name: 'New Donation Type',
+      organisationId: 'organisation-id-123',
+      isTaxReceiptEnabled: true,
+    }
+    prismaServiceMock.organisation.findUniqueOrThrow.mockResolvedValueOnce(
+      mockDeep<Organisation>({ isTaxReceiptEnabled: false }),
+    )
+
+    await expect(donationTypeService.create(request)).rejects.toThrow(
+      'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
+    )
+  })
+
   it('should update donation type', async () => {
     const id = 'donation-type-id-123'
     const request = {
       name: 'Updated Donation Type',
       organisationId: 'organisation-id-456',
+      isTaxReceiptEnabled: false,
     }
+    prismaServiceMock.organisation.findUniqueOrThrow.mockResolvedValueOnce(
+      mockDeep<Organisation>({ isTaxReceiptEnabled: true }),
+    )
     prismaServiceMock.donationType.update.mockResolvedValueOnce(mockDeep<DonationType>())
 
     await donationTypeService.update(id, request)
@@ -77,6 +100,22 @@ describe('DonationTypeService', () => {
       where: { id },
       data: request,
     })
+  })
+
+  it('should throw error when updating donation type with tax receipts enabled under an organisation with tax receipts disabled', async () => {
+    const id = 'donation-type-id-123'
+    const request = {
+      name: 'Updated Donation Type',
+      organisationId: 'organisation-id-456',
+      isTaxReceiptEnabled: true,
+    }
+    prismaServiceMock.organisation.findUniqueOrThrow.mockResolvedValueOnce(
+      mockDeep<Organisation>({ isTaxReceiptEnabled: false }),
+    )
+
+    await expect(donationTypeService.update(id, request)).rejects.toThrow(
+      'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
+    )
   })
 
   it('should disable donation type', async () => {

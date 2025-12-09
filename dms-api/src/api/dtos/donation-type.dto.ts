@@ -7,6 +7,7 @@ export class DonationTypeDto {
   updatedAt: string
   isDisabled: boolean
   organisationId: string
+  isTaxReceiptEnabled: boolean
 }
 
 export class DonationTypeSortOrder extends NameSortOrder {}

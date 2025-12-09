@@ -1,10 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsOptional, IsString } from 'class-validator'
 
 export class OrganisationRequest {
   @ApiProperty()
   @IsString()
   name: string
+
+  @ApiProperty()
+  @IsBoolean()
+  isTaxReceiptEnabled: boolean
 
   @ApiProperty({ required: false })
   @IsOptional()

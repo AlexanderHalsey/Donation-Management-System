@@ -27,11 +27,24 @@
         </template>
       </Select>
     </FormField>
+    <FormField
+      v-show="organisation?.isTaxReceiptEnabled"
+      name="isTaxReceiptEnabled"
+      label="Eligible aux reçus fiscaux"
+    >
+      <QCheckbox
+        id="isTaxReceiptEnabled"
+        v-model="isTaxReceiptEnabled"
+        :error="errors.isTaxReceiptEnabled"
+        v-bind="isTaxReceiptEnabledAttrs"
+        style="padding-bottom: 20px"
+      />
+    </FormField>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, computed } from 'vue'
+import { onBeforeUnmount, computed, watch } from 'vue'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -60,16 +73,24 @@ const { defineField, errors, handleSubmit, resetForm } = useForm({
     ? {
         name: props.donationType?.name,
         organisationId: props.donationType?.organisationId,
+        isTaxReceiptEnabled: props.donationType?.isTaxReceiptEnabled,
       }
-    : {},
+    : { isTaxReceiptEnabled: false },
 })
 
 const [name, nameAttrs] = defineField('name')
 const [organisationId, organisationIdAttrs] = defineField('organisationId')
+const [isTaxReceiptEnabled, isTaxReceiptEnabledAttrs] = defineField('isTaxReceiptEnabled')
 
 const organisation = computed(() =>
   props.organisationOptions.find((o) => o.id === organisationId.value),
 )
+
+watch(organisation, (newOrganisation) => {
+  if (newOrganisation?.isTaxReceiptEnabled !== true) {
+    isTaxReceiptEnabled.value = false
+  }
+})
 
 const updateOrganisation = (newOrganisation: OrganisationRef | null) => {
   organisationId.value = newOrganisation?.id

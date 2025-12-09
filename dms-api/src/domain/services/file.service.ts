@@ -52,7 +52,7 @@ export class FileService {
     })
   }
 
-  async finalizeFile(fileId: string): Promise<void> {
+  async activateFile(fileId: string): Promise<void> {
     await this.prisma.fileMetadata.update({
       where: { id: fileId },
       data: {

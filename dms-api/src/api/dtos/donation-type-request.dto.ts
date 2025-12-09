@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString, IsUUID } from 'class-validator'
+import { IsBoolean, IsString, IsUUID } from 'class-validator'
 
 export class DonationTypeRequest {
   @ApiProperty()
@@ -9,4 +9,8 @@ export class DonationTypeRequest {
   @ApiProperty()
   @IsUUID()
   organisationId: string
+
+  @ApiProperty()
+  @IsBoolean()
+  isTaxReceiptEnabled: boolean
 }

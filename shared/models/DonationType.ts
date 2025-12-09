@@ -5,4 +5,5 @@ export interface DonationType {
   updatedAt: Date
   organisationId: string
   isDisabled: boolean
+  isTaxReceiptEnabled: boolean
 }

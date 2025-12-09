@@ -4,6 +4,16 @@
       <Input id="name" v-model="name" :error="errors.name" v-bind="nameAttrs" />
     </FormField>
 
+    <FormField name="isTaxReceiptEnabled" label="Eligible aux reçus fiscaux">
+      <QCheckbox
+        id="isTaxReceiptEnabled"
+        v-model="isTaxReceiptEnabled"
+        :error="errors.isTaxReceiptEnabled"
+        v-bind="isTaxReceiptEnabledAttrs"
+        style="padding-bottom: 20px"
+      />
+    </FormField>
+
     <FormField name="title" label="Nom sur le reçu">
       <Input id="title" v-model="title" :error="errors.title" v-bind="titleAttrs" />
     </FormField>
@@ -105,10 +115,11 @@ const { defineField, errors, handleSubmit, resetForm } = useForm({
         logoId: props.organisation.logo?.id,
         signatureId: props.organisation.signature?.id,
       }
-    : {},
+    : { isTaxReceiptEnabled: false },
 })
 
 const [name, nameAttrs] = defineField('name')
+const [isTaxReceiptEnabled, isTaxReceiptEnabledAttrs] = defineField('isTaxReceiptEnabled')
 const [title, titleAttrs] = defineField('title')
 const [address, addressAttrs] = defineField('address')
 const [locality, localityAttrs] = defineField('locality')

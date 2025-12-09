@@ -86,6 +86,7 @@ describe('OrganisationService', () => {
     it('should create organisation without files', async () => {
       const request = {
         name: 'New Organisation',
+        isTaxReceiptEnabled: false,
         title: 'Organisation Title',
         address: '123 Main St',
         locality: 'City',
@@ -100,12 +101,13 @@ describe('OrganisationService', () => {
         include: { logo: true, signature: true },
         omit: { logoId: true, signatureId: true },
       })
-      expect(fileServiceMock.finalizeFile).not.toHaveBeenCalled()
+      expect(fileServiceMock.activateFile).not.toHaveBeenCalled()
     })
 
     it('should create organisation and finalize files', async () => {
       const request = {
         name: 'New Organisation',
+        isTaxReceiptEnabled: true,
         title: 'Organisation Title',
         address: '123 Main St',
         locality: 'City',
@@ -122,14 +124,15 @@ describe('OrganisationService', () => {
         include: { logo: true, signature: true },
         omit: { logoId: true, signatureId: true },
       })
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledTimes(2)
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledWith('logo-file-id')
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledWith('signature-file-id')
+      expect(fileServiceMock.activateFile).toHaveBeenCalledTimes(2)
+      expect(fileServiceMock.activateFile).toHaveBeenCalledWith('logo-file-id')
+      expect(fileServiceMock.activateFile).toHaveBeenCalledWith('signature-file-id')
     })
 
     it('should create organisation and finalize only provided files', async () => {
       const request = {
         name: 'New Organisation',
+        isTaxReceiptEnabled: true,
         logoId: 'logo-file-id',
         // No signatureId
       }
@@ -137,8 +140,8 @@ describe('OrganisationService', () => {
 
       await organisationService.create(request)
 
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledTimes(1)
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledWith('logo-file-id')
+      expect(fileServiceMock.activateFile).toHaveBeenCalledTimes(1)
+      expect(fileServiceMock.activateFile).toHaveBeenCalledWith('logo-file-id')
     })
   })
 
@@ -155,6 +158,7 @@ describe('OrganisationService', () => {
       const id = 'organisation-id-123'
       const request = {
         name: 'Updated Organisation',
+        isTaxReceiptEnabled: true,
         title: 'Updated Title',
       }
       const existingFileIds = { logoId: null, signatureId: null }
@@ -171,14 +175,16 @@ describe('OrganisationService', () => {
         include: { logo: true, signature: true },
         omit: { logoId: true, signatureId: true },
       })
-      expect(fileServiceMock.finalizeFile).not.toHaveBeenCalled()
+      expect(fileServiceMock.activateFile).not.toHaveBeenCalled()
       expect(fileServiceMock.deleteFile).not.toHaveBeenCalled()
+      expect(prismaServiceMock.donationType.updateMany).not.toHaveBeenCalled()
     })
 
     it('should update organisation and handle file changes', async () => {
       const id = 'organisation-id-123'
       const request = {
         name: 'Updated Organisation',
+        isTaxReceiptEnabled: true,
         logoId: 'new-logo-id',
         signatureId: 'new-signature-id',
       }
@@ -190,18 +196,20 @@ describe('OrganisationService', () => {
 
       await organisationService.update(id, request)
 
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledTimes(2)
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledWith('new-logo-id')
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledWith('new-signature-id')
+      expect(fileServiceMock.activateFile).toHaveBeenCalledTimes(2)
+      expect(fileServiceMock.activateFile).toHaveBeenCalledWith('new-logo-id')
+      expect(fileServiceMock.activateFile).toHaveBeenCalledWith('new-signature-id')
       expect(fileServiceMock.deleteFile).toHaveBeenCalledTimes(2)
       expect(fileServiceMock.deleteFile).toHaveBeenCalledWith('old-logo-id')
       expect(fileServiceMock.deleteFile).toHaveBeenCalledWith('old-signature-id')
+      expect(prismaServiceMock.donationType.updateMany).not.toHaveBeenCalled()
     })
 
     it('should handle partial file updates', async () => {
       const id = 'organisation-id-123'
       const request = {
         name: 'Updated Organisation',
+        isTaxReceiptEnabled: true,
         logoId: 'new-logo-id',
         signatureId: 'old-signature-id', // Same as existing
       }
@@ -213,10 +221,32 @@ describe('OrganisationService', () => {
 
       await organisationService.update(id, request)
 
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledTimes(1)
-      expect(fileServiceMock.finalizeFile).toHaveBeenCalledWith('new-logo-id')
+      expect(fileServiceMock.activateFile).toHaveBeenCalledTimes(1)
+      expect(fileServiceMock.activateFile).toHaveBeenCalledWith('new-logo-id')
       expect(fileServiceMock.deleteFile).toHaveBeenCalledTimes(1)
       expect(fileServiceMock.deleteFile).toHaveBeenCalledWith('old-logo-id')
+      expect(prismaServiceMock.donationType.updateMany).not.toHaveBeenCalled()
+    })
+
+    it('should disable tax receipts for donation types when organisation tax receipts are disabled', async () => {
+      const id = 'organisation-id-123'
+      const request = {
+        name: 'Updated Organisation',
+        isTaxReceiptEnabled: false,
+        title: 'Updated Title',
+      }
+      const existingFileIds = { logoId: null, signatureId: null }
+      prismaServiceMock.organisation.findUniqueOrThrow.mockResolvedValueOnce(
+        mockDeep<Organisation>(existingFileIds),
+      )
+      prismaServiceMock.organisation.update.mockResolvedValueOnce(mockDeep<Organisation>())
+
+      await organisationService.update(id, request)
+
+      expect(prismaServiceMock.donationType.updateMany).toHaveBeenCalledWith({
+        where: { organisationId: id, isTaxReceiptEnabled: true },
+        data: { isTaxReceiptEnabled: false },
+      })
     })
   })
 
