@@ -35,6 +35,7 @@
           v-if="!row.taxReceiptId"
           :donation="row"
           @delete:donation="$emit('delete:donation', $event)"
+          @create:tax-receipt="$emit('create:tax-receipt', $event)"
         />
       </td>
     </template>
@@ -85,6 +86,7 @@ const props = defineProps({
 const emit = defineEmits<{
   'update:pagination': [pagination: DonationListPaginationRequest]
   'delete:donation': [donationId: string]
+  'create:tax-receipt': [donationId: string]
 }>()
 
 const headers: QTableProps['columns'] = [
@@ -153,6 +155,9 @@ const headers: QTableProps['columns'] = [
 const rowClassFn = (row: DonationListItem) => {
   if (row.taxReceiptId) {
     return 'bg-green-2'
+  }
+  if (row.isTaxReceiptEnabled) {
+    return 'bg-amber-3'
   }
   return 'bg-white'
 }

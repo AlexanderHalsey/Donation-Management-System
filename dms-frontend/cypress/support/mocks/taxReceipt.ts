@@ -8,6 +8,7 @@ import type {
   TaxReceiptListItem,
   TaxReceiptListFilter,
   TaxReceiptListSortOrder,
+  TaxReceiptStatus,
 } from '@shared/models'
 
 export type TaxReceiptListFilterMock = Omit<TaxReceiptListFilter, 'donorId'> & {
@@ -27,8 +28,10 @@ export function buildMockTaxReceipts(
     updatedAt: addDays(new Date(2024, 1, 1), index),
     donor: donorRefs[index % donorRefs.length],
     receiptNumber: index + 1000,
-    isCanceled: index % 50 === 0,
-    type: index % 2 === 0 ? 'annual' : 'individual',
+    status: (['PENDING', 'PROCESSING', 'FAILED', 'COMPLETED', 'CANCELED'] as TaxReceiptStatus[])[
+      index % 5
+    ],
+    type: index % 2 === 0 ? 'ANNUAL' : 'INDIVIDUAL',
     file: {
       id: v4(),
       name: `tax-receipt-${index + 1}.pdf`,
@@ -41,8 +44,7 @@ export function buildMockTaxReceipts(
         !filter.donorId.in.includes(donorRefs.indexOf(taxReceipt.donor))) ||
       (typeof filter?.createdAt?.gte === 'object' && taxReceipt.createdAt < filter.createdAt.gte) ||
       (typeof filter?.createdAt?.lte === 'object' && taxReceipt.createdAt > filter.createdAt.lte) ||
-      (filter?.isCanceled?.equals !== undefined &&
-        taxReceipt.isCanceled !== filter.isCanceled.equals) ||
+      (filter?.status?.in !== undefined && !filter.status.in.includes(taxReceipt.status)) ||
       (filter?.type?.equals !== undefined && filter.type.equals !== taxReceipt.type)
     ) {
       return false

@@ -16,39 +16,12 @@ export class FileService {
     private readonly fileStorageService: FileStorageService,
   ) {}
 
-  async uploadFile(file: Express.Multer.File, status: 'DRAFT' | 'ACTIVE'): Promise<string> {
-    const hash = this.computeHash(file.buffer)
-
-    return await this.prisma.$transaction(async (tx) => {
-      const fileMetadata = await tx.fileMetadata.create({
-        data: {
-          expiresAt:
-            status === 'DRAFT'
-              ? new Date(Date.now() + 24 * 60 * 60 * 1000) // Expires in 24 hours if draft
-              : null,
-          name: file.originalname,
-          size: file.size,
-          mimeType: file.mimetype,
-          status,
-          hash,
-        },
-        select: { id: true },
-      })
-
-      const duplicateFile = await tx.fileMetadata.findFirst({
-        where: { hash, status: 'ACTIVE' },
-        select: { storageKey: true },
-      })
-
-      const storageKey =
-        duplicateFile?.storageKey || (await this.fileStorageService.uploadFile(file))
-
-      await tx.fileMetadata.update({
-        where: { id: fileMetadata.id },
-        data: { storageKey },
-      })
-
-      return fileMetadata.id
+  async uploadDraftFile(file: Express.Multer.File): Promise<string> {
+    return await this._createFile({
+      name: file.originalname,
+      mimeType: file.mimetype,
+      buffer: file.buffer,
+      status: 'DRAFT',
     })
   }
 
@@ -62,12 +35,85 @@ export class FileService {
     })
   }
 
+  async createFile({
+    name,
+    mimeType,
+    buffer,
+  }: {
+    name: string
+    mimeType: string
+    buffer: Buffer
+  }): Promise<string> {
+    return await this._createFile({ name, mimeType, buffer, status: 'ACTIVE' })
+  }
+
+  private async _createFile({
+    name,
+    mimeType,
+    buffer,
+    status,
+  }: {
+    name: string
+    mimeType: string
+    buffer: Buffer
+    status: 'ACTIVE' | 'DRAFT'
+  }): Promise<string> {
+    const hash = this.computeHash(buffer)
+    let uploadedStorageKey: string | undefined
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const duplicateFile = await tx.fileMetadata.findFirst({
+            where: { hash, status: 'ACTIVE' },
+            select: { storageKey: true },
+          })
+
+          const storageKey =
+            duplicateFile?.storageKey ||
+            (await this.fileStorageService.uploadFile({ name, buffer }))
+          if (!duplicateFile) uploadedStorageKey = storageKey
+
+          const fileId = await tx.fileMetadata.create({
+            data: {
+              name,
+              mimeType,
+              storageKey,
+              size: buffer.length,
+              hash,
+              status,
+              expiresAt: status === 'DRAFT' ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null,
+            },
+            select: { id: true },
+          })
+
+          uploadedStorageKey = undefined
+          return fileId.id
+        },
+        { timeout: 60 * 1000 },
+      )
+    } catch (error) {
+      if (uploadedStorageKey) {
+        try {
+          await this.fileStorageService.deleteFile(uploadedStorageKey)
+        } catch (cleanupError) {
+          console.error(
+            'Failed to cleanup uploaded file after transaction failure: ',
+            uploadedStorageKey,
+            cleanupError,
+          )
+        }
+      }
+      throw new BadRequestException(
+        `Failed to create file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
+    }
+  }
+
   async downloadFile(fileId: string): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
     const fileMetadata = await this.prisma.fileMetadata.findUniqueOrThrow({
       where: { id: fileId },
     })
 
-    if (!fileMetadata.storageKey) throw new BadRequestException('File storage key not found')
     if (fileMetadata.status !== 'ACTIVE') throw new BadRequestException('File is not active')
 
     const buffer = await this.fileStorageService.downloadFile(fileMetadata.storageKey)
@@ -85,19 +131,41 @@ export class FileService {
     }
   }
 
+  async updateFileContent(
+    file: PrismaFileMetadata,
+
+    newBuffer: Buffer,
+  ): Promise<void> {
+    const hash = this.computeHash(newBuffer)
+    await this.prisma.$transaction(
+      async (tx) => {
+        await tx.fileMetadata.update({
+          where: { id: file.id },
+          data: {
+            hash,
+            size: newBuffer.length,
+          },
+        })
+        await this.fileStorageService.updateFile({ filePath: file.storageKey, buffer: newBuffer })
+      },
+      { timeout: 60 * 1000 },
+    )
+  }
+
   async deleteFile(fileId: string): Promise<void> {
-    return await this.prisma.$transaction(async (tx) => {
-      const fileMetadata = await tx.fileMetadata.findUniqueOrThrow({
-        where: { id: fileId },
-        select: { storageKey: true },
-      })
+    return await this.prisma.$transaction(
+      async (tx) => {
+        const fileMetadata = await tx.fileMetadata.findUniqueOrThrow({
+          where: { id: fileId },
+          select: { storageKey: true },
+        })
 
-      if (!fileMetadata.storageKey) throw new BadRequestException('File storage key not found')
+        await tx.fileMetadata.delete({ where: { id: fileId } })
 
-      await this.fileStorageService.deleteFile(fileMetadata.storageKey)
-
-      await tx.fileMetadata.delete({ where: { id: fileId } })
-    })
+        await this.fileStorageService.deleteFile(fileMetadata.storageKey)
+      },
+      { timeout: 60 * 1000 },
+    )
   }
 
   computeHash(buffer: Buffer): string {

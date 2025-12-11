@@ -29,6 +29,9 @@ COPY --chown=dms:dms dms-api/tsconfig*.json ./
 COPY --chown=dms:dms dms-api/nest-cli.json ./
 COPY --chown=dms:dms dms-api/prisma.config.ts ./
 COPY --chown=dms:dms dms-api/prisma/ ./prisma/
+COPY --chown=dms:dms dms-api/startup.sh ./
+
+RUN chmod +x ./startup.sh
 
 # Set a dummy database URL for Prisma code generation
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
@@ -47,9 +50,10 @@ WORKDIR /app/dms-api
 
 COPY --from=builder --chown=dms:dms /app/dms-api/dist ./dist
 COPY --from=builder --chown=dms:dms /app/dms-api/prisma.config.ts ./
-COPY --from=builder --chown=dms:dms /app/dms-api/prisma/models ./prisma/models
-COPY --from=builder --chown=dms:dms /app/dms-api/prisma/migrations ./prisma/migrations
+COPY --from=builder --chown=dms:dms /app/dms-api/prisma ./prisma
+COPY --from=builder --chown=dms:dms /app/dms-api/startup.sh ./
+COPY --from=builder --chown=dms:dms /app/dms-api/tsconfig.json ./
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma generate --sql && npx prisma migrate deploy && node dist/dms-api/src/main"]
+CMD ["/bin/sh", "./startup.sh"]

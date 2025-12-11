@@ -1,26 +1,25 @@
-import { TaxReceiptCreateManyInput } from '../generated/prisma/models'
+import { TaxReceiptCreateInput } from '../generated/prisma/models'
+import { buildMockTaxReceiptPdfTemplateFile } from './file.mock'
 
-export const buildMockTaxReceiptCreateManyInput = ({
-  index,
-  fileId,
+export const buildMockTaxReceiptCreateInput = ({
   donorId,
+  donations,
   type,
   createdAt,
 }: {
-  index: number
-  fileId: string
   donorId: string
+  donations: { id: string }[]
   type: 'ANNUAL' | 'INDIVIDUAL'
   createdAt: Date
-}): TaxReceiptCreateManyInput => {
+}): TaxReceiptCreateInput => {
   return {
-    fileId,
-    donorId,
     createdAt,
-    receiptNumber: 1000 + index,
-    isCanceled: false,
+    status: 'COMPLETED',
     canceledReason: null,
     canceledAt: null,
     type,
+    file: { create: buildMockTaxReceiptPdfTemplateFile() },
+    donor: { connect: { id: donorId } },
+    donations: { connect: donations },
   }
 }

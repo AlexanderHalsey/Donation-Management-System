@@ -33,7 +33,7 @@ describe('Organisation Create', () => {
       .eq(0)
       .should('have.text', 'Obligatoire')
   })
-  it.only('should allow filling in various fields', () => {
+  it('should allow filling in various fields', () => {
     cy.visit('/organisations/create')
 
     // Enter name (required)

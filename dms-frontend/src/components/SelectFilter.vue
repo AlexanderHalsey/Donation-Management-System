@@ -34,30 +34,21 @@
   </Select>
 </template>
 
-<script setup lang="ts">
-import { ref, watch, type PropType } from 'vue'
+<script setup lang="ts" generic="T extends SelectFilter">
+import { ref, watch } from 'vue'
 
 import Select, { type SelectOption } from './ui/Select.vue'
 
-import type { UuidFilter } from '@shared/models'
+import type { SelectFilter } from '@shared/models'
 
-const props = defineProps({
-  modelValue: {
-    type: Object as PropType<UuidFilter>,
-    default: undefined,
-  },
-  options: {
-    type: Array as PropType<Array<SelectOption>>,
-    default: () => [],
-  },
-  lazyLoad: {
-    type: Function as PropType<() => Promise<void>>,
-    default: undefined,
-  },
-})
+const props = defineProps<{
+  modelValue?: T
+  options: Array<SelectOption>
+  lazyLoad?: () => Promise<void>
+}>()
 
 const emit = defineEmits<{
-  'update:model-value': [value: UuidFilter]
+  'update:model-value': [value: T]
   'lazy-load': []
 }>()
 
@@ -65,7 +56,7 @@ const values = ref<SelectOption[]>([])
 const updateModelValue = (newValues: SelectOption[]) => {
   emit('update:model-value', {
     in: newValues.map((option) => option.id),
-  })
+  } as T)
 }
 
 watch(

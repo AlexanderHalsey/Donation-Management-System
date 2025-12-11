@@ -84,7 +84,8 @@ export interface DonorDto extends DonorListItemDto {
   isDisabled: boolean
 }
 
-export type TaxReceiptType = 'annual' | 'individual'
+export type TaxReceiptType = 'ANNUAL' | 'INDIVIDUAL'
+export type TaxReceiptStatus = 'PENDING' | 'PROCESSING' | 'FAILED' | 'COMPLETED' | 'CANCELED'
 
 export interface TaxReceiptListItemDto {
   id: string
@@ -93,11 +94,11 @@ export interface TaxReceiptListItemDto {
   receiptNumber: number
   donor: DonorRefDto
   type: TaxReceiptType
-  file: {
+  file?: {
     id: string
     name: string
   }
-  isCanceled: boolean
+  status: TaxReceiptStatus
   canceledAt?: string
   canceledReason?: string
 }
@@ -111,6 +112,7 @@ export interface DonationListItemDto {
   organisation: OrganisationRefDto
   donationType: DonationTypeDto
   donor: DonorRefDto
+  isTaxReceiptEnabled: boolean
   taxReceiptId?: string
 }
 
@@ -126,7 +128,7 @@ export interface FileMetadataDto {
   id: string
   uploadedAt: string
   expiresAt?: string
-  storageKey?: string
+  storageKey: string
   name: string
   size: number
   mimeType: string
@@ -207,34 +209,38 @@ interface NameSortOrder {
 
 export interface DonationListFilter {
   donor?: {
-    id?: UuidFilter
+    id?: SelectFilter
     isDisabled?: BoolFilter
   }
   donatedAt?: DateTimeFilter
   amount?: FloatFilter
-  paymentModeId?: UuidFilter
-  organisationId?: UuidFilter
-  donationTypeId?: UuidFilter
+  paymentModeId?: SelectFilter
+  organisationId?: SelectFilter
+  donationTypeId?: SelectFilter
 }
 
 export interface DonorListFilter {
-  id?: UuidFilter
+  id?: SelectFilter
   donatedAt?: DateTimeFilter
   totalAmount?: FloatFilter
 }
 
 export interface TaxReceiptListFilter {
-  donorId?: UuidFilter
+  donorId?: SelectFilter
   createdAt?: DateTimeFilter
   type?: TaxReceiptTypeFilter
-  isCanceled?: BoolFilter
+  status?: TaxReceiptStatusFilter
 }
 
 export interface TaxReceiptTypeFilter {
   equals?: TaxReceiptType
 }
 
-export interface UuidFilter {
+export interface TaxReceiptStatusFilter {
+  in?: TaxReceiptStatus[]
+}
+
+export interface SelectFilter {
   in?: string[]
 }
 
@@ -395,4 +401,8 @@ export interface FileUploadRequest {
 
 export interface FileUploadResponse {
   id: string
+}
+
+export interface GetTaxReceiptResponse {
+  taxReceiptId: string
 }

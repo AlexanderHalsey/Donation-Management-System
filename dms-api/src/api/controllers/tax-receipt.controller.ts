@@ -9,6 +9,7 @@ import {
   CancelTaxReceiptRequest,
   GetTaxReceiptListRequest,
   GetTaxReceiptListResponse,
+  GetTaxReceiptResponse,
 } from '../dtos'
 
 @Controller('tax-receipts')
@@ -44,6 +45,22 @@ export class TaxReceiptController {
     }
   }
 
+  @Post('individual/:donationId')
+  @ApiOperation({ summary: 'Generate an individual tax receipt for a donation' })
+  @ApiResponse({ status: 200, description: 'Individual tax receipt generated successfully' })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async createIndividualTaxReceipt(
+    @Param('donationId') donationId: string,
+  ): Promise<GetTaxReceiptResponse> {
+    const taxReceiptId = await this.taxReceiptService.createTaxReceipt({
+      donationIds: [donationId],
+      taxReceiptType: 'INDIVIDUAL',
+    })
+
+    return { taxReceiptId }
+  }
+
   @Put(':id/cancel')
   @ApiOperation({ summary: 'Cancel a tax receipt' })
   @ApiResponse({ status: 200, description: 'Tax receipt cancelled successfully' })
@@ -54,5 +71,22 @@ export class TaxReceiptController {
     @Body() request: CancelTaxReceiptRequest,
   ): Promise<void> {
     await this.taxReceiptService.cancelTaxReceipt(id, request)
+  }
+
+  @Post(':id/retry-failed')
+  @ApiOperation({ summary: 'Retry generating a failed tax receipt' })
+  @ApiResponse({ status: 200, description: 'Tax receipt generation retried successfully' })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async retryFailedTaxReceipt(@Param('id') id: string): Promise<void> {
+    const taxReceipt = await this.taxReceiptService.getTaxReceiptById(id)
+    if (taxReceipt.status !== 'FAILED') {
+      throw new Error('Only failed tax receipts can be retried. Tax receipt id : ' + id)
+    }
+    await this.taxReceiptService.processTaxReceiptGeneration({
+      taxReceiptId: id,
+      donationIds: taxReceipt.donationIds,
+      taxReceiptType: taxReceipt.type,
+    })
   }
 }

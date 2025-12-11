@@ -42,6 +42,7 @@ export function buildMockDonations(
     createdAt: addDays(new Date(2024, 0, 1), index),
     updatedAt: addDays(new Date(2024, 1, 1), index),
     donatedAt: addDays(new Date(2024, 0, 1), index),
+    isTaxReceiptEnabled: index % 4 === 0,
     amount: ((index % 10) + 1) * 10,
     paymentMode: paymentModes[index % paymentModes.length],
     organisation: organisations[index % organisations.length],

@@ -5,7 +5,6 @@
     :pagination="computedPagination"
     :loading="loading"
     row-key="id"
-    :table-row-class-fn="rowClassFn"
     data-cy="tax-receipt-list-table"
     @update:pagination="updatePagination"
   >
@@ -20,15 +19,22 @@
     </template>
     <template #body-cell-file="{ row }">
       <td>
-        <Btn flat class="file-link" @click="viewFile(row.file)">{{ row.file.name }}</Btn>
+        <Btn v-if="row.file" flat class="file-link" @click="viewFile(row.file)">{{
+          row.file.name
+        }}</Btn>
+        <span v-else>-</span>
       </td>
     </template>
+    <template #body-cell-status="{ row }">
+      <td class="text-right"><TaxReceiptStatusIcon :tax-receipt-status="row.status" /></td>
+    </template>
     <template #body-cell-actions="{ row }">
-      <td>
+      <td class="text-center">
         <TaxReceiptListItemActions
           v-if="!row.taxReceiptId"
           :taxReceipt="row"
           @cancel:taxReceipt="$emit('cancel:taxReceipt', $event)"
+          @retry-failed:tax-receipt="$emit('retry-failed:tax-receipt', $event)"
         />
       </td>
     </template>
@@ -46,6 +52,7 @@ import FormattedDate from '@/components/FormattedDate.vue'
 
 import { DonorLink } from '@/features/donors'
 
+import TaxReceiptStatusIcon from './TaxReceiptStatusIcon.vue'
 import TaxReceiptTypeTag from './TaxReceiptTypeTag.vue'
 import TaxReceiptListItemActions from './TaxReceiptListItemActions.vue'
 
@@ -76,6 +83,7 @@ const props = defineProps({
 const emit = defineEmits<{
   'update:pagination': [pagination: TaxReceiptListPaginationRequest]
   'cancel:taxReceipt': [formData: CancelTaxReceiptFormData]
+  'retry-failed:tax-receipt': [taxReceipt: TaxReceiptListItem]
 }>()
 
 const headers: QTableProps['columns'] = [
@@ -101,8 +109,8 @@ const headers: QTableProps['columns'] = [
     field: 'createdAt',
     align: 'left',
     sortable: true,
-    headerStyle: 'width: 120px;',
-    style: 'width: 120px;',
+    headerStyle: 'width: 100px;',
+    style: 'width: 100px;',
   },
   {
     name: 'type',
@@ -110,8 +118,8 @@ const headers: QTableProps['columns'] = [
     field: 'type',
     align: 'left',
     sortable: true,
-    headerStyle: 'width: 120px;',
-    style: 'width: 120px;',
+    headerStyle: 'width: 100px;',
+    style: 'width: 100px;',
   },
   {
     name: 'file',
@@ -123,18 +131,22 @@ const headers: QTableProps['columns'] = [
     style: 'width: 320px',
   },
   {
+    name: 'status',
+    label: '',
+    field: 'status',
+    align: 'right',
+    headerStyle: 'width: 30px;',
+    style: 'width: 30px;',
+  },
+  {
     name: 'actions',
     label: '',
     field: 'id',
     align: 'right',
-    headerStyle: 'width: 50px',
-    style: 'width: 50px',
+    headerStyle: 'width: 30px',
+    style: 'width: 30px',
   },
 ]
-
-const rowClassFn = (row: TaxReceiptListItem) => {
-  return row.isCanceled ? 'bg-red-2' : 'bg-white'
-}
 
 const computedPagination = computed<QTablePagination>(() => {
   const sortBy = Object.keys(props.pagination?.orderBy ?? {})?.[0] ?? null

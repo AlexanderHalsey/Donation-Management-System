@@ -26,7 +26,9 @@ describe('Donation List', () => {
         cy.get('td').eq(3).should('contain.text', 'Payment Mode 4')
         cy.get('td').eq(4).should('contain.text', 'Organisation 2')
         cy.get('td').eq(5).should('contain.text', 'Donation Type 10')
+        cy.get('td').eq(6).find('button').click()
       })
+    cy.get('[id^=q-portal--menu--]').find('.q-item').should('have.length', 2)
     cy.get(donationListItem)
       .eq(3)
       .within(() => {
@@ -36,7 +38,9 @@ describe('Donation List', () => {
         cy.get('td').eq(3).should('contain.text', 'Payment Mode 1')
         cy.get('td').eq(4).should('contain.text', 'Organisation 1')
         cy.get('td').eq(5).should('contain.text', 'Donation Type 7')
+        cy.get('td').eq(6).find('button').click()
       })
+    cy.get('[id^=q-portal--menu--]').find('.q-item').should('have.length', 3) // also includes create individual tax receipt action
     cy.get(donationListItem)
       .eq(7)
       .within(() => {
@@ -46,7 +50,9 @@ describe('Donation List', () => {
         cy.get('td').eq(3).should('contain.text', 'Payment Mode 1')
         cy.get('td').eq(4).should('contain.text', 'Organisation 1')
         cy.get('td').eq(5).should('contain.text', 'Donation Type 3')
+        cy.get('td').eq(6).find('button').click()
       })
+    cy.get('[id^=q-portal--menu--]').find('.q-item').should('have.length', 3) // also includes create individual tax receipt action
   })
   it('allows the user to navigate pages', () => {
     cy.visit('/donations')
@@ -158,6 +164,21 @@ describe('Donation List', () => {
     cy.get('#q-portal--menu--1 .q-item').eq(0).click() // Click edit action
     cy.url().should('match', /\/donations\/[a-f0-9-]{36}$/)
   })
+  it('should allow a user to create an individual tax receipt from a donation', () => {
+    cy.visit('/donations')
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
+    cy.mockDonation(3)
+    cy.get(donationListItem)
+      .eq(3)
+      .within(() => {
+        cy.get('td').eq(6).find('button').click() // Click action button
+      })
+    cy.mockCreateIndividualTaxReceipt()
+    cy.mockTaxReceiptList()
+    cy.get('#q-portal--menu--1 .q-item').eq(1).click() // Click create individual tax receipt action
+    cy.url().should('match', /\/tax-receipts/)
+    cy.get('.q-notification').should('contain.text', 'Le reçu fiscal a été créé avec succès.')
+  })
   it('should allow deleting a donation from the list', () => {
     cy.visit('/donations')
     cy.wait(['@getDonationList', '@getOrganisationRefList'])
@@ -167,7 +188,7 @@ describe('Donation List', () => {
       .within(() => {
         cy.get('td').eq(6).find('button').click() // Click action button
       })
-    cy.get('#q-portal--menu--1 .q-item').eq(1).click() // Click delete action
+    cy.get('#q-portal--menu--1 .q-item').eq(2).click() // Click delete action
 
     cy.mockDeleteDonation()
     cy.mockDonationList()

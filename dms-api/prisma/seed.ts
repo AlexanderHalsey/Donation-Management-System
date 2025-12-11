@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { PrismaClient } from './generated/prisma/client'
+import { Organisation, PrismaClient } from './generated/prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 
 import { groupBy } from 'es-toolkit'
@@ -10,11 +10,9 @@ import {
   buildMockDonationMethodCreateManyInput,
   buildMockDonationTypeCreateManyInput,
   buildMockDonorCreateManyInput,
-  buildMockOrganisationCreateManyInput,
-  buildMockOrganisationFiles,
+  buildMockOrganisationCreateInput,
   buildMockPaymentModeCreateManyInput,
-  buildMockTaxReceiptCreateManyInput,
-  buildMockTaxReceiptPdfTemplateFile,
+  buildMockTaxReceiptCreateInput,
 } from './mocks'
 
 const prisma = new PrismaClient({
@@ -24,28 +22,14 @@ const prisma = new PrismaClient({
 })
 
 async function main() {
-  const organisationFiles = await prisma.fileMetadata.createManyAndReturn({
-    data: buildMockOrganisationFiles(),
-    select: { id: true, name: true },
-  })
-
-  const getOrganisationFileId = (type: 'logo' | 'signature') => {
-    return organisationFiles.find(
-      (file) => file.name === `${type}.${type === 'logo' ? 'png' : 'webp'}`,
-    )?.id
+  const organisations: Organisation[] = []
+  for (let i = 0; i < 3; i++) {
+    organisations.push(
+      await prisma.organisation.create({
+        data: buildMockOrganisationCreateInput(i),
+      }),
+    )
   }
-
-  const organisations = await prisma.organisation.createManyAndReturn({
-    data: new Array(3)
-      .fill(null)
-      .map((_, index) =>
-        buildMockOrganisationCreateManyInput(
-          index,
-          index === 0 ? getOrganisationFileId('logo') : undefined,
-          index === 0 ? getOrganisationFileId('signature') : undefined,
-        ),
-      ),
-  })
 
   const paymentModes = await prisma.paymentMode.createManyAndReturn({
     select: { id: true },
@@ -91,40 +75,42 @@ async function main() {
         donorId: donors[Math.floor(Math.random() * donors.length)].id,
       }),
     ),
+    select: {
+      id: true,
+      donorId: true,
+      donatedAt: true,
+      organisationId: true,
+      donationTypeId: true,
+    },
   })
 
-  const eligibleDonations = groupBy(
-    donations.filter(
-      (donation) =>
-        organisations.find((org) => org.id === donation.organisationId)?.isTaxReceiptEnabled &&
-        donationTypes.find((dt) => dt.id === donation.donationTypeId)?.isTaxReceiptEnabled,
-    ),
+  const groupedDonationsWithReceipts = groupBy(
+    donations
+      .filter(
+        (donation) =>
+          organisations.find((org) => org.id === donation.organisationId)?.isTaxReceiptEnabled &&
+          donationTypes.find((dt) => dt.id === donation.donationTypeId)?.isTaxReceiptEnabled,
+      )
+      .filter(() => Math.random() < 0.6),
     (donation) => `${donation.donorId}-${donation.donatedAt.getFullYear()}`,
   )
 
-  const taxReceiptTemplateFiles = await prisma.fileMetadata.createManyAndReturn({
-    data: Array(Object.values(eligibleDonations).length)
-      .fill(null)
-      .map(() => buildMockTaxReceiptPdfTemplateFile()),
-    select: { id: true },
-  })
+  // initialize receipt number sequence - start from 1000
+  await prisma.$executeRaw`SELECT setval('"taxreceipt_receiptnumber_seq"', ${1000}, false)`
 
-  await prisma.taxReceipt.createMany({
-    data: Object.values(eligibleDonations).map((donationGroup, index) =>
-      buildMockTaxReceiptCreateManyInput({
-        index,
-        fileId: taxReceiptTemplateFiles[index].id,
-        donorId: donationGroup[0].donorId,
-        // in reality an annual receipt can absolutely be for a single donation,
-        // but this helps us initialise a nice spread of both types in the seed data
-        type: donationGroup.length === 1 ? 'INDIVIDUAL' : 'ANNUAL',
+  for (const donationsWithReceipts of Object.values(groupedDonationsWithReceipts)) {
+    await prisma.taxReceipt.create({
+      data: buildMockTaxReceiptCreateInput({
+        donorId: donationsWithReceipts[0].donorId,
+        donations: donationsWithReceipts,
+        type: donationsWithReceipts.length === 1 ? 'INDIVIDUAL' : 'ANNUAL',
         createdAt:
-          donationGroup.length === 1
-            ? donationGroup[0].donatedAt
-            : new Date(donationGroup[0].donatedAt.getFullYear(), 3, 1),
+          donationsWithReceipts.length === 1
+            ? donationsWithReceipts[0].donatedAt
+            : new Date(donationsWithReceipts[0].donatedAt.getFullYear(), 3, 1),
       }),
-    ),
-  })
+    })
+  }
 }
 
 main()

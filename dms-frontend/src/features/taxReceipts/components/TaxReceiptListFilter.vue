@@ -16,7 +16,7 @@
       <div class="row">
         <div>
           <div class="text-bold q-mb-sm">Donateur</div>
-          <UuidFilterComponent
+          <SelectFilterComponent
             :model-value="filter?.donorId"
             :options="donors.options"
             :lazy-load="donors.load"
@@ -47,6 +47,13 @@
                 <span class="ellipsis">{{ scope.opt.label }}</span>
               </QChip>
             </template>
+            <template #option="scope">
+              <QItem v-bind="scope.itemProps">
+                <QItemSection>
+                  <TaxReceiptTypeTag :tax-receipt-type="scope.opt.value" />
+                </QItemSection>
+              </QItem>
+            </template>
           </Select>
         </div>
       </div>
@@ -62,16 +69,24 @@
 
       <div class="row">
         <div class="col">
-          <div class="text-bold q-mb-sm">Reçus annulés</div>
-          <YesNoCheckbox
-            :model-value="filter?.isCanceled?.equals"
-            @update:model-value="
-              updateFilter({
-                ...filter,
-                isCanceled: { equals: $event },
-              })
-            "
-          />
+          <div class="text-bold q-mb-sm">Statut du reçu</div>
+          <SelectFilterComponent
+            :model-value="filter?.status"
+            :options="TAX_RECEIPT_STATUS_OPTIONS"
+            multiple
+            @update:model-value="updateFilter({ ...filter, status: $event })"
+          >
+            <template #option="scope">
+              <QItem v-bind="scope.itemProps">
+                <QItemSection>
+                  <QItemLabel>{{ scope.opt.label }}</QItemLabel>
+                </QItemSection>
+                <QItemSection avatar>
+                  <TaxReceiptStatusIcon :tax-receipt-status="scope.opt.value" />
+                </QItemSection>
+              </QItem>
+            </template>
+          </SelectFilterComponent>
         </div>
         <QSeparator vertical class="q-mx-md" />
         <div class="col"></div>
@@ -92,11 +107,14 @@ import Btn from '@/components/ui/Btn.vue'
 import Select from '@/components/ui/Select.vue'
 
 import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
-import UuidFilterComponent from '@/components/UuidFilter.vue'
-import YesNoCheckbox from '@/components/YesNoCheckbox.vue'
+import SelectFilterComponent from '@/components/SelectFilter.vue'
+
+import TaxReceiptStatusIcon from './TaxReceiptStatusIcon.vue'
 
 import type { LazySelectOptions } from '@/types'
 import type { TaxReceiptListFilter, DonorRefSelect, TaxReceiptType } from '@shared/models'
+import { TAX_RECEIPT_STATUS_OPTIONS } from '../constants'
+import TaxReceiptTypeTag from './TaxReceiptTypeTag.vue'
 
 const props = defineProps({
   donors: {
@@ -118,8 +136,8 @@ type TaxReceiptTypeSelect = {
   name: string
 }
 const taxReceiptTypeOptions = computed<TaxReceiptTypeSelect[]>(() => [
-  { id: 'annual', name: 'Annuel' },
-  { id: 'individual', name: 'Individuel' },
+  { id: 'ANNUAL', name: 'Annuel' },
+  { id: 'INDIVIDUAL', name: 'Individuel' },
 ])
 
 const taxReceiptTypeOption = computed(() =>
@@ -152,7 +170,7 @@ const filterCount = computed(
       !!props.filter?.createdAt?.lte,
       !!props.filter?.createdAt?.gte,
       !!props.filter?.type?.equals,
-      props.filter?.isCanceled?.equals !== undefined,
+      !!props.filter?.status?.in,
     ].filter(Boolean).length,
 )
 </script>

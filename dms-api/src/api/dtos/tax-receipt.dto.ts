@@ -7,10 +7,19 @@ import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
 import { NameSortOrder, SortOrderEnum, type SortOrder } from './sort-order.dto'
 
 export enum TaxReceiptTypeEnum {
-  ANNUAL = 'annual',
-  INDIVIDUAL = 'individual',
+  ANNUAL = 'ANNUAL',
+  INDIVIDUAL = 'INDIVIDUAL',
 }
-export type TaxReceiptType = 'annual' | 'individual'
+export type TaxReceiptType = 'ANNUAL' | 'INDIVIDUAL'
+
+export enum TaxReceiptStatusEnum {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  FAILED = 'FAILED',
+  COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED',
+}
+export type TaxReceiptStatus = 'PENDING' | 'PROCESSING' | 'FAILED' | 'COMPLETED' | 'CANCELED'
 
 export class TaxReceiptListItemDto {
   id: string
@@ -19,11 +28,11 @@ export class TaxReceiptListItemDto {
   receiptNumber: number
   donor: DonorRefDto
   type: TaxReceiptType
-  file: {
+  file?: {
     id: string
     name: string
   }
-  isCanceled: boolean
+  status: TaxReceiptStatus
   canceledAt?: string
   canceledReason?: string
 }

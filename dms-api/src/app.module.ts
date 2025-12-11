@@ -35,6 +35,7 @@ import {
   FileService,
   OrganisationService,
   PaymentModeService,
+  TaxReceiptGeneratorService,
   TaxReceiptService,
 } from '@/domain'
 
@@ -88,6 +89,7 @@ import {
     PaymentModeService,
     PrismaService,
     TaxReceiptConverter,
+    TaxReceiptGeneratorService,
     TaxReceiptService,
     TypedSqlService,
   ],

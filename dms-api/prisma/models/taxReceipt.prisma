@@ -1,20 +1,28 @@
 model TaxReceipt {
-  id             String         @id @default(uuid()) @db.Uuid
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  receiptNumber  Int            @unique
-  fileId         String         @unique @db.Uuid
-  donorId        String         @db.Uuid
-  isCanceled     Boolean        @default(false)
+  id             String           @id @default(uuid()) @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  receiptNumber  Int              @unique @default(autoincrement()) @db.Integer
+  fileId         String?          @unique @db.Uuid
+  donorId        String           @db.Uuid
   canceledReason String?
   canceledAt     DateTime?
   type           TaxReceiptType
-  donor          Donor          @relation(fields: [donorId], references: [id])
-  file           FileMetadata   @relation("TaxReceipt", fields: [fileId], references: [id])
+  status         TaxReceiptStatus @default(PENDING)
+  donor          Donor            @relation(fields: [donorId], references: [id])
+  file           FileMetadata?    @relation(fields: [fileId], references: [id])
   donations      Donation[]
 }
 
 enum TaxReceiptType {
   INDIVIDUAL
   ANNUAL
+}
+
+enum TaxReceiptStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELED
+  FAILED
 }

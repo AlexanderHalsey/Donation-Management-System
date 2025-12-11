@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { isEmpty } from 'es-toolkit/compat'
-import { nullsToUndefined } from '@shared/utils'
+import { nullsToUndefined, type RecursivelyReplaceNullWithUndefined } from '@shared/utils'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -20,6 +20,7 @@ const BASIC_INCLUDE_FIELDS = {
       id: true,
       name: true,
       isDisabled: true,
+      isTaxReceiptEnabled: true,
     },
   },
   paymentMode: true,
@@ -68,65 +69,88 @@ export class DonationService {
       this.prisma.donation.count({ where: filter }),
     ])
     return {
-      donations: donations.map(nullsToUndefined),
+      donations: donations.map((donation) => this.transformToDonationModel(donation)),
       totalCount,
     }
   }
 
   async getById(donationId: string): Promise<Donation> {
-    return nullsToUndefined(
-      await this.prisma.donation.findUniqueOrThrow({
-        include: FULL_INCLUDE_FIELDS,
-        omit: BASIC_OMIT_FIELDS,
-        where: { id: donationId },
-      }),
-    )
+    const donation = await this.prisma.donation.findUniqueOrThrow({
+      where: { id: donationId },
+      include: FULL_INCLUDE_FIELDS,
+      omit: BASIC_OMIT_FIELDS,
+    })
+    return this.transformToDonationModel(donation)
   }
 
   async createDonation(formData: DonationRequest): Promise<Donation> {
     await this._validateDonationType(formData)
 
-    return nullsToUndefined(
-      await this.prisma.donation.create({
-        data: {
-          donorId: formData.donorId,
-          donatedAt: formData.donatedAt,
-          amount: formData.amount,
-          organisationId: formData.organisationId,
-          donationTypeId: formData.donationTypeId,
-          paymentModeId: formData.paymentModeId,
-          donationMethodId: formData.donationMethodId,
-          donationAssetTypeId: formData.donationAssetTypeId,
-        },
-        include: FULL_INCLUDE_FIELDS,
-        omit: BASIC_OMIT_FIELDS,
-      }),
-    )
+    const donation = await this.prisma.donation.create({
+      data: {
+        donorId: formData.donorId,
+        donatedAt: formData.donatedAt,
+        amount: formData.amount,
+        organisationId: formData.organisationId,
+        donationTypeId: formData.donationTypeId,
+        paymentModeId: formData.paymentModeId,
+        donationMethodId: formData.donationMethodId,
+        donationAssetTypeId: formData.donationAssetTypeId,
+      },
+      include: FULL_INCLUDE_FIELDS,
+      omit: BASIC_OMIT_FIELDS,
+    })
+
+    return this.transformToDonationModel(donation)
   }
 
   async updateDonation(donationId: string, formData: DonationRequest): Promise<Donation> {
+    const existingDonation = await this.prisma.donation.findUniqueOrThrow({
+      where: { id: donationId },
+      select: { taxReceiptId: true },
+    })
+
+    if (existingDonation.taxReceiptId) {
+      throw new Error(
+        "Can't update donation. Donation already has a tax receipt associated with it :" +
+          existingDonation.taxReceiptId,
+      )
+    }
+
     await this._validateDonationType(formData)
 
-    return nullsToUndefined(
-      await this.prisma.donation.update({
-        data: {
-          donorId: formData.donorId,
-          donatedAt: formData.donatedAt,
-          amount: formData.amount,
-          organisationId: formData.organisationId,
-          donationTypeId: formData.donationTypeId,
-          paymentModeId: formData.paymentModeId,
-          donationMethodId: formData.donationMethodId,
-          donationAssetTypeId: formData.donationAssetTypeId,
-        },
-        where: { id: donationId },
-        include: FULL_INCLUDE_FIELDS,
-        omit: BASIC_OMIT_FIELDS,
-      }),
-    )
+    const donation = await this.prisma.donation.update({
+      data: {
+        donorId: formData.donorId,
+        donatedAt: formData.donatedAt,
+        amount: formData.amount,
+        organisationId: formData.organisationId,
+        donationTypeId: formData.donationTypeId,
+        paymentModeId: formData.paymentModeId,
+        donationMethodId: formData.donationMethodId,
+        donationAssetTypeId: formData.donationAssetTypeId,
+      },
+      where: { id: donationId },
+      include: FULL_INCLUDE_FIELDS,
+      omit: BASIC_OMIT_FIELDS,
+    })
+
+    return this.transformToDonationModel(donation)
   }
 
   async deleteDonation(donationId: string): Promise<void> {
+    const donation = await this.prisma.donation.findUniqueOrThrow({
+      where: { id: donationId },
+      select: { taxReceiptId: true },
+    })
+
+    if (donation.taxReceiptId) {
+      throw new Error(
+        "Can't delete donation. Donation already has a tax receipt associated with it :" +
+          donation.taxReceiptId,
+      )
+    }
+
     await this.prisma.donation.delete({
       where: { id: donationId },
     })
@@ -136,5 +160,19 @@ export class DonationService {
     await this.prisma.donationType.findUniqueOrThrow({
       where: { id: formData.donationTypeId, organisationId: formData.organisationId },
     })
+  }
+
+  transformToDonationModel<
+    T extends {
+      organisation: { isTaxReceiptEnabled: boolean }
+      donationType: { isTaxReceiptEnabled: boolean }
+    },
+  >(donation: T): RecursivelyReplaceNullWithUndefined<T> & { isTaxReceiptEnabled: boolean } {
+    const isTaxReceiptEnabled =
+      donation.organisation.isTaxReceiptEnabled && donation.donationType.isTaxReceiptEnabled
+    return {
+      ...nullsToUndefined(donation),
+      isTaxReceiptEnabled,
+    }
   }
 }

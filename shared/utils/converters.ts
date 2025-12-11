@@ -1,4 +1,4 @@
-type RecursivelyReplaceNullWithUndefined<T> = T extends null
+export type RecursivelyReplaceNullWithUndefined<T> = T extends null
   ? undefined
   : T extends Date
     ? T

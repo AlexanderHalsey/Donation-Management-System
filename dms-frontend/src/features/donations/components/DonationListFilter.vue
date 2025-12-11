@@ -17,7 +17,7 @@
         <div class="col-4">
           <div>
             <div class="text-bold q-mb-sm">Donateur</div>
-            <UuidFilterComponent
+            <SelectFilterComponent
               :model-value="filter?.donor?.id"
               :options="donors.options"
               :lazy-load="donors.load"
@@ -29,7 +29,7 @@
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div>
             <div class="text-bold q-mb-sm">Mode de paiement</div>
-            <UuidFilterComponent
+            <SelectFilterComponent
               :model-value="filter?.paymentModeId"
               :options="paymentModes.options"
               :lazy-load="paymentModes.load"
@@ -42,12 +42,12 @@
                   </QItemSection>
                 </QItem>
               </template>
-            </UuidFilterComponent>
+            </SelectFilterComponent>
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div>
             <div class="text-bold q-mb-sm">Organisation</div>
-            <UuidFilterComponent
+            <SelectFilterComponent
               :model-value="filter?.organisationId"
               @update:model-value="updateFilter({ ...filter, organisationId: $event })"
               :options="organisations"
@@ -62,7 +62,7 @@
                   </QItemSection>
                 </QItem>
               </template>
-            </UuidFilterComponent>
+            </SelectFilterComponent>
           </div>
         </div>
         <QSeparator vertical class="q-mx-md" />
@@ -86,7 +86,7 @@
           <div class="row">
             <div>
               <div class="text-bold q-mb-sm">Type de don</div>
-              <UuidFilterComponent
+              <SelectFilterComponent
                 :model-value="filter?.donationTypeId"
                 :options="donationTypes.options"
                 :lazy-load="donationTypes.load"
@@ -107,7 +107,7 @@
                     </QItemSection>
                   </QItem>
                 </template>
-              </UuidFilterComponent>
+              </SelectFilterComponent>
             </div>
             <QSeparator vertical class="q-mx-md" />
             <div>
@@ -147,7 +147,7 @@ import Btn from '@/components/ui/Btn.vue'
 
 import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
 import FloatFilterComponent from '@/components/FloatFilter.vue'
-import UuidFilterComponent from '@/components/UuidFilter.vue'
+import SelectFilterComponent from '@/components/SelectFilter.vue'
 import YesNoCheckbox from '@/components/YesNoCheckbox.vue'
 
 import type { LazySelectOptions } from '@/types'

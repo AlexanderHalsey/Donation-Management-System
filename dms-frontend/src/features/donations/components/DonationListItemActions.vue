@@ -14,6 +14,18 @@
         <QItemSection> Editer </QItemSection>
       </QItem>
       <QItem
+        v-if="isTaxReceiptEnabled"
+        clickable
+        v-close-popup
+        @click="$emit('create:tax-receipt', donation.id)"
+        style="padding: 8px 12px; border-radius: 6px; width: 150px"
+      >
+        <QItemSection style="flex: unset">
+          <QIcon name="receipt_long" />
+        </QItemSection>
+        <QItemSection> Générer un reçu </QItemSection>
+      </QItem>
+      <QItem
         clickable
         v-close-popup
         class="text-red-8"
@@ -34,14 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue'
+import { computed, ref, type PropType } from 'vue'
 
 import Btn from '@/components/ui/Btn.vue'
 import DeleteDonationDialog from './DeleteDonationDialog.vue'
 
 import type { DonationListItem } from '@shared/models'
 
-defineProps({
+const props = defineProps({
   donation: {
     type: Object as PropType<DonationListItem>,
     required: true,
@@ -49,6 +61,7 @@ defineProps({
 })
 defineEmits<{
   'delete:donation': [donationId: string]
+  'create:tax-receipt': [donationId: string]
 }>()
 
 const deleteDonationDialog = ref<InstanceType<typeof DeleteDonationDialog> | null>(null)
@@ -58,4 +71,8 @@ const clickShowAction = (event: Event) => {
   event.stopPropagation()
   showAction.value = !showAction.value
 }
+
+const isTaxReceiptEnabled = computed(
+  () => props.donation.isTaxReceiptEnabled && !props.donation.taxReceiptId,
+)
 </script>

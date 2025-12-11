@@ -17,7 +17,7 @@ export function buildMockFile({ name }: { name?: string } = {}): FileMetadata {
     id: v4(),
     uploadedAt: new Date(),
     expiresAt: undefined,
-    storageKey: undefined,
+    storageKey: 'mock/storage/key',
     name: name ?? 'mock-image.png',
     size: 1024,
     mimeType: 'image/png',

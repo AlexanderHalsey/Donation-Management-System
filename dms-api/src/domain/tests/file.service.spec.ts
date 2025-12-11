@@ -49,67 +49,89 @@ describe('FileService', () => {
     stream: new Readable(),
   }
 
-  describe('uploadFile', () => {
+  describe('uploadDraftFile', () => {
     it('should upload a draft file and return its ID', async () => {
       prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
         return cb(prismaServiceMock)
       })
-      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
       prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce(null)
       fileStorageServiceMock.uploadFile.mockResolvedValueOnce('storage-key-123')
-      prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
+      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
-      const fileId = await fileService.uploadFile(mockFile, 'DRAFT')
+      const fileId = await fileService.uploadDraftFile(mockFile)
 
       expect(fileId).toBeDefined()
+      expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.expiresAt).toBeTruthy()
-      expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
-      expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
-    })
-
-    it('should upload an active file and return its ID', async () => {
-      prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
-        return cb(prismaServiceMock)
-      })
-      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
-      prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce(null)
-      fileStorageServiceMock.uploadFile.mockResolvedValueOnce('storage-key-456')
-      prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
-
-      const fileId = await fileService.uploadFile(mockFile, 'ACTIVE')
-
-      expect(fileId).toBeDefined()
-      expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
-      expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.expiresAt).toBeNull()
-      expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
-      expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
     })
 
     it('should reuse existing file for duplicate uploads', async () => {
       prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
         return cb(prismaServiceMock)
       })
-      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
       prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce({
         storageKey: 'existing-storage-key-456',
       } as FileMetadata)
-      prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
+      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
-      const fileId = await fileService.uploadFile(mockFile, 'DRAFT')
+      const fileId = await fileService.uploadDraftFile(mockFile)
 
       expect(fileId).toBeDefined()
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
       expect(fileStorageServiceMock.uploadFile).not.toHaveBeenCalled()
-      expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
     })
   })
 
-  it('should update a file status', async () => {
+  it('should activate a file', async () => {
     prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
-    const _ = await fileService.finalizeFile('file-id-123')
+    const _ = await fileService.activateFile('file-id-123')
     expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
+  })
+
+  describe('createFile', () => {
+    it('should create an active file and return its ID', async () => {
+      prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
+        return cb(prismaServiceMock)
+      })
+      prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce(null)
+      fileStorageServiceMock.uploadFile.mockResolvedValueOnce('storage-key-789')
+      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
+
+      const fileId = await fileService.createFile({
+        name: 'active-file.txt',
+        mimeType: 'text/plain',
+        buffer: Buffer.from('Active file content'),
+      })
+
+      expect(fileId).toBeDefined()
+      expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.status).toBe('ACTIVE')
+      expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.expiresAt).toBeNull()
+    })
+
+    it('should reuse existing file for duplicate active uploads', async () => {
+      prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
+        return cb(prismaServiceMock)
+      })
+      prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
+      prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce({
+        storageKey: 'existing-storage-key-101',
+      } as FileMetadata)
+
+      const fileId = await fileService.createFile({
+        name: 'duplicate-active-file.txt',
+        mimeType: 'text/plain',
+        buffer: Buffer.from('Duplicate active file content'),
+      })
+
+      expect(fileId).toBeDefined()
+      expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
+      expect(fileStorageServiceMock.uploadFile).not.toHaveBeenCalled()
+    })
   })
 
   describe('downloadFile', () => {
@@ -134,18 +156,6 @@ describe('FileService', () => {
       expect(result.buffer).toBeInstanceOf(Buffer)
       expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
       expect(fileStorageServiceMock.downloadFile).toHaveBeenCalledTimes(1)
-    })
-    it('should throw an error if file storageKey is missing', async () => {
-      prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce({
-        ...fileMetadata,
-        storageKey: null,
-      })
-
-      await expect(fileService.downloadFile('file-id-123')).rejects.toThrow(
-        'File storage key not found',
-      )
-
-      expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
     })
     it('should throw an error if the file is not active', async () => {
       prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce({
@@ -173,37 +183,46 @@ describe('FileService', () => {
     })
   })
 
-  describe('deleteFile', () => {
-    it('should delete a file by its ID', async () => {
-      prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
-        return cb(prismaServiceMock)
-      })
-      prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce({
-        storageKey: 'storage-key-to-delete',
-      } as FileMetadata)
-      fileStorageServiceMock.deleteFile.mockResolvedValueOnce()
-      prismaServiceMock.fileMetadata.delete.mockResolvedValueOnce(mockDeep<FileMetadata>())
-
-      await fileService.deleteFile('file-id-123')
-
-      expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
-      expect(fileStorageServiceMock.deleteFile).toHaveBeenCalledTimes(1)
-      expect(prismaServiceMock.fileMetadata.delete).toHaveBeenCalledTimes(1)
+  it('should update file content', async () => {
+    prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
+      return cb(prismaServiceMock)
     })
-    it('should throw an error if the file storage key is not found', async () => {
-      prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
-        return cb(prismaServiceMock)
-      })
-      prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce({
-        storageKey: null,
-      } as FileMetadata)
+    prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
-      await expect(fileService.deleteFile('file-id-123')).rejects.toThrow(
-        'File storage key not found',
-      )
+    await fileService.updateFileContent(
+      {
+        id: 'file-id-123',
+        storageKey: 'old-storage-key-123',
+        status: 'ACTIVE',
+        uploadedAt: new Date(),
+        expiresAt: null,
+        name: 'test-file.txt',
+        size: 1024,
+        mimeType: 'text/plain',
+        hash: 'old-hash',
+      },
+      Buffer.from('Updated file content'),
+    )
 
-      expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
+    expect(fileStorageServiceMock.updateFile).toHaveBeenCalledTimes(1)
+    expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
+  })
+
+  it('should delete a file by its ID', async () => {
+    prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {
+      return cb(prismaServiceMock)
     })
+    prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce({
+      storageKey: 'storage-key-to-delete',
+    } as FileMetadata)
+    fileStorageServiceMock.deleteFile.mockResolvedValueOnce()
+    prismaServiceMock.fileMetadata.delete.mockResolvedValueOnce(mockDeep<FileMetadata>())
+
+    await fileService.deleteFile('file-id-123')
+
+    expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
+    expect(fileStorageServiceMock.deleteFile).toHaveBeenCalledTimes(1)
+    expect(prismaServiceMock.fileMetadata.delete).toHaveBeenCalledTimes(1)
   })
 
   describe('cleanupExpiredDrafts', () => {

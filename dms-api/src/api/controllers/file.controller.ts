@@ -40,7 +40,9 @@ export class FileController {
     )
     file: Express.Multer.File,
   ): Promise<FileUploadResponse> {
-    return { id: await this.fileService.uploadFile(file, 'DRAFT') }
+    return {
+      id: await this.fileService.uploadDraftFile(file),
+    }
   }
 
   @Get(':fileId')

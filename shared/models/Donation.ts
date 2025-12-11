@@ -2,7 +2,7 @@ import type { DonationAssetType } from './DonationAssetType'
 import type { DonationMethod } from './DonationMethod'
 import type { DonationType } from './DonationType'
 import type { DonorRef } from './Donor'
-import type { BoolFilter, DateTimeFilter, FloatFilter, UuidFilter } from './Filters'
+import type { BoolFilter, DateTimeFilter, FloatFilter, SelectFilter } from './Filters'
 import type { OrganisationRef } from './Organisation'
 import type { Pagination, PaginationRequest } from './Pagination'
 import type { PaymentMode } from './PaymentMode'
@@ -17,6 +17,7 @@ export interface DonationListItem {
   organisation: OrganisationRef
   donationType: DonationType
   donor: DonorRef
+  isTaxReceiptEnabled: boolean
   taxReceiptId?: string
 }
 
@@ -31,12 +32,12 @@ export type DonationListPagination = Pagination<DonationListSortOrder>
 
 export interface DonationListFilter {
   donor?: {
-    id?: UuidFilter
+    id?: SelectFilter
     isDisabled?: BoolFilter
   }
   donatedAt?: DateTimeFilter
   amount?: FloatFilter
-  paymentModeId?: UuidFilter
-  organisationId?: UuidFilter
-  donationTypeId?: UuidFilter
+  paymentModeId?: SelectFilter
+  organisationId?: SelectFilter
+  donationTypeId?: SelectFilter
 }

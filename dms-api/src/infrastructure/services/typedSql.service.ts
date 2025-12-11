@@ -82,7 +82,11 @@ export class TypedSqlService {
         )
       }
     }
-    return this.typedSqlModule
+    // Non-null assertion required for Docker builds: TypeScript can statically analyze that
+    // the SQL module path doesn't exist during build, so it knows the import will fail and
+    // this.typedSqlModule remains null. The ! asserts our runtime guarantee that we never
+    // reach this return when the module is actually null (exception is thrown instead).
+    return this.typedSqlModule!
   }
 
   async getDonorListItem(

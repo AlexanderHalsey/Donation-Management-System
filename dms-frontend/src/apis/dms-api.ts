@@ -44,6 +44,7 @@ import type {
   GetPaymentModeResponse,
   GetTaxReceiptListRequest,
   GetTaxReceiptListResponse,
+  GetTaxReceiptResponse,
 } from '@shared/dtos'
 import type {
   Donation,
@@ -394,4 +395,15 @@ export const uploadImage = async (file: File): Promise<FileUploadResponse> => {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
   )
+}
+
+export const postIndividualTaxReceipt = async (donationId: string): Promise<string> => {
+  const response = await withClient((client) =>
+    client.post<GetTaxReceiptResponse>(`/tax-receipts/individual/${donationId}`),
+  )
+  return response.taxReceiptId
+}
+
+export const postRetryFailedTaxReceiptGeneration = async (taxReceiptId: string): Promise<void> => {
+  await withClient((client) => client.post<void>(`/tax-receipts/${taxReceiptId}/retry-failed`))
 }

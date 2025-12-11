@@ -35,11 +35,14 @@ declare global {
       mockCreateDonationAssetType(formData: DonationAssetTypeFormDataMock): Chainable<Subject>
       mockCreateDonationMethod(formData: DonationMethodFormDataMock): Chainable<Subject>
       mockCreateDonationType(formData: DonationTypeFormDataMock): Chainable<Subject>
+      mockCreateIndividualTaxReceipt(): Chainable<Subject>
+      mockCreateOrganisation(formData: OrganisationFormDataMock): Chainable<Subject>
       mockCreatePaymentMode(formData: PaymentModeFormDataMock): Chainable<Subject>
       mockDeleteDonation(): Chainable<Subject>
       mockDisableDonationAssetType(donationAssetTypeId: string): Chainable<Subject>
       mockDisableDonationMethod(donationMethodId: string): Chainable<Subject>
       mockDisableDonationType(donationTypeId: string): Chainable<Subject>
+      mockDisableOrganisation(organisationId: string): Chainable<Subject>
       mockDisablePaymentMode(paymentModeId: string): Chainable<Subject>
       mockDonation(index: number): Chainable<Subject>
       mockDonationAssetType(index: number): Chainable<Subject>
@@ -61,14 +64,9 @@ declare global {
       mockOrganisation(index: number): Chainable<Subject>
       mockOrganisationList(): Chainable<Subject>
       mockOrganisationRefList(): Chainable<Subject>
-      mockCreateOrganisation(formData: OrganisationFormDataMock): Chainable<Subject>
-      mockUpdateOrganisation(
-        organisationId: string,
-        formData: OrganisationFormDataMock,
-      ): Chainable<Subject>
-      mockDisableOrganisation(organisationId: string): Chainable<Subject>
       mockPaymentMode(index: number): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
+      mockRetryFailedTaxReceipt(): Chainable<Subject>
       mockTaxReceiptList(
         pagination?: TaxReceiptListPaginationRequest,
         filter?: TaxReceiptListFilterMock,
@@ -85,6 +83,10 @@ declare global {
       mockUpdateDonationType(
         donationTypeId: string,
         formData: DonationTypeFormDataMock,
+      ): Chainable<Subject>
+      mockUpdateOrganisation(
+        organisationId: string,
+        formData: OrganisationFormDataMock,
       ): Chainable<Subject>
       mockUpdatePaymentMode(
         paymentModeId: string,
@@ -575,6 +577,22 @@ Cypress.Commands.add('mockCancelTaxReceipt', () => {
     statusCode: 200,
     body: null,
   }).as('cancelTaxReceipt')
+})
+
+Cypress.Commands.add('mockCreateIndividualTaxReceipt', () => {
+  cy.intercept('POST', `${MOCK_API_HOST}/tax-receipts/individual/*`, {
+    statusCode: 201,
+    body: {
+      taxReceiptId: 'new-tax-receipt-id',
+    },
+  }).as('createIndividualTaxReceipt')
+})
+
+Cypress.Commands.add('mockRetryFailedTaxReceipt', () => {
+  cy.intercept('POST', `${MOCK_API_HOST}/tax-receipts/*/retry-failed`, {
+    statusCode: 200,
+    body: null,
+  }).as('retryFailedTaxReceipt')
 })
 
 Cypress.Commands.add('mockCreateDonation', (formData: DonationFormDataMock) => {

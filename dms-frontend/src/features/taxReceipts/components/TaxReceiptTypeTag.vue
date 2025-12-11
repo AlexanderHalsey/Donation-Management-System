@@ -17,9 +17,9 @@ const props = defineProps({
 
 const label = computed(() => {
   switch (props.taxReceiptType) {
-    case 'annual':
+    case 'ANNUAL':
       return 'Annuel'
-    case 'individual':
+    case 'INDIVIDUAL':
       return 'Individuel'
     default:
       return props.taxReceiptType
@@ -27,13 +27,13 @@ const label = computed(() => {
 })
 
 const options: Tag[] = [
-  { backgroundColor: '#E0F7FA', color: '#006064' },
-  { backgroundColor: '#FFF3E0', color: '#E65100' },
+  { backgroundColor: '#E3F2FD', color: '#006064' },
+  { backgroundColor: '#EDE7F6', color: '#311B92' },
   // add more options as needed
 ]
 
 const style = computed(() => {
-  const index = props.taxReceiptType === 'annual' ? 0 : 1
+  const index = props.taxReceiptType === 'ANNUAL' ? 0 : 1
   return {
     backgroundColor: options[index]?.backgroundColor,
     color: options[index]?.color,

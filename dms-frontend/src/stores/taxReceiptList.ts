@@ -1,7 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import { getTaxReceipts } from '@/apis/dms-api'
+import {
+  cancelTaxReceipt,
+  getTaxReceipts,
+  postIndividualTaxReceipt,
+  postRetryFailedTaxReceiptGeneration,
+} from '@/apis/dms-api'
 
 import type {
   TaxReceiptListFilter,
@@ -9,6 +14,7 @@ import type {
   TaxReceiptListPaginationRequest,
   TaxReceiptListItem,
 } from '@shared/models'
+import type { CancelTaxReceiptFormData } from '@/features/taxReceipts'
 
 export const useTaxReceiptListStore = defineStore('taxReceiptList', () => {
   const taxReceiptList = ref<TaxReceiptListItem[]>([])
@@ -30,11 +36,30 @@ export const useTaxReceiptListStore = defineStore('taxReceiptList', () => {
     filter.value = newFilter
   }
 
+  const cancel = async (formData: CancelTaxReceiptFormData) => {
+    await cancelTaxReceipt(formData.id, formData.canceledReason)
+  }
+
+  const createIndividualTaxReceipt = async (donationId: string) => {
+    await postIndividualTaxReceipt(donationId)
+  }
+
+  const retryFailedTaxReceiptGeneration = async (taxReceiptId: string) => {
+    await postRetryFailedTaxReceiptGeneration(taxReceiptId)
+    const index = taxReceiptList.value.findIndex((taxReceipt) => taxReceipt.id === taxReceiptId)
+    if (index !== -1) {
+      taxReceiptList.value[index].status = 'COMPLETED'
+    }
+  }
+
   return {
-    taxReceiptList,
+    cancel,
+    createIndividualTaxReceipt,
     fetchTaxReceipts,
     filter,
     pagination,
+    retryFailedTaxReceiptGeneration,
+    taxReceiptList,
     updateFilter,
   }
 })

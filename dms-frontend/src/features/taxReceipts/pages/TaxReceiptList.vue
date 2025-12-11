@@ -20,6 +20,7 @@
       :loading="tableLoading"
       @update:pagination="fetchTaxReceipts"
       @cancel:taxReceipt="cancelTaxReceipt"
+      @retry-failed:tax-receipt="retryFailedTaxReceipt"
     />
   </Page>
 </template>
@@ -35,12 +36,13 @@ import Page from '@/layouts/Page.vue'
 import TaxReceiptListTable from '../components/TaxReceiptListTable.vue'
 import TaxReceiptListFilter from '../components/TaxReceiptListFilter.vue'
 
-import { useDonorListStore, useTaxReceiptListStore, useTaxReceiptStore } from '@/stores'
+import { useDonorListStore, useTaxReceiptListStore } from '@/stores'
 
 import type { Breadcrumb, LazySelectOptions } from '@/types'
 import type {
   DonorRefSelect,
   TaxReceiptListFilter as TaxReceiptListFilterRequest,
+  TaxReceiptListItem,
   TaxReceiptListPaginationRequest,
 } from '@shared/models'
 import type { CancelTaxReceiptFormData } from '../types'
@@ -52,7 +54,6 @@ const breadcrumbs: Breadcrumb[] = [
 const $q = useQuasar()
 
 const taxReceiptListStore = useTaxReceiptListStore()
-const taxReceiptStore = useTaxReceiptStore()
 const donorListStore = useDonorListStore()
 
 const taxReceiptList = computed(() => taxReceiptListStore.taxReceiptList)
@@ -87,9 +88,18 @@ const onFilterUpdate = async (filter?: TaxReceiptListFilterRequest) => {
 
 const cancelTaxReceipt = async (formData: CancelTaxReceiptFormData) => {
   working.value = true
-  await taxReceiptStore.cancel(formData)
+  await taxReceiptListStore.cancel(formData)
   working.value = false
   $q.notify({ type: 'positive', message: 'Le reçu fiscal a été annulé avec succès.' })
+  // Refetch tax receipts to update the list
+  await fetchTaxReceipts(paginationRequest.value)
+}
+
+const retryFailedTaxReceipt = async (taxReceipt: TaxReceiptListItem) => {
+  working.value = true
+  await taxReceiptListStore.retryFailedTaxReceiptGeneration(taxReceipt.id)
+  working.value = false
+  $q.notify({ type: 'positive', message: 'Le reçu fiscal a été régénéré avec succès.' })
   // Refetch tax receipts to update the list
   await fetchTaxReceipts(paginationRequest.value)
 }

@@ -19,6 +19,7 @@
       :loading="tableLoading"
       @update:pagination="fetchDonations"
       @delete:donation="deleteDonation"
+      @create:tax-receipt="createTaxReceipt"
     />
   </Page>
 </template>
@@ -26,6 +27,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 
 import { omit } from 'es-toolkit'
 
@@ -42,6 +44,7 @@ import {
   useDonorListStore,
   useOrganisationListStore,
   usePaymentModeListStore,
+  useTaxReceiptListStore,
 } from '@/stores'
 
 import type { Breadcrumb, LazySelectOptions } from '@/types'
@@ -58,6 +61,7 @@ const breadcrumbs: Breadcrumb[] = [
 ]
 
 const $q = useQuasar()
+const router = useRouter()
 
 const donationListStore = useDonationListStore()
 const donationStore = useDonationStore()
@@ -65,6 +69,7 @@ const organisationListStore = useOrganisationListStore()
 const donationTypeListStore = useDonationTypeListStore()
 const paymentModeListStore = usePaymentModeListStore()
 const donorListStore = useDonorListStore()
+const taxReceiptListStore = useTaxReceiptListStore()
 
 const donationList = computed(() => donationListStore.donationList)
 const pagination = computed(() => donationListStore.pagination)
@@ -115,6 +120,14 @@ const deleteDonation = async (donationId: string) => {
   $q.notify({ type: 'positive', message: 'Le don a été supprimé avec succès.' })
   // Refetch donations to update the list
   await fetchDonations(paginationRequest.value)
+}
+
+const createTaxReceipt = async (donationId: string) => {
+  working.value = true
+  await taxReceiptListStore.createIndividualTaxReceipt(donationId)
+  working.value = false
+  $q.notify({ type: 'positive', message: 'Le reçu fiscal a été créé avec succès.' })
+  await router.push('/tax-receipts')
 }
 
 onMounted(async () => {

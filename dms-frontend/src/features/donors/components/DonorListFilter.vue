@@ -14,7 +14,7 @@
       </div>
       <div>
         <div class="text-bold q-mb-sm">Donateur</div>
-        <UuidFilterComponent
+        <SelectFilterComponent
           :model-value="filter?.id"
           :options="donorRefs.options"
           :lazy-load="donorRefs.load"
@@ -53,7 +53,7 @@ import Btn from '@/components/ui/Btn.vue'
 
 import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
 import FloatFilterComponent from '@/components/FloatFilter.vue'
-import UuidFilterComponent from '@/components/UuidFilter.vue'
+import SelectFilterComponent from '@/components/SelectFilter.vue'
 
 import type { LazySelectOptions } from '@/types'
 import type { DonorListFilter, DonorRefSelect } from '@shared/models'

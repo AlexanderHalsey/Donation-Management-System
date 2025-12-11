@@ -6,18 +6,30 @@ import * as path from 'node:path'
 export class FileStorageService {
   constructor() {}
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile({ name, buffer }: { name: string; buffer: Buffer }): Promise<string> {
     // Placeholder implementation for file upload
     // In a real scenario, this would involve uploading the file to a storage service
     // and returning the URL or identifier of the uploaded file.
-    const filePath = `src/infrastructure/storage/${file.originalname}`
+    const filePath = `src/infrastructure/storage/${name}`
 
     // Ensure the storage directory exists
     const dir = path.dirname(filePath)
     await fs.mkdir(dir, { recursive: true })
 
-    await fs.writeFile(filePath, file.buffer)
+    await fs.writeFile(filePath, buffer)
     return filePath
+  }
+
+  async updateFile({ filePath, buffer }: { filePath: string; buffer: Buffer }): Promise<void> {
+    // Placeholder implementation for file update
+    // In a real scenario, this would involve updating the file in a storage service
+    // using the provided fileId and new content.
+    try {
+      await fs.access(filePath)
+    } catch {
+      throw new BadRequestException('File not found')
+    }
+    await fs.writeFile(filePath, buffer)
   }
 
   async downloadFile(filePath: string): Promise<Buffer> {

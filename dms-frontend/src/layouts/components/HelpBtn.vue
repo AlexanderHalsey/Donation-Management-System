@@ -15,8 +15,11 @@
                 &emsp;...&emsp;...&emsp;...&emsp;...&emsp;...&emsp;...
               </div>
             </TitledComponent>
-            <TitledComponent title="Donateur désactivé">
-              <div class="text-primary text-bold">🚫 NOM Prénom</div>
+            <TitledComponent title="Dons éligibles au reçu fiscal">
+              <div class="list-item-line bg-amber-3">
+                <span class="text-primary text-bold">NOM Prénom</span>
+                &emsp;...&emsp;...&emsp;...&emsp;...&emsp;...&emsp;...
+              </div>
             </TitledComponent>
             <QSeparator class="q-my-sm" />
             <div class="text-subtitle1 text-weight-bold q-mb-xs">
@@ -32,13 +35,20 @@
               Reçus fiscaux
             </div>
             <TitledComponent title="Reçu fiscal annulé">
-              <div class="list-item-line bg-red-2">
+              <div class="list-item-line">
                 <span class="text-primary text-bold">1000&emsp; NOM Prénom</span>
-                &emsp;...&emsp;...&emsp;...&emsp;...
+                &emsp;...&emsp;...&emsp;...&emsp;<span>
+                  <QIcon name="cancel" color="grey" size="xs" />
+                </span>
               </div>
             </TitledComponent>
-            <TitledComponent title="Donateur désactivé">
-              <div class="text-primary text-bold">🚫 NOM Prénom</div>
+            <TitledComponent title="Reçu fiscal échoué">
+              <div class="list-item-line">
+                <span class="text-primary text-bold">1001&emsp; NOM Prénom</span>
+                &emsp;...&emsp;...&emsp;...&emsp;<span>
+                  <QIcon name="error" color="red" size="xs" />
+                </span>
+              </div>
             </TitledComponent>
           </QItemSection>
         </QItem>

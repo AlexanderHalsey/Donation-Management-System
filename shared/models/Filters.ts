@@ -1,4 +1,4 @@
-export interface UuidFilter {
+export interface SelectFilter {
   in?: string[]
 }
 

@@ -2,12 +2,12 @@
   <QDialog v-model="cancelDialog" maximized>
     <QCard style="width: 660px; height: auto">
       <QCardSection class="text-bold" style="font-size: 18px">
-        {{ taxReceipt.isCanceled ? 'Reçu annulé' : "Confirmer l'annulation" }}
+        {{ isCanceled ? 'Reçu annulé' : "Confirmer l'annulation" }}
       </QCardSection>
-      <QCardSection v-if="!taxReceipt.isCanceled" class="text-center text-italic">
+      <QCardSection v-if="!isCanceled" class="text-center text-italic">
         Êtes-vous sûr de vouloir annuler ce reçu fiscal ? Cette action est irréversible.
       </QCardSection>
-      <QCardSection v-if="!taxReceipt.isCanceled">
+      <QCardSection v-if="!isCanceled">
         <label for="canceledReason" class="text-bold text-right"> Raison de l'annulation </label>
 
         <Input
@@ -31,9 +31,9 @@
         </div>
       </QCardSection>
       <QCardActions align="right">
-        <Btn flat :label="taxReceipt.isCanceled ? 'Fermer' : 'Annuler'" v-close-popup />
+        <Btn flat :label="isCanceled ? 'Fermer' : 'Annuler'" v-close-popup />
         <Btn
-          v-if="!taxReceipt.isCanceled"
+          v-if="!isCanceled"
           flat
           label="Confirmer"
           color="red"
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, type PropType } from 'vue'
+import { computed, onBeforeUnmount, ref, type PropType } from 'vue'
 
 import Btn from '@/components/ui/Btn.vue'
 import Input from '@/components/ui/Input.vue'
@@ -74,6 +74,8 @@ const open = () => {
   cancelDialog.value = true
 }
 
+const isCanceled = computed(() => props.taxReceipt.status === 'CANCELED')
+
 const { defineField, errors, handleSubmit, resetForm } = useForm({
   validationSchema: toTypedSchema(cancelTaxReceiptSchema),
 })
@@ -85,7 +87,7 @@ onBeforeUnmount(() => {
 })
 
 const validate = handleSubmit((formData) => {
-  if (props.taxReceipt.isCanceled) {
+  if (isCanceled.value) {
     // If the receipt is already canceled, we just want to view the cancellation reason
     cancelDialog.value = false
     return

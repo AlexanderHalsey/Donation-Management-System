@@ -4,7 +4,7 @@ export interface FileMetadata {
   id: string
   uploadedAt: Date
   expiresAt?: Date
-  storageKey?: string
+  storageKey: string
   name: string
   size: number
   mimeType: string

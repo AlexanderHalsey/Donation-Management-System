@@ -12,10 +12,11 @@ describe('Tax Receipt List', () => {
   const paginationControls = taxReceiptListFooter + ' .q-table__control:nth-child(3) button'
   const filter = '[data-cy="tax-receipt-list-filter"]'
 
-  it('displays the tax receipt list', () => {
+  it('displays the tax receipt list and its various states correctly', () => {
     cy.visit('/tax-receipts')
     cy.wait(['@getTaxReceiptList'])
     cy.get(taxReceiptListItem).should('have.length', 10)
+    // canceled receipt item
     cy.get(taxReceiptListItem)
       .first()
       .within(() => {
@@ -24,7 +25,49 @@ describe('Tax Receipt List', () => {
         cy.get('td').eq(2).should('contain.text', '09/04/2024')
         cy.get('td').eq(3).should('contain.text', 'Individuel')
         cy.get('td').eq(4).should('contain.text', 'tax-receipt-100.pdf')
+        cy.get('td').eq(5).find('.q-icon').should('have.class', 'text-grey')
+        cy.get('td').eq(6).click()
       })
+    cy.get('[id^=q-portal--menu--]')
+      .find('.q-item')
+      .should('have.length', 1)
+      .should('contain.text', "Afficher l'annulation")
+    // completed receipt item
+    cy.get(taxReceiptListItem)
+      .eq(1)
+      .within(() => {
+        cy.get('td').eq(0).should('contain.text', '1098')
+        cy.get('td').eq(1).should('contain.text', 'LASTNAME9 FirstName9')
+        cy.get('td').eq(2).should('contain.text', '08/04/2024')
+        cy.get('td').eq(3).should('contain.text', 'Annuel')
+        cy.get('td').eq(4).should('contain.text', 'tax-receipt-99.pdf')
+        cy.get('td').eq(5).find('.q-icon').should('have.class', 'text-green')
+        cy.get('td').eq(6).click()
+      })
+    cy.get('[id^=q-portal--menu--]')
+      .find('.q-item')
+      .should('have.length', 1)
+      .should('contain.text', 'Annuler')
+    // failed receipt item
+    cy.get(taxReceiptListItem)
+      .eq(2)
+      .within(() => {
+        cy.get('td').eq(0).should('contain.text', '1097')
+        cy.get('td').eq(1).should('contain.text', 'LASTNAME8 FirstName8')
+        cy.get('td').eq(2).should('contain.text', '07/04/2024')
+        cy.get('td').eq(3).should('contain.text', 'Individuel')
+        cy.get('td').eq(4).should('contain.text', 'tax-receipt-98.pdf')
+        cy.get('td').eq(5).find('.q-icon').should('have.class', 'text-red')
+        cy.get('td').eq(6).click()
+      })
+    cy.get('[id^=q-portal--menu--]')
+      .find('.q-item')
+      .should('have.length', 2)
+      .eq(0)
+      .should('contain.text', 'Réessayer')
+      .next()
+      .should('contain.text', 'Annuler')
+    // processing receipt item
     cy.get(taxReceiptListItem)
       .eq(3)
       .within(() => {
@@ -33,15 +76,20 @@ describe('Tax Receipt List', () => {
         cy.get('td').eq(2).should('contain.text', '06/04/2024')
         cy.get('td').eq(3).should('contain.text', 'Annuel')
         cy.get('td').eq(4).should('contain.text', 'tax-receipt-97.pdf')
+        cy.get('td').eq(5).find('.q-icon').should('have.class', 'text-amber')
+        cy.get('td').eq(6).find('button').should('not.be.visible')
       })
+    // pending receipt item
     cy.get(taxReceiptListItem)
-      .eq(7)
+      .eq(4)
       .within(() => {
-        cy.get('td').eq(0).should('contain.text', '1092')
-        cy.get('td').eq(1).should('contain.text', 'LASTNAME3 FirstName3')
-        cy.get('td').eq(2).should('contain.text', '02/04/2024')
-        cy.get('td').eq(3).should('contain.text', 'Annuel')
-        cy.get('td').eq(4).should('contain.text', 'tax-receipt-93.pdf')
+        cy.get('td').eq(0).should('contain.text', '1095')
+        cy.get('td').eq(1).should('contain.text', 'LASTNAME6 FirstName6')
+        cy.get('td').eq(2).should('contain.text', '05/04/2024')
+        cy.get('td').eq(3).should('contain.text', 'Individuel')
+        cy.get('td').eq(4).should('contain.text', 'tax-receipt-96.pdf')
+        cy.get('td').eq(5).find('.q-icon').should('have.class', 'text-blue')
+        cy.get('td').eq(6).find('button').should('not.be.visible')
       })
   })
   it('allows the user to navigate pages', () => {
@@ -135,16 +183,31 @@ describe('Tax Receipt List', () => {
         cy.get('td').eq(3).should('contain.text', 'Individuel')
       })
   })
+  it('should allow retrying a failed tax receipt from the list', () => {
+    cy.visit('/tax-receipts')
+    cy.wait('@getTaxReceiptList')
+    cy.get(taxReceiptListItem)
+      .eq(2)
+      .within(() => {
+        cy.get('td').eq(6).click()
+      })
+    cy.mockRetryFailedTaxReceipt()
+    cy.mockTaxReceiptList()
+    cy.get('#q-portal--menu--1 .q-list').within(() => {
+      cy.get('.q-item').eq(0).contains('Réessayer').click()
+    })
+    cy.get('.q-notification').should('contain.text', 'Le reçu fiscal a été régénéré avec succès.')
+  })
   it('should allow cancelling a tax receipt from the list', () => {
     cy.visit('/tax-receipts')
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem)
       .eq(2)
       .within(() => {
-        cy.get('td').eq(5).find('button').click()
+        cy.get('td').eq(6).find('button').click()
       })
     cy.get('#q-portal--menu--1 .q-list').within(() => {
-      cy.get('.q-item').contains('Annuler').click()
+      cy.get('.q-item').eq(1).contains('Annuler').click()
     })
     cy.get('.q-dialog').within(() => {
       cy.get('button').eq(1).contains('Confirmer').click()
@@ -239,7 +302,7 @@ describe('Tax Receipt List', () => {
       cy.get(filter).click()
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
-        { type: { equals: 'annual' } },
+        { type: { equals: 'ANNUAL' } },
       )
       getTaxReceiptTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click()
@@ -252,7 +315,7 @@ describe('Tax Receipt List', () => {
       cy.get(paginationInfo).should('contain.text', '1-10 of 50')
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
-        { type: { equals: 'individual' } },
+        { type: { equals: 'INDIVIDUAL' } },
       )
       // select Individual as filter instead
       getTaxReceiptTypeFilter().within(() => {
@@ -264,37 +327,66 @@ describe('Tax Receipt List', () => {
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 50')
     })
-    it('should allow filtering by toggling tax receipt isCanceled status', () => {
-      const getIncludeCanceledFilter = () => getFilterMenu().eq(5).children().eq(0).children().eq(1)
+    it('should allow filtering by tax receipt status', () => {
+      const getStatusFilter = () => getFilterMenu().eq(5).children().eq(0).children().eq(1)
       cy.visit('/tax-receipts')
       cy.wait('@getTaxReceiptList')
       cy.get(filter).click()
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
         {
-          isCanceled: { equals: false },
+          status: { in: ['CANCELED'] },
         },
       )
-      // select isCanceled = false as filter
-      getIncludeCanceledFilter().within(() => {
-        cy.get('.q-checkbox').eq(0).click()
+      // select status canceled as filter
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click()
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 98')
-      // now select isCanceled = true as filter too
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click() // close dropdown
+      })
+      cy.get(paginationInfo).should('contain.text', '1-10 of 20')
+      // select status processing as filter too
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
         {
-          isCanceled: { equals: true },
+          status: { in: ['CANCELED', 'PROCESSING'] },
         },
       )
-      getIncludeCanceledFilter().within(() => {
-        cy.get('.q-checkbox').eq(1).click()
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click()
       })
-      cy.get(paginationInfo).should('contain.text', '1-2 of 2')
-      // now click true again for all results
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(1).click()
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click() // close dropdown
+      })
+      cy.get(paginationInfo).should('contain.text', '1-10 of 40')
+      // select status failed as filter too
+      cy.mockTaxReceiptList(
+        { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
+        {
+          status: { in: ['CANCELED', 'PROCESSING', 'FAILED'] },
+        },
+      )
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click()
+      })
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(2).click()
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click() // close dropdown
+      })
+      cy.get(paginationInfo).should('contain.text', '1-10 of 60')
+      // now remove status from filter
       cy.mockTaxReceiptList({ page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } })
-      getIncludeCanceledFilter().within(() => {
-        cy.get('.q-checkbox').eq(1).click()
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click()
+      })
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(2).click()
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(1).click()
+      cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click()
+      getStatusFilter().within(() => {
+        cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 100')
     })

@@ -20,6 +20,7 @@ export class DonationListItemDto {
   organisation: OrganisationRefDto
   donationType: DonationTypeDto
   donor: DonorRefDto
+  isTaxReceiptEnabled: boolean
   taxReceiptId?: string
 }
 
