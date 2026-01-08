@@ -23,7 +23,7 @@ describe('Organisation Update', () => {
     cy.get(formField).eq(8).find('.q-field textarea').should('have.value', 'Object Description 1')
     cy.get(formField).eq(9).find('.q-field input').should('have.value', 'Signatory Name 1')
     cy.get(formField).eq(10).find('.q-field input').should('have.value', 'Signatory Position 1')
-    cy.get(formField).eq(11).find('.q-field .q-chip').should('contain.text', 'signature.webp')
+    cy.get(formField).eq(11).find('.q-field .q-chip').should('contain.text', 'signature.jpg')
   })
   it('should show validation errors', () => {
     cy.visit('/organisations/organisation-id-1')
@@ -63,7 +63,7 @@ describe('Organisation Update', () => {
     cy.get(formField)
       .eq(6)
       .find('input[type="file"]')
-      .selectFile('cypress/fixtures/img/signature.webp', { force: true })
+      .selectFile('cypress/fixtures/img/signature.jpg', { force: true })
 
     // Change object
     cy.get(formField).eq(7).find('input').clear()

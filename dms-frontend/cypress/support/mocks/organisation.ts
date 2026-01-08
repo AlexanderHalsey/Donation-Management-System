@@ -35,7 +35,7 @@ export function buildMockOrganisations(): Organisation[] {
     objectDescription: `Object Description ${index + 1}`,
     signatoryName: `Signatory Name ${index + 1}`,
     signatoryPosition: `Signatory Position ${index + 1}`,
-    signature: index === 0 ? buildMockFile({ name: 'signature.webp' }) : undefined,
+    signature: index === 0 ? buildMockFile({ name: 'signature.jpg' }) : undefined,
     isDisabled: false,
   }))
 }

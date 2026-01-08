@@ -78,7 +78,7 @@ describe('Organisation Create', () => {
     cy.get(formField)
       .eq(11)
       .find('input[type="file"]')
-      .selectFile('cypress/fixtures/img/signature.webp', { force: true })
+      .selectFile('cypress/fixtures/img/signature.jpg', { force: true })
 
     cy.mockOrganisationList()
     cy.mockCreateOrganisation({

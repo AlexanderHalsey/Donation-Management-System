@@ -25,10 +25,10 @@ export const buildMockOrganisationCreateInput = (index: number): OrganisationCre
   },
   signature: {
     create: {
-      storageKey: 'src/infrastructure/storage/signature.webp',
-      name: 'signature.webp',
+      storageKey: 'src/infrastructure/storage/signature.jpg',
+      name: 'signature.jpg',
       size: 1024,
-      mimeType: 'image/webp',
+      mimeType: 'image/jpeg',
       hash: '26a5e1d7ef984196e90a11986c6385715fa1d6ee523f79ab9eb8112b85c52ce4',
       status: 'ACTIVE',
     },
