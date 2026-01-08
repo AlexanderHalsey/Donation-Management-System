@@ -63,7 +63,7 @@ export class TaxReceiptController {
 
   @Put(':id/cancel')
   @ApiOperation({ summary: 'Cancel a tax receipt' })
-  @ApiResponse({ status: 200, description: 'Tax receipt cancelled successfully' })
+  @ApiResponse({ status: 200, description: 'Tax receipt canceled successfully' })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
   @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
   async cancelTaxReceipt(
@@ -85,6 +85,7 @@ export class TaxReceiptController {
     }
     await this.taxReceiptService.processTaxReceiptGeneration({
       taxReceiptId: id,
+      taxReceiptNumber: taxReceipt.receiptNumber,
       donationIds: taxReceipt.donationIds,
       taxReceiptType: taxReceipt.type,
     })

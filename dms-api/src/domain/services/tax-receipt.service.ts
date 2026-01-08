@@ -70,7 +70,9 @@ export class TaxReceiptService {
     const donations = await this.prisma.donation.findMany({
       where: { id: { in: donationIds } },
       include: {
-        organisation: { select: { isTaxReceiptEnabled: true } },
+        organisation: {
+          select: { id: true, isTaxReceiptEnabled: true, logoId: true, signatureId: true },
+        },
         donationType: { select: { isTaxReceiptEnabled: true } },
       },
     })
@@ -103,59 +105,118 @@ export class TaxReceiptService {
       }
     })
 
-    const taxReceiptId = await this.prisma.$transaction(async (tx) => {
-      const taxReceipt = await tx.taxReceipt.create({
-        data: {
-          type: taxReceiptType,
-          status: 'PENDING',
-          donorId: donorIds[0],
-        },
-        select: { id: true },
-      })
+    const { id: taxReceiptId, receiptNumber: taxReceiptNumber } = await this.prisma.$transaction(
+      async (tx) => {
+        const taxReceipt = await tx.taxReceipt.create({
+          data: {
+            type: taxReceiptType,
+            status: 'PENDING',
+            donorId: donorIds[0],
+          },
+          select: { id: true, receiptNumber: true },
+        })
 
-      await tx.donation.updateMany({
-        where: { id: { in: donationIds } },
-        data: { taxReceiptId: taxReceipt.id },
-      })
+        await tx.donation.updateMany({
+          where: { id: { in: donationIds } },
+          data: { taxReceiptId: taxReceipt.id },
+        })
 
-      return taxReceipt.id
-    })
-
-    // To be queued later, catch is temporary until a proper job queue is implemented
-    this.processTaxReceiptGeneration({ taxReceiptId, donationIds, taxReceiptType }).catch(
-      (error) => {
-        this.handleTaxReceiptGenerationFailure(taxReceiptId, error)
+        return taxReceipt
       },
     )
+
+    // To be queued later, catch is temporary until a proper job queue is implemented
+    this.processTaxReceiptGeneration({
+      taxReceiptId,
+      taxReceiptNumber,
+      donationIds,
+      taxReceiptType,
+    }).catch((error) => {
+      this.handleTaxReceiptGenerationFailure(taxReceiptId, error)
+    })
 
     return taxReceiptId
   }
 
   async processTaxReceiptGeneration({
     taxReceiptId,
+    taxReceiptNumber,
     donationIds,
     taxReceiptType,
   }: {
     taxReceiptId: string
+    taxReceiptNumber: number
     donationIds: string[]
     taxReceiptType: TaxReceiptType
   }): Promise<void> {
-    await this.prisma.taxReceipt.update({
-      where: { id: taxReceiptId },
-      data: { status: 'PROCESSING' },
-    })
+    const [donations] = await this.prisma.$transaction([
+      this.prisma.donation.findMany({
+        where: { id: { in: donationIds } },
+        include: {
+          donor: true,
+          organisation: true,
+          donationMethod: true,
+          paymentMode: true,
+          donationAssetType: true,
+        },
+      }),
+      this.prisma.taxReceipt.update({
+        where: { id: taxReceiptId },
+        data: { status: 'PROCESSING' },
+      }),
+    ])
 
-    const donations = await this.prisma.donation.findMany({
-      where: { id: { in: donationIds } },
-      include: { donor: true, organisation: true },
-    })
+    const organisations = uniq(donations.map((donation) => donation.organisation))
+
+    if (organisations.length > 1) {
+      throw new BadRequestException(
+        'Donations must belong to the same organisation. Current organisation IDs: ' +
+          organisations.map((org) => org.id).join(', '),
+      )
+    }
+
+    const organisation = organisations[0]
+
+    if (
+      [
+        'title',
+        'address',
+        'postCode',
+        'locality',
+        'object',
+        'objectDescription',
+        'signatoryName',
+        'signatoryPosition',
+        'logoId',
+        'signatureId',
+      ].some((field) => !organisation?.[field as keyof typeof organisation])
+    ) {
+      throw new Error('Organisation details are incomplete for tax receipt generation')
+    }
 
     if (donations.length < donationIds.length) {
       throw new Error('One or more donations not found during tax receipt processing')
     }
 
+    const [{ buffer: logo }, { buffer: signature }] = await Promise.all([
+      this.fileService.downloadFile(organisation.logoId!),
+      this.fileService.downloadFile(organisation.signatureId!),
+    ])
+
     const pdfBuffer = await this.taxReceiptGeneratorService.generateTaxReceipt({
-      organisation: donations[0].organisation,
+      taxReceiptNumber,
+      organisation: {
+        title: organisation.title!,
+        address: organisation.address!,
+        postCode: organisation.postCode!,
+        locality: organisation.locality!,
+        object: organisation.object!,
+        objectDescription: organisation.objectDescription!,
+        signatoryName: organisation.signatoryName!,
+        signatoryPosition: organisation.signatoryPosition!,
+        logo,
+        signature,
+      },
       donor: donations[0].donor,
       donations,
       taxReceiptType,

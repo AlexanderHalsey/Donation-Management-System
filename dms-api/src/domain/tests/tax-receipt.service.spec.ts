@@ -1,6 +1,8 @@
 import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 
+import { omit } from 'es-toolkit'
+
 import { mockDeep, mockReset } from 'jest-mock-extended'
 
 import { FileService } from '../services/file.service'
@@ -8,7 +10,7 @@ import { TaxReceiptService } from '../services/tax-receipt.service'
 import { TaxReceiptGeneratorService } from '../services/tax-receipt-generator.service'
 import { PrismaService } from '@/infrastructure'
 
-import type { PrismaClient, TaxReceipt } from '@generated/prisma/client'
+import type { Prisma, TaxReceipt } from '@generated/prisma/client'
 
 describe('TaxReceiptService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -64,7 +66,7 @@ describe('TaxReceiptService', () => {
   describe('create tax receipt', () => {
     it('throws error if donations belong to different donors', async () => {
       prismaServiceMock.donation.findMany.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<PrismaClient['donation']['findMany']>>>([
+        mockDeep<Prisma.DonationGetPayload<null>[]>([
           {
             id: 'donation-1',
             donorId: 'donor-1',
@@ -88,7 +90,7 @@ describe('TaxReceiptService', () => {
 
     it('throws error if a donation already has a tax receipt', async () => {
       prismaServiceMock.donation.findMany.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<PrismaClient['donation']['findMany']>>>([
+        mockDeep<Prisma.DonationGetPayload<null>[]>([
           {
             id: 'donation-1',
             donorId: 'donor-1',
@@ -110,10 +112,12 @@ describe('TaxReceiptService', () => {
     it('throws error if tax receipts are not enabled for a donation', async () => {
       prismaServiceMock.donation.findMany.mockResolvedValueOnce(
         mockDeep<
-          (Awaited<ReturnType<PrismaClient['donation']['findMany']>>[number] & {
-            organisation: { isTaxReceiptEnabled: boolean }
-            donationType: { isTaxReceiptEnabled: boolean }
-          })[]
+          Prisma.DonationGetPayload<{
+            include: {
+              organisation: { select: { isTaxReceiptEnabled: boolean } }
+              donationType: { select: { isTaxReceiptEnabled: boolean } }
+            }
+          }>[]
         >([
           {
             id: 'donation-1',
@@ -136,10 +140,12 @@ describe('TaxReceiptService', () => {
     it('creates tax receipt successfully', async () => {
       prismaServiceMock.donation.findMany.mockResolvedValueOnce(
         mockDeep<
-          (Awaited<ReturnType<PrismaClient['donation']['findMany']>>[number] & {
-            organisation: { isTaxReceiptEnabled: boolean }
-            donationType: { isTaxReceiptEnabled: boolean }
-          })[]
+          Prisma.DonationGetPayload<{
+            include: {
+              organisation: { select: { isTaxReceiptEnabled: boolean } }
+              donationType: { select: { isTaxReceiptEnabled: boolean } }
+            }
+          }>[]
         >([
           {
             id: 'donation-1',
@@ -156,7 +162,7 @@ describe('TaxReceiptService', () => {
       })
 
       prismaServiceMock.taxReceipt.create.mockResolvedValueOnce(
-        mockDeep<TaxReceipt>({ id: 'new-tax-receipt-id' }),
+        mockDeep<TaxReceipt>({ id: 'new-tax-receipt-id', receiptNumber: 12345 }),
       )
 
       taxReceiptService.processTaxReceiptGeneration = jest.fn().mockResolvedValueOnce(void 0)
@@ -168,42 +174,233 @@ describe('TaxReceiptService', () => {
 
       expect(taxReceiptId).toBe('new-tax-receipt-id')
       expect(prismaServiceMock.$transaction).toHaveBeenCalledTimes(1)
-      expect(prismaServiceMock.taxReceipt.create).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.taxReceipt.create).toHaveBeenCalledWith({
+        data: {
+          type: 'INDIVIDUAL',
+          status: 'PENDING',
+          donorId: 'donor-1',
+        },
+        select: { id: true, receiptNumber: true },
+      })
       expect(prismaServiceMock.donation.updateMany).toHaveBeenCalledTimes(1)
-      expect(taxReceiptService.processTaxReceiptGeneration).toHaveBeenCalledTimes(1)
+      expect(taxReceiptService.processTaxReceiptGeneration).toHaveBeenCalledWith({
+        taxReceiptId: 'new-tax-receipt-id',
+        taxReceiptNumber: 12345,
+        donationIds: ['donation-1'],
+        taxReceiptType: 'INDIVIDUAL',
+      })
     })
   })
 
-  it('processes tax receipt generation', async () => {
-    prismaServiceMock.donation.findMany.mockResolvedValueOnce(
-      mockDeep<Awaited<ReturnType<PrismaClient['donation']['findMany']>>>([
+  describe('processTaxReceiptGeneration', () => {
+    it('processes tax receipt generation successfully', async () => {
+      const donationId = 'donation-1'
+      const taxReceiptNumber = 12345
+      const donor = {
+        id: 'donor-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+      }
+      const organisation = {
+        id: 'org-1',
+        title: 'Test Org',
+        address: '123 Test St',
+        postCode: '12345',
+        locality: 'Test City',
+        object: 'Test Object',
+        objectDescription: 'Test Description',
+        signatoryName: 'Test Signatory',
+        signatoryPosition: 'President',
+        logoId: 'logo-file-id',
+        signatureId: 'signature-file-id',
+      }
+      const mockDonationWithRelations = mockDeep<
+        Prisma.DonationGetPayload<{
+          include: {
+            donor: true
+            organisation: true
+            donationMethod: true
+            paymentMode: true
+            donationAssetType: true
+          }
+        }>[]
+      >([
+        {
+          id: donationId,
+          donorId: donor.id,
+          donor,
+          organisation,
+          donationMethod: { id: 'method-1', name: 'Online' },
+          paymentMode: { id: 'payment-1', name: 'Credit Card' },
+          donationAssetType: { id: 'asset-1', name: 'Money' },
+        },
+      ])
+
+      prismaServiceMock.$transaction.mockResolvedValueOnce([mockDonationWithRelations])
+
+      fileServiceMock.downloadFile.mockResolvedValueOnce(
+        mockDeep<Awaited<ReturnType<typeof fileServiceMock.downloadFile>>>({
+          buffer: Buffer.from('logo-file-buffer'),
+        }),
+      )
+      fileServiceMock.downloadFile.mockResolvedValueOnce(
+        mockDeep<Awaited<ReturnType<typeof fileServiceMock.downloadFile>>>({
+          buffer: Buffer.from('signature-file-buffer'),
+        }),
+      )
+
+      taxReceiptGeneratorServiceMock.generateTaxReceipt.mockResolvedValue(
+        Buffer.from('pdf-file-buffer'),
+      )
+
+      fileServiceMock.createFile.mockResolvedValueOnce('generated-file-id-123')
+
+      await taxReceiptService.processTaxReceiptGeneration({
+        taxReceiptId: 'tax-receipt-id-123',
+        taxReceiptNumber: taxReceiptNumber,
+        donationIds: [donationId],
+        taxReceiptType: 'INDIVIDUAL',
+      })
+
+      expect(prismaServiceMock.taxReceipt.update).toHaveBeenCalledWith({
+        where: { id: 'tax-receipt-id-123' },
+        data: { status: 'PROCESSING' },
+      })
+      expect(prismaServiceMock.donation.findMany).toHaveBeenCalledWith({
+        where: { id: { in: [donationId] } },
+        include: {
+          donor: true,
+          organisation: true,
+          donationMethod: true,
+          paymentMode: true,
+          donationAssetType: true,
+        },
+      })
+      expect(fileServiceMock.downloadFile).toHaveBeenCalledTimes(2)
+      expect(taxReceiptGeneratorServiceMock.generateTaxReceipt).toHaveBeenCalledWith({
+        taxReceiptNumber,
+        organisation: expect.objectContaining(omit(organisation, ['id', 'logoId', 'signatureId'])),
+        donor: mockDonationWithRelations[0].donor,
+        donations: mockDonationWithRelations,
+        taxReceiptType: 'INDIVIDUAL',
+      })
+      expect(fileServiceMock.createFile).toHaveBeenCalledWith({
+        name: 'tax-receipt-tax-receipt-id-123.pdf',
+        mimeType: 'application/pdf',
+        buffer: Buffer.from('pdf-file-buffer'),
+      })
+      expect(prismaServiceMock.taxReceipt.update).toHaveBeenCalledTimes(2)
+      expect(prismaServiceMock.taxReceipt.update).toHaveBeenLastCalledWith({
+        where: { id: 'tax-receipt-id-123' },
+        data: {
+          status: 'COMPLETED',
+          fileId: 'generated-file-id-123',
+        },
+      })
+    })
+
+    it('throws error if donations belong to different organisations', async () => {
+      const mockDonationsWithDifferentOrgs = mockDeep<
+        Prisma.DonationGetPayload<{
+          include: {
+            organisation: { select: { id: boolean; title: boolean } }
+          }
+        }>[]
+      >([
         {
           id: 'donation-1',
-          donorId: 'donor-1',
+          organisation: { id: 'org-1', title: 'Org 1' },
         },
-      ]),
-    )
+        {
+          id: 'donation-2',
+          organisation: { id: 'org-2', title: 'Org 2' },
+        },
+      ])
 
-    taxReceiptGeneratorServiceMock.generateTaxReceipt.mockResolvedValueOnce(
-      Buffer.from('pdf-file-buffer'),
-    )
+      prismaServiceMock.$transaction.mockResolvedValueOnce([mockDonationsWithDifferentOrgs])
 
-    fileServiceMock.createFile.mockResolvedValueOnce('generated-file-id-123')
-
-    await taxReceiptService.processTaxReceiptGeneration({
-      taxReceiptId: 'tax-receipt-id-123',
-      donationIds: ['donation-1'],
-      taxReceiptType: 'INDIVIDUAL',
+      await expect(
+        taxReceiptService.processTaxReceiptGeneration({
+          taxReceiptId: 'tax-receipt-id-123',
+          taxReceiptNumber: 12345,
+          donationIds: ['donation-1', 'donation-2'],
+          taxReceiptType: 'INDIVIDUAL',
+        }),
+      ).rejects.toThrow(
+        'Donations must belong to the same organisation. Current organisation IDs: org-1, org-2',
+      )
     })
 
-    expect(prismaServiceMock.taxReceipt.update).toHaveBeenCalledWith({
-      where: { id: 'tax-receipt-id-123' },
-      data: { status: 'PROCESSING' },
+    it('throws error if organisation details are incomplete', async () => {
+      const mockDonationWithIncompleteOrg = mockDeep<
+        Prisma.DonationGetPayload<{
+          include: {
+            organisation: true
+          }
+        }>[]
+      >([
+        {
+          id: 'donation-1',
+          organisation: {
+            id: 'org-1',
+            title: null, // Missing required field
+            address: '123 Test St',
+            postCode: '12345',
+            locality: 'Test City',
+            object: 'Test Object',
+            objectDescription: 'Test Description',
+            signatoryName: 'Test Signatory',
+            signatoryPosition: 'President',
+            logoId: 'logo-file-id',
+            signatureId: 'signature-file-id',
+          },
+        },
+      ])
+
+      prismaServiceMock.$transaction.mockResolvedValueOnce([mockDonationWithIncompleteOrg])
+
+      await expect(
+        taxReceiptService.processTaxReceiptGeneration({
+          taxReceiptId: 'tax-receipt-id-123',
+          taxReceiptNumber: 12345,
+          donationIds: ['donation-1'],
+          taxReceiptType: 'INDIVIDUAL',
+        }),
+      ).rejects.toThrow('Organisation details are incomplete for tax receipt generation')
     })
-    expect(prismaServiceMock.donation.findMany).toHaveBeenCalledTimes(1)
-    expect(taxReceiptGeneratorServiceMock.generateTaxReceipt).toHaveBeenCalledTimes(1)
-    expect(fileServiceMock.createFile).toHaveBeenCalledTimes(1)
-    expect(prismaServiceMock.taxReceipt.update).toHaveBeenCalledTimes(2)
+
+    it('throws error if fewer donations found than requested', async () => {
+      prismaServiceMock.$transaction.mockResolvedValueOnce([
+        [
+          {
+            id: 'donation-1',
+            organisation: {
+              id: 'org-1',
+              title: 'Test Org',
+              address: '123 Test St',
+              postCode: '12345',
+              locality: 'Test City',
+              object: 'Test Object',
+              objectDescription: 'Test Description',
+              signatoryName: 'Test Signatory',
+              signatoryPosition: 'President',
+              logoId: 'logo-file-id',
+              signatureId: 'signature-file-id',
+            },
+          },
+        ],
+      ])
+
+      await expect(
+        taxReceiptService.processTaxReceiptGeneration({
+          taxReceiptId: 'tax-receipt-id-123',
+          taxReceiptNumber: 12345,
+          donationIds: ['donation-1', 'donation-2'],
+          taxReceiptType: 'INDIVIDUAL',
+        }),
+      ).rejects.toThrow('One or more donations not found during tax receipt processing')
+    })
   })
 
   describe('should cancel tax receipt', () => {
@@ -212,6 +409,7 @@ describe('TaxReceiptService', () => {
         return cb(prismaServiceMock)
       })
     })
+
     it('throws error if tax receipt is not completed', async () => {
       prismaServiceMock.taxReceipt.findUniqueOrThrow.mockResolvedValueOnce(
         mockDeep<TaxReceipt>({

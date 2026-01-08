@@ -6,7 +6,7 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { DonationService } from '../services/donation.service'
 import { PrismaService } from '@/infrastructure'
 
-import { PrismaClient } from '@generated/prisma/client'
+import { Prisma } from '@generated/prisma/client'
 
 describe('DonationService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -45,10 +45,12 @@ describe('DonationService', () => {
     const donationId = 'donation-id-123'
     prismaServiceMock.donation.findUniqueOrThrow.mockResolvedValueOnce(
       mockDeep<
-        Awaited<ReturnType<PrismaClient['donation']['findUniqueOrThrow']>> & {
-          organisation: { isTaxReceiptEnabled: false }
-          donationType: { isTaxReceiptEnabled: false }
-        }
+        Prisma.DonationGetPayload<{
+          include: {
+            organisation: { select: { isTaxReceiptEnabled: true } }
+            donationType: { select: { isTaxReceiptEnabled: true } }
+          }
+        }>
       >({
         id: donationId,
         organisation: { isTaxReceiptEnabled: false },
@@ -83,7 +85,7 @@ describe('DonationService', () => {
 
   it('should create a donation', async () => {
     prismaServiceMock.donationType.findUniqueOrThrow.mockResolvedValueOnce(
-      mockDeep<Awaited<ReturnType<PrismaClient['donationType']['findUniqueOrThrow']>>>({
+      mockDeep<Prisma.DonationTypeGetPayload<null>>({
         id: 'donation-type-id',
         organisationId: 'org-id',
       }),
@@ -91,10 +93,12 @@ describe('DonationService', () => {
 
     prismaServiceMock.donation.create.mockResolvedValueOnce(
       mockDeep<
-        Awaited<ReturnType<PrismaClient['donation']['create']>> & {
-          organisation: { isTaxReceiptEnabled: false }
-          donationType: { isTaxReceiptEnabled: false }
-        }
+        Prisma.DonationGetPayload<{
+          include: {
+            organisation: { select: { isTaxReceiptEnabled: true } }
+            donationType: { select: { isTaxReceiptEnabled: true } }
+          }
+        }>
       >({
         id: 'new-donation-id',
         organisation: { isTaxReceiptEnabled: false },
@@ -120,7 +124,7 @@ describe('DonationService', () => {
   describe('update', () => {
     it('should throw error if donation has tax receipt', async () => {
       prismaServiceMock.donation.findUniqueOrThrow.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<PrismaClient['donation']['findUniqueOrThrow']>>>({
+        mockDeep<Prisma.DonationGetPayload<null>>({
           id: 'existing-donation-id',
           taxReceiptId: 'tax-receipt-id-123',
         }),
@@ -145,10 +149,12 @@ describe('DonationService', () => {
     it('should update a donation', async () => {
       prismaServiceMock.donation.findUniqueOrThrow.mockResolvedValueOnce(
         mockDeep<
-          Awaited<ReturnType<PrismaClient['donation']['findUniqueOrThrow']>> & {
-            organisation: { isTaxReceiptEnabled: false }
-            donationType: { isTaxReceiptEnabled: false }
-          }
+          Prisma.DonationGetPayload<{
+            include: {
+              organisation: { select: { isTaxReceiptEnabled: false } }
+              donationType: { select: { isTaxReceiptEnabled: false } }
+            }
+          }>
         >({
           id: 'existing-donation-id',
           taxReceiptId: null,
@@ -158,7 +164,7 @@ describe('DonationService', () => {
       )
 
       prismaServiceMock.donationType.findUniqueOrThrow.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<PrismaClient['donationType']['findUniqueOrThrow']>>>({
+        mockDeep<Prisma.DonationTypeGetPayload<null>>({
           id: 'donation-type-id',
           organisationId: 'org-id',
         }),
@@ -166,10 +172,12 @@ describe('DonationService', () => {
 
       prismaServiceMock.donation.update.mockResolvedValueOnce(
         mockDeep<
-          Awaited<ReturnType<PrismaClient['donation']['update']>> & {
-            organisation: { isTaxReceiptEnabled: false }
-            donationType: { isTaxReceiptEnabled: false }
-          }
+          Prisma.DonationGetPayload<{
+            include: {
+              organisation: { select: { isTaxReceiptEnabled: false } }
+              donationType: { select: { isTaxReceiptEnabled: false } }
+            }
+          }>
         >({
           id: 'existing-donation-id',
           organisation: { isTaxReceiptEnabled: false },
@@ -196,7 +204,7 @@ describe('DonationService', () => {
   describe('deleteDonation', () => {
     it('should throw error if donation has tax receipt', async () => {
       prismaServiceMock.donation.findUniqueOrThrow.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<PrismaClient['donation']['findUniqueOrThrow']>>>({
+        mockDeep<Prisma.DonationGetPayload<null>>({
           id: 'donation-id-to-delete',
           taxReceiptId: 'tax-receipt-id-123',
         }),
@@ -213,7 +221,7 @@ describe('DonationService', () => {
       const donationId = 'donation-id-to-delete'
 
       prismaServiceMock.donation.findUniqueOrThrow.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<PrismaClient['donation']['findUniqueOrThrow']>>>({
+        mockDeep<Prisma.DonationGetPayload<null>>({
           id: 'existing-donation-id',
           taxReceiptId: null,
         }),
