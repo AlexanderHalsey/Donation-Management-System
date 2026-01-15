@@ -1,9 +1,10 @@
 <template>
   <BtnDropdown outline color="primary" icon="filter_alt" label="Filtres">
     <template #label>
-      <QBadge v-if="filterCount" color="red-8" floating rounded>
+      <QBadge v-if="filterCount" color="red-8" rounded class="q-ml-sm">
         {{ filterCount }}
       </QBadge>
+      <span v-else style="width: 26.5px"></span>
     </template>
     <div class="q-px-md q-py-sm">
       <div class="row justify-between items-center q-mb-lg">
@@ -113,7 +114,7 @@ import TaxReceiptStatusIcon from './TaxReceiptStatusIcon.vue'
 
 import type { LazySelectOptions } from '@/types'
 import type { TaxReceiptListFilter, DonorRefSelect, TaxReceiptType } from '@shared/models'
-import { TAX_RECEIPT_STATUS_OPTIONS } from '../constants'
+import { TAX_RECEIPT_STATUS_OPTIONS } from '@shared/constants'
 import TaxReceiptTypeTag from './TaxReceiptTypeTag.vue'
 
 const props = defineProps({

@@ -21,9 +21,13 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.17.0",
+    "@types/content-disposition": "^0.5.9",
+    "@types/file-saver": "^2.0.7",
     "@vee-validate/zod": "^4.15.0",
     "axios": "^1.12.2",
+    "content-disposition": "^1.0.1",
     "es-toolkit": "^1.40.0",
+    "file-saver": "^2.0.5",
     "i18next": "^25.6.3",
     "pinia": "^3.0.1",
     "pinia-plugin-persistedstate": "^4.5.0",

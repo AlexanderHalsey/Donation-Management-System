@@ -232,4 +232,12 @@ describe('DonationService', () => {
       expect(prismaServiceMock.donation.delete).toHaveBeenCalledTimes(1)
     })
   })
+
+  it('should get donation export list', async () => {
+    prismaServiceMock.donation.findMany.mockResolvedValueOnce([])
+
+    await donationService.getExportList({ updatedAt: 'desc' }, { amount: { gte: 10 } })
+
+    expect(prismaServiceMock.donation.findMany).toHaveBeenCalledTimes(1)
+  })
 })

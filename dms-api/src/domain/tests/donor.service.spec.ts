@@ -65,4 +65,13 @@ describe('DonorService', () => {
 
     expect(prismaServiceMock.donor.findUniqueOrThrow).toHaveBeenCalledTimes(1)
   })
+
+  it('should get donor export list', async () => {
+    prismaServiceMock.$queryRawTyped.mockResolvedValueOnce([])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    typedSqlServiceMock.getDonorListItem.mockResolvedValueOnce({} as any)
+    await donorService.getExportList({ updatedAt: 'desc' }, { totalAmount: { gte: 10 } })
+
+    expect(prismaServiceMock.$queryRawTyped).toHaveBeenCalledTimes(1)
+  })
 })

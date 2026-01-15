@@ -22,7 +22,9 @@ async function bootstrap() {
   )
 
   if (process.env.NODE_ENV !== 'production') {
-    app.enableCors()
+    app.enableCors({
+      exposedHeaders: ['content-disposition'],
+    })
   }
 
   const config = new DocumentBuilder().setTitle('DMS API').setVersion('1.0').build()

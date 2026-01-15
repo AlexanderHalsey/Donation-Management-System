@@ -1,4 +1,4 @@
-import type { TaxReceiptStatus } from '@shared/models'
+import type { TaxReceiptStatus } from './models'
 
 export const TAX_RECEIPT_STATUS_OPTIONS: {
   id: TaxReceiptStatus

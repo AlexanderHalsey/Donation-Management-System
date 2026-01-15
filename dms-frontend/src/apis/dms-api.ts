@@ -1,3 +1,7 @@
+import axios from 'axios'
+import { parse as parseContentDisposition } from 'content-disposition'
+import { saveAs } from 'file-saver'
+
 import { withClient } from './client'
 
 import {
@@ -53,6 +57,7 @@ import type {
   DonationListItem,
   DonationListPagination,
   DonationListPaginationRequest,
+  DonationListSortOrder,
   DonationMethod,
   DonationType,
   Donor,
@@ -60,6 +65,7 @@ import type {
   DonorListItem,
   DonorListPagination,
   DonorListPaginationRequest,
+  DonorListSortOrder,
   DonorRef,
   Organisation,
   OrganisationRef,
@@ -406,4 +412,54 @@ export const postIndividualTaxReceipt = async (donationId: string): Promise<stri
 
 export const postRetryFailedTaxReceiptGeneration = async (taxReceiptId: string): Promise<void> => {
   await withClient((client) => client.post<void>(`/tax-receipts/${taxReceiptId}/retry-failed`))
+}
+
+export const exportDonationListCsv = async (
+  orderBy: DonationListSortOrder,
+  filter?: DonationListFilter,
+): Promise<void> => {
+  const client = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+  })
+  const response = await client.post<string>('/exports/donations/csv', { orderBy, filter })
+  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
+}
+
+export const exportDonationListXlsx = async (
+  orderBy: DonationListSortOrder,
+  filter?: DonationListFilter,
+): Promise<void> => {
+  const client = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    responseType: 'arraybuffer',
+  })
+  const response = await client.post<ArrayBuffer>('/exports/donations/xlsx', { orderBy, filter })
+  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
+}
+
+export const exportDonorListCsv = async (
+  orderBy: DonorListSortOrder,
+  filter?: DonorListFilter,
+): Promise<void> => {
+  const client = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+  })
+  const response = await client.post<string>('/exports/donors/csv', { orderBy, filter })
+  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
+}
+
+export const exportDonorListXlsx = async (
+  orderBy: DonorListSortOrder,
+  filter?: DonorListFilter,
+): Promise<void> => {
+  const client = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    responseType: 'arraybuffer',
+  })
+  const response = await client.post<ArrayBuffer>('/exports/donors/xlsx', { orderBy, filter })
+  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
 }

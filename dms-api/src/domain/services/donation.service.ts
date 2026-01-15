@@ -5,12 +5,17 @@ import { nullsToUndefined, type RecursivelyReplaceNullWithUndefined } from '@sha
 
 import { PrismaService } from '@/infrastructure'
 
+import { TAX_RECEIPT_STATUS_OPTIONS } from '@shared/constants'
+
 import {
   Donation,
-  DonationListPaginationRequest,
+  DonationExport,
   DonationListFilter,
   DonationListItem,
+  DonationListPaginationRequest,
+  DonationListSortOrder,
 } from '@shared/models'
+
 import { DonationRequest } from '@/api/dtos'
 
 const BASIC_INCLUDE_FIELDS = {
@@ -154,6 +159,34 @@ export class DonationService {
     await this.prisma.donation.delete({
       where: { id: donationId },
     })
+  }
+
+  async getExportList(
+    orderBy: DonationListSortOrder,
+    filter?: DonationListFilter,
+  ): Promise<DonationExport[]> {
+    const donations = await this.prisma.donation.findMany({
+      include: { ...FULL_INCLUDE_FIELDS, taxReceipt: true },
+      omit: BASIC_OMIT_FIELDS,
+      where: filter,
+      orderBy: isEmpty(orderBy) ? { updatedAt: 'desc' } : orderBy,
+    })
+    return donations.map((donation) => ({
+      donatedAt: donation.donatedAt,
+      amount: donation.amount,
+      lastName: donation.donor.lastName,
+      firstName: donation.donor.firstName || undefined,
+      paymentMode: donation.paymentMode.name,
+      donationType: donation.donationType.name,
+      organisation: donation.organisation.name,
+      donationMethod: donation.donationMethod?.name || undefined,
+      donationAssetType: donation.donationAssetType?.name || undefined,
+      taxReceiptNumber: donation.taxReceipt?.receiptNumber || undefined,
+      taxReceiptType: donation.taxReceipt?.type || undefined,
+      taxReceiptStatus:
+        TAX_RECEIPT_STATUS_OPTIONS.find((option) => option.id === donation.taxReceipt?.status)
+          ?.name || undefined,
+    }))
   }
 
   private async _validateDonationType(formData: DonationRequest) {

@@ -8,9 +8,11 @@ import { PrismaService, TypedSqlService } from '@/infrastructure'
 
 import {
   Donor,
+  DonorExport,
   DonorListFilter,
   DonorListItem,
   DonorListPaginationRequest,
+  DonorListSortOrder,
   DonorRef,
 } from '@shared/models'
 
@@ -92,5 +94,20 @@ export class DonorService {
       donationCount: donor.donations.length,
       donationTotalAmount: donor.donations.reduce((sum, donation) => sum + donation.amount, 0),
     })
+  }
+
+  async getExportList(
+    orderBy: DonorListSortOrder,
+    filter?: DonorListFilter,
+  ): Promise<DonorExport[]> {
+    const { donors } = await this.getFilteredList(
+      {
+        page: 1,
+        pageSize: Number.MAX_SAFE_INTEGER,
+        orderBy,
+      },
+      filter,
+    )
+    return donors
   }
 }

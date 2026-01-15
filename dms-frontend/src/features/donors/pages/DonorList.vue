@@ -1,12 +1,15 @@
 <template>
   <Page title="Liste des donateurs" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
-      <DonorListFilter
-        :filter="filter"
-        :donor-refs="donorRefs"
-        data-cy="donor-list-filter"
-        @update:filter="onFilterUpdate"
-      />
+      <BtnGroup outline>
+        <DonorListFilter
+          :filter="filter"
+          :donor-refs="donorRefs"
+          data-cy="donor-list-filter"
+          @update:filter="onFilterUpdate"
+        />
+        <ListExportButton @export-csv="exportCsv" @export-xlsx="exportXlsx" />
+      </BtnGroup>
     </template>
     <div class="row justify-center">
       <DonorListTable
@@ -27,6 +30,9 @@ import { computed, onMounted, ref } from 'vue'
 import { omit } from 'es-toolkit'
 
 import Page from '@/layouts/Page.vue'
+import BtnGroup from '@/components/ui/BtnGroup.vue'
+
+import ListExportButton from '@/components/ListExportButton.vue'
 
 import DonorListTable from '../components/DonorListTable.vue'
 import DonorListFilter from '../components/DonorListFilter.vue'
@@ -73,6 +79,14 @@ const onFilterUpdate = async (filter?: DonorListFilterRequest) => {
     ...paginationRequest.value,
     page: 1,
   })
+}
+
+const exportCsv = async () => {
+  await donorListStore.exportCsv()
+}
+
+const exportXlsx = async () => {
+  await donorListStore.exportXlsx()
 }
 
 onMounted(async () => {

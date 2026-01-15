@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
 
-import { TAX_RECEIPT_STATUS_OPTIONS } from '../constants'
+import { TAX_RECEIPT_STATUS_OPTIONS } from '@shared/constants'
 import type { TaxReceiptStatus } from '@shared/models'
 
 const props = defineProps({

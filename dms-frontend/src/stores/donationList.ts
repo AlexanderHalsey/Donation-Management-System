@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import { getDonations } from '@/apis/dms-api'
+import { exportDonationListCsv, exportDonationListXlsx, getDonations } from '@/apis/dms-api'
 
 import type {
   DonationListFilter,
@@ -30,8 +30,18 @@ export const useDonationListStore = defineStore('donationList', () => {
     filter.value = newFilter
   }
 
+  const exportCsv = () => {
+    return exportDonationListCsv(pagination.value.orderBy ?? {}, filter.value)
+  }
+
+  const exportXlsx = () => {
+    return exportDonationListXlsx(pagination.value.orderBy ?? {}, filter.value)
+  }
+
   return {
     donationList,
+    exportCsv,
+    exportXlsx,
     fetchDonations,
     filter,
     pagination,

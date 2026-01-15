@@ -37,6 +37,14 @@ export interface Donor extends DonorListItem {
   isDisabled: boolean
 }
 
+export interface DonorExport {
+  lastName: string
+  firstName?: string
+  email?: string
+  donationCount: number
+  donationTotalAmount: number
+}
+
 export type DonorListPaginationRequest = PaginationRequest<DonorListSortOrder>
 export type DonorListPagination = Pagination<DonorListSortOrder>
 

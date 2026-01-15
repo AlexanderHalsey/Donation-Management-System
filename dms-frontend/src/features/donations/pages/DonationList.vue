@@ -2,15 +2,18 @@
   <Page title="Liste des dons" :breadcrumbs="breadcrumbs" :loading="loading" :working="working">
     <template #actions>
       <Btn to="/donations/create" icon="add" color="primary" class="q-mr-sm"> Nouveau </Btn>
-      <DonationListFilter
-        :filter="filter"
-        :organisations="organisations"
-        :donationTypes="donationTypes"
-        :paymentModes="paymentModes"
-        :donors="donors"
-        data-cy="donation-list-filter"
-        @update:filter="onFilterUpdate"
-      />
+      <BtnGroup outline>
+        <DonationListFilter
+          :filter="filter"
+          :organisations="organisations"
+          :donationTypes="donationTypes"
+          :paymentModes="paymentModes"
+          :donors="donors"
+          data-cy="donation-list-filter"
+          @update:filter="onFilterUpdate"
+        />
+        <ListExportButton @export-csv="exportCsv" @export-xlsx="exportXlsx" />
+      </BtnGroup>
     </template>
     <DonationListTable
       :donationList="donationList"
@@ -33,6 +36,9 @@ import { omit } from 'es-toolkit'
 
 import Page from '@/layouts/Page.vue'
 import Btn from '@/components/ui/Btn.vue'
+import BtnGroup from '@/components/ui/BtnGroup.vue'
+
+import ListExportButton from '@/components/ListExportButton.vue'
 
 import DonationListTable from '../components/DonationListTable.vue'
 import DonationListFilter from '../components/DonationListFilter.vue'
@@ -128,6 +134,18 @@ const createTaxReceipt = async (donationId: string) => {
   working.value = false
   $q.notify({ type: 'positive', message: 'Le reçu fiscal a été créé avec succès.' })
   await router.push('/tax-receipts')
+}
+
+const exportCsv = async () => {
+  working.value = true
+  await donationListStore.exportCsv()
+  working.value = false
+}
+
+const exportXlsx = async () => {
+  working.value = true
+  await donationListStore.exportXlsx()
+  working.value = false
 }
 
 onMounted(async () => {

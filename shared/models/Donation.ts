@@ -27,6 +27,21 @@ export interface Donation extends DonationListItem {
   donationAssetType: DonationAssetType
 }
 
+export interface DonationExport {
+  lastName: string
+  firstName?: string
+  donatedAt: Date
+  amount: number
+  paymentMode: string
+  donationType: string
+  organisation: string
+  donationMethod?: string
+  donationAssetType?: string
+  taxReceiptNumber?: number
+  taxReceiptType?: string
+  taxReceiptStatus?: string
+}
+
 export type DonationListPaginationRequest = PaginationRequest<DonationListSortOrder>
 export type DonationListPagination = Pagination<DonationListSortOrder>
 
