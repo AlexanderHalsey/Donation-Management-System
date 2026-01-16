@@ -190,17 +190,8 @@ describe('FileService', () => {
     prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
     await fileService.updateFileContent(
-      {
-        id: 'file-id-123',
-        storageKey: 'old-storage-key-123',
-        status: 'ACTIVE',
-        uploadedAt: new Date(),
-        expiresAt: null,
-        name: 'test-file.txt',
-        size: 1024,
-        mimeType: 'text/plain',
-        hash: 'old-hash',
-      },
+      'file-id-123',
+      'old-storage-key-123',
       Buffer.from('Updated file content'),
     )
 

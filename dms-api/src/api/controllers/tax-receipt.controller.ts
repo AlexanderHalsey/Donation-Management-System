@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Put } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Param, Post, Put } from '@nestjs/common'
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { TaxReceiptService } from '@/domain'
@@ -81,7 +81,9 @@ export class TaxReceiptController {
   async retryFailedTaxReceipt(@Param('id') id: string): Promise<void> {
     const taxReceipt = await this.taxReceiptService.getTaxReceiptById(id)
     if (taxReceipt.status !== 'FAILED') {
-      throw new Error('Only failed tax receipts can be retried. Tax receipt id : ' + id)
+      throw new BadRequestException(
+        'Only failed tax receipts can be retried. Tax receipt id : ' + id,
+      )
     }
     await this.taxReceiptService.processTaxReceiptGeneration({
       taxReceiptId: id,

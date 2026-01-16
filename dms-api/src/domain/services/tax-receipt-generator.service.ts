@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -37,7 +37,7 @@ export class TaxReceiptGeneratorService {
     ]
     const template = templates.find((t) => t.name === process.env.TAX_RECEIPT_TEMPLATE)?.template
     if (!template) {
-      throw new Error(
+      throw new BadRequestException(
         'Invalid TAX_RECEIPT_TEMPLATE environment variable. Must be "cerfa" or "demo".',
       )
     }
@@ -216,7 +216,7 @@ export class TaxReceiptGeneratorService {
       title: this.template.content.labels.donorLabel,
       cb: (y) => {
         y = this.pdfRenderer.addText({
-          text: `${donor.firstName ?? ''} ${donor.lastName ?? ''}`,
+          text: `${donor.firstName ? `${donor.firstName} ` : ''}${donor.lastName}`,
           x: this.template.positions.donorInfo.x,
           y,
           ...this.template.styles.bold,

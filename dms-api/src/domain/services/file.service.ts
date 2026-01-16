@@ -131,22 +131,18 @@ export class FileService {
     }
   }
 
-  async updateFileContent(
-    file: PrismaFileMetadata,
-
-    newBuffer: Buffer,
-  ): Promise<void> {
+  async updateFileContent(id: string, storageKey: string, newBuffer: Buffer): Promise<void> {
     const hash = this.computeHash(newBuffer)
     await this.prisma.$transaction(
       async (tx) => {
         await tx.fileMetadata.update({
-          where: { id: file.id },
+          where: { id },
           data: {
             hash,
             size: newBuffer.length,
           },
         })
-        await this.fileStorageService.updateFile({ filePath: file.storageKey, buffer: newBuffer })
+        await this.fileStorageService.updateFile({ filePath: storageKey, buffer: newBuffer })
       },
       { timeout: 60 * 1000 },
     )

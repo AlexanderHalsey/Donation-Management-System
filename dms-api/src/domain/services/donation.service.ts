@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined, type RecursivelyReplaceNullWithUndefined } from '@shared/utils'
@@ -116,7 +116,7 @@ export class DonationService {
     })
 
     if (existingDonation.taxReceiptId) {
-      throw new Error(
+      throw new BadRequestException(
         "Can't update donation. Donation already has a tax receipt associated with it :" +
           existingDonation.taxReceiptId,
       )
@@ -150,7 +150,7 @@ export class DonationService {
     })
 
     if (donation.taxReceiptId) {
-      throw new Error(
+      throw new BadRequestException(
         "Can't delete donation. Donation already has a tax receipt associated with it :" +
           donation.taxReceiptId,
       )
