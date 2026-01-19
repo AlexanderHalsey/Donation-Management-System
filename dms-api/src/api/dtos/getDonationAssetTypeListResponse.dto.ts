@@ -1,4 +1,4 @@
-import { DonationAssetTypeDto } from './donation-asset-type.dto'
+import { DonationAssetTypeDto } from './donationAssetType.dto'
 
 export class GetDonationAssetTypeListResponse {
   donationAssetTypes: DonationAssetTypeDto[]

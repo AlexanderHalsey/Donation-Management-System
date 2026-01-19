@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEnum, IsOptional } from 'class-validator'
 
-import { SortOrder, SortOrderEnum } from './sort-order.dto'
+import { SortOrder, SortOrderEnum } from './sortOrder.dto'
 
 export class DonorRefDto {
   id: string

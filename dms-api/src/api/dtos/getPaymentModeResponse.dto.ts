@@ -1,4 +1,4 @@
-import { PaymentModeDto } from './payment-mode.dto'
+import { PaymentModeDto } from './paymentMode.dto'
 
 export class GetPaymentModeResponse {
   paymentMode: PaymentModeDto

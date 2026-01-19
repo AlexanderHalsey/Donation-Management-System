@@ -8,8 +8,8 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { PrismaService, BullMQService } from '@/infrastructure'
 
 import { FileService } from '../services/file.service'
-import { TaxReceiptService } from '../services/tax-receipt.service'
-import { TaxReceiptGeneratorService } from '../services/tax-receipt-generator.service'
+import { TaxReceiptService } from '../services/taxReceipt.service'
+import { TaxReceiptGeneratorService } from '../services/taxReceiptGenerator.service'
 
 import type {
   FileMetadata as FileMetadataPrisma,

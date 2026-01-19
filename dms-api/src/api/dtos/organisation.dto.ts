@@ -1,5 +1,5 @@
-import { FileMetadataDto } from './file-metadata.dto'
-import { NameSortOrder } from './sort-order.dto'
+import { FileMetadataDto } from './fileMetadata.dto'
+import { NameSortOrder } from './sortOrder.dto'
 
 export class OrganisationRefDto {
   id: string

@@ -6,7 +6,7 @@ import { jsPDF } from 'jspdf'
 import { PDFDocument, PDFImage, PDFPage } from 'pdf-lib'
 import imageSize from 'image-size'
 
-import { PDFRendererService, PDF } from '../services/pdf-renderer.service'
+import { PDFRendererService, PDF } from '../services/pdfRenderer.service'
 import { Return } from '@prisma/client/runtime/client'
 
 jest.mock('jspdf', () => ({ jsPDF: jest.fn() }))

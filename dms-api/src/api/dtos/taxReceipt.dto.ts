@@ -4,7 +4,7 @@ import { Type } from 'class-transformer'
 import { IsEnum, IsOptional, ValidateNested } from 'class-validator'
 
 import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
-import { NameSortOrder, SortOrderEnum, type SortOrder } from './sort-order.dto'
+import { NameSortOrder, SortOrderEnum, type SortOrder } from './sortOrder.dto'
 
 export enum TaxReceiptTypeEnum {
   ANNUAL = 'ANNUAL',

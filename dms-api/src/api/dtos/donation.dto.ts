@@ -3,13 +3,13 @@ import { IsEnum, IsOptional, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 
 import { OrganisationRefDto, OrganisationRefSortOrder } from './organisation.dto'
-import { DonationTypeDto, DonationTypeSortOrder } from './donation-type.dto'
-import { DonationMethodDto, DonationMethodSortOrder } from './donation-method.dto'
-import { DonationAssetTypeDto, DonationAssetTypeSortOrder } from './donation-asset-type.dto'
-import { PaymentModeDto, PaymentModeSortOrder } from './payment-mode.dto'
+import { DonationTypeDto, DonationTypeSortOrder } from './donationType.dto'
+import { DonationMethodDto, DonationMethodSortOrder } from './donationMethod.dto'
+import { DonationAssetTypeDto, DonationAssetTypeSortOrder } from './donationAssetType.dto'
+import { PaymentModeDto, PaymentModeSortOrder } from './paymentMode.dto'
 import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
 
-import { SortOrderEnum, SortOrder } from './sort-order.dto'
+import { SortOrderEnum, SortOrder } from './sortOrder.dto'
 
 export class DonationListItemDto {
   id: string

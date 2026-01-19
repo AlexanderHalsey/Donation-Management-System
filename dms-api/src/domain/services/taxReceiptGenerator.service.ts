@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import * as path from 'path'
 import * as fs from 'fs'
 
-import { PDFRendererService, PDF } from './pdf-renderer.service'
+import { PDFRendererService, PDF } from './pdfRenderer.service'
 
 import {
   convertToWords,

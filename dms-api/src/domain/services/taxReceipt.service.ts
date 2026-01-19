@@ -7,7 +7,7 @@ import { nullsToUndefined } from '@shared/utils'
 import { BullMQService, PrismaService } from '@/infrastructure'
 
 import { FileService } from './file.service'
-import { TaxReceiptGeneratorService } from './tax-receipt-generator.service'
+import { TaxReceiptGeneratorService } from './taxReceiptGenerator.service'
 
 import type {
   TaxReceiptListItem,

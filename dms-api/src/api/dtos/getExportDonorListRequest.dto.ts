@@ -3,7 +3,7 @@ import { IsNotEmptyObject, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 
 import { DonorListSortOrder } from './donor.dto'
-import { DonorListFilter } from './get-donor-list-request.dto'
+import { DonorListFilter } from './getDonorListRequest.dto'
 
 export class GetExportDonorListRequest {
   @ApiProperty({ type: DonorListSortOrder })

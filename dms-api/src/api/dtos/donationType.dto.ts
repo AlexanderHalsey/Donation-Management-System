@@ -1,4 +1,4 @@
-import { NameSortOrder } from './sort-order.dto'
+import { NameSortOrder } from './sortOrder.dto'
 
 export class DonationTypeDto {
   id: string

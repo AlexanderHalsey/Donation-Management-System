@@ -3,8 +3,8 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { TaxReceiptGeneratorService } from '../services/tax-receipt-generator.service'
-import { PDFRendererService } from '../services/pdf-renderer.service'
+import { TaxReceiptGeneratorService } from '../services/taxReceiptGenerator.service'
+import { PDFRendererService } from '../services/pdfRenderer.service'
 import { demoTaxReceiptTemplate, cerfaTaxReceiptTemplate } from '../templates/taxReceiptGeneration'
 
 import type { TaxReceiptOrganisationInfo, TaxReceiptDonation } from '../types'

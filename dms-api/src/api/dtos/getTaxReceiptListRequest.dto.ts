@@ -8,7 +8,7 @@ import {
   TaxReceiptStatusEnum,
   TaxReceiptTypeEnum,
   TaxReceiptType,
-} from './tax-receipt.dto'
+} from './taxReceipt.dto'
 
 import { PaginationRequest } from './pagination.dto'
 import { DateTimeFilter, UuidFilter } from './filter.dto'
