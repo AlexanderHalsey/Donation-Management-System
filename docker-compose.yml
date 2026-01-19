@@ -9,6 +9,13 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 5432:5432
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
   dms-api:
     build:
       context: ./
@@ -19,8 +26,12 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - TAX_RECEIPT_TEMPLATE=demo
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       - db
+      - redis
     restart: unless-stopped
 
   dms-frontend:
@@ -33,3 +44,6 @@ services:
     depends_on:
       - dms-api
     restart: unless-stopped
+
+volumes:
+  redis_data:

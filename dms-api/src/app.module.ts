@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
+import { BullModule } from '@nestjs/bullmq'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 
 import {
@@ -38,11 +39,20 @@ import {
   OrganisationService,
   PaymentModeService,
   PDFRendererService,
+  TaxReceiptConsumer,
   TaxReceiptGeneratorService,
   TaxReceiptService,
 } from '@/domain'
 
-import { FileStorageService, PrismaService, TypedSqlService } from '@/infrastructure'
+import {
+  BullMQService,
+  DONOR_SYNC_QUEUE,
+  EMAIL_QUEUE,
+  FileStorageService,
+  PrismaService,
+  TAX_RECEIPT_QUEUE,
+  TypedSqlService,
+} from '@/infrastructure'
 
 import {
   DonationAssetTypeCleanupTask,
@@ -54,7 +64,24 @@ import {
 } from '@/infrastructure/tasks'
 
 @Module({
-  imports: [ConfigModule.forRoot(), ScheduleModule.forRoot()],
+  imports: [
+    ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+          retryDelayOnFailover: 1000,
+        },
+      }),
+    }),
+    BullModule.registerQueue({ name: DONOR_SYNC_QUEUE }),
+    BullModule.registerQueue({ name: TAX_RECEIPT_QUEUE }),
+    BullModule.registerQueue({ name: EMAIL_QUEUE }),
+  ],
   controllers: [
     DonationAssetTypeController,
     DonationController,
@@ -68,6 +95,7 @@ import {
     TaxReceiptController,
   ],
   providers: [
+    BullMQService,
     DonationAssetTypeCleanupTask,
     DonationAssetTypeConverter,
     DonationAssetTypeService,
@@ -94,6 +122,7 @@ import {
     PaymentModeService,
     PDFRendererService,
     PrismaService,
+    TaxReceiptConsumer,
     TaxReceiptConverter,
     TaxReceiptGeneratorService,
     TaxReceiptService,

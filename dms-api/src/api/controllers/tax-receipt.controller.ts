@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, Param, Post, Put } from '@nestjs
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { TaxReceiptService } from '@/domain'
+import { BullMQService } from '@/infrastructure'
 
 import { TaxReceiptConverter } from '../converters'
 
@@ -17,6 +18,7 @@ export class TaxReceiptController {
   constructor(
     private readonly taxReceiptService: TaxReceiptService,
     private readonly taxReceiptConverter: TaxReceiptConverter,
+    private readonly bullMQService: BullMQService,
   ) {}
 
   @Post('filtered-list')
@@ -85,7 +87,7 @@ export class TaxReceiptController {
         'Only failed tax receipts can be retried. Tax receipt id : ' + id,
       )
     }
-    await this.taxReceiptService.processTaxReceiptGeneration({
+    await this.bullMQService.addTaxReceiptJob('GENERATE', {
       taxReceiptId: id,
       taxReceiptNumber: taxReceipt.receiptNumber,
       donationIds: taxReceipt.donationIds,

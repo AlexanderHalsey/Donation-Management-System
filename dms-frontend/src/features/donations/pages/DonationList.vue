@@ -132,7 +132,7 @@ const createTaxReceipt = async (donationId: string) => {
   working.value = true
   await taxReceiptListStore.createIndividualTaxReceipt(donationId)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le reçu fiscal a été créé avec succès.' })
+  $q.notify({ type: 'positive', message: 'Le reçu fiscal est en cours de génération.' })
   await router.push('/tax-receipts')
 }
 

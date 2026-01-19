@@ -196,7 +196,7 @@ describe('Tax Receipt List', () => {
     cy.get('#q-portal--menu--1 .q-list').within(() => {
       cy.get('.q-item').eq(0).contains('Réessayer').click()
     })
-    cy.get('.q-notification').should('contain.text', 'Le reçu fiscal a été régénéré avec succès.')
+    cy.get('.q-notification').should('contain.text', 'Le reçu fiscal est en cours de régénération.')
   })
   it('should allow cancelling a tax receipt from the list', () => {
     cy.visit('/tax-receipts')
@@ -220,7 +220,7 @@ describe('Tax Receipt List', () => {
       cy.get('button').eq(1).contains('Confirmer').click()
     })
     cy.wait(['@cancelTaxReceipt', '@getTaxReceiptList'])
-    cy.get('.q-notification').should('contain.text', 'Le reçu fiscal a été annulé avec succès.')
+    cy.get('.q-notification').should('contain.text', "Le reçu fiscal est en cours d'annulation.")
   })
   describe('Filters', () => {
     const getFilterMenu = () => cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children()

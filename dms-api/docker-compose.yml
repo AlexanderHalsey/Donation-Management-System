@@ -9,6 +9,13 @@ services:
     - POSTGRES_PASSWORD=postgres
     ports:
     - 5432:5432
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
   migrate:
     image: node:20
     working_dir: /app
@@ -18,5 +25,6 @@ services:
       sh -c "npm install && npx prisma migrate deploy"
     depends_on:
     - db
+    - redis
     environment:
     - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres

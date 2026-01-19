@@ -5,17 +5,25 @@ import { omit } from 'es-toolkit'
 
 import { mockDeep, mockReset } from 'jest-mock-extended'
 
+import { PrismaService, BullMQService } from '@/infrastructure'
+
 import { FileService } from '../services/file.service'
 import { TaxReceiptService } from '../services/tax-receipt.service'
 import { TaxReceiptGeneratorService } from '../services/tax-receipt-generator.service'
-import { PrismaService } from '@/infrastructure'
 
-import type { Prisma, TaxReceipt } from '@generated/prisma/client'
+import type {
+  FileMetadata as FileMetadataPrisma,
+  Prisma,
+  TaxReceipt,
+} from '@generated/prisma/client'
+import type { FileMetadata } from '@shared/models'
 
 describe('TaxReceiptService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
   const fileServiceMock = mockDeep<FileService>()
   const taxReceiptGeneratorServiceMock = mockDeep<TaxReceiptGeneratorService>()
+  const bullMqServiceMock = mockDeep<BullMQService>()
+
   let taxReceiptService: TaxReceiptService
 
   beforeEach(async () => {
@@ -37,6 +45,10 @@ describe('TaxReceiptService', () => {
         {
           provide: TaxReceiptGeneratorService,
           useValue: taxReceiptGeneratorServiceMock,
+        },
+        {
+          provide: BullMQService,
+          useValue: bullMqServiceMock,
         },
       ],
     }).compile()
@@ -165,8 +177,6 @@ describe('TaxReceiptService', () => {
         mockDeep<TaxReceipt>({ id: 'new-tax-receipt-id', receiptNumber: 12345 }),
       )
 
-      taxReceiptService.processTaxReceiptGeneration = jest.fn().mockResolvedValueOnce(void 0)
-
       const taxReceiptId = await taxReceiptService.createTaxReceipt({
         donationIds: ['donation-1'],
         taxReceiptType: 'INDIVIDUAL',
@@ -183,7 +193,7 @@ describe('TaxReceiptService', () => {
         select: { id: true, receiptNumber: true },
       })
       expect(prismaServiceMock.donation.updateMany).toHaveBeenCalledTimes(1)
-      expect(taxReceiptService.processTaxReceiptGeneration).toHaveBeenCalledWith({
+      expect(bullMqServiceMock.addTaxReceiptJob).toHaveBeenCalledWith('GENERATE', {
         taxReceiptId: 'new-tax-receipt-id',
         taxReceiptNumber: 12345,
         donationIds: ['donation-1'],
@@ -239,16 +249,14 @@ describe('TaxReceiptService', () => {
 
       prismaServiceMock.$transaction.mockResolvedValueOnce([mockDonationWithRelations])
 
-      fileServiceMock.downloadFile.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<typeof fileServiceMock.downloadFile>>>({
-          buffer: Buffer.from('logo-file-buffer'),
-        }),
-      )
-      fileServiceMock.downloadFile.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<typeof fileServiceMock.downloadFile>>>({
-          buffer: Buffer.from('signature-file-buffer'),
-        }),
-      )
+      fileServiceMock.downloadFile.mockResolvedValueOnce({
+        buffer: Buffer.from('logo-file-buffer'),
+        metadata: mockDeep<FileMetadata>(),
+      })
+      fileServiceMock.downloadFile.mockResolvedValueOnce({
+        buffer: Buffer.from('signature-file-buffer'),
+        metadata: mockDeep<FileMetadata>(),
+      })
 
       taxReceiptGeneratorServiceMock.generateTaxReceipt.mockResolvedValue(
         Buffer.from('pdf-file-buffer'),
@@ -427,18 +435,14 @@ describe('TaxReceiptService', () => {
 
     it('successfully cancels tax receipt', async () => {
       prismaServiceMock.taxReceipt.findUniqueOrThrow.mockResolvedValueOnce(
-        mockDeep<TaxReceipt>({
+        mockDeep<TaxReceipt & { file: FileMetadataPrisma }>({
           id: 'tax-receipt-id-123',
           status: 'COMPLETED',
+          file: {
+            id: 'file-id-123',
+            storageKey: 'storage-key-123',
+          },
         }),
-      )
-      fileServiceMock.downloadFile.mockResolvedValueOnce(
-        mockDeep<Awaited<ReturnType<typeof fileServiceMock.downloadFile>>>({
-          buffer: Buffer.from('original-pdf-buffer'),
-        }),
-      )
-      taxReceiptGeneratorServiceMock.cancelTaxReceipt.mockResolvedValueOnce(
-        Buffer.from('canceled-pdf-buffer'),
       )
 
       await taxReceiptService.cancelTaxReceipt('tax-receipt-id-123', {
@@ -447,9 +451,44 @@ describe('TaxReceiptService', () => {
 
       expect(prismaServiceMock.taxReceipt.update).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.donation.updateMany).toHaveBeenCalledTimes(1)
-      expect(fileServiceMock.downloadFile).toHaveBeenCalledTimes(1)
-      expect(taxReceiptGeneratorServiceMock.cancelTaxReceipt).toHaveBeenCalledTimes(1)
-      expect(fileServiceMock.updateFileContent).toHaveBeenCalledTimes(1)
+      expect(bullMqServiceMock.addTaxReceiptJob).toHaveBeenCalledWith(
+        'CANCEL',
+        expect.objectContaining({
+          fileId: expect.any(String),
+          storageKey: expect.any(String),
+        }),
+      )
+    })
+  })
+
+  describe('processTaxReceiptCancellation', () => {
+    it('processes tax receipt cancellation successfully', async () => {
+      const fileId = 'file-id-123'
+      const storageKey = 'storage-key-123'
+      const originalPdfBuffer = Buffer.from('original-pdf-buffer')
+      const cancelledPdfBuffer = Buffer.from('cancelled-pdf-buffer')
+
+      fileServiceMock.downloadFile.mockResolvedValueOnce({
+        buffer: originalPdfBuffer,
+        metadata: mockDeep<FileMetadata>(),
+      })
+
+      taxReceiptGeneratorServiceMock.cancelTaxReceipt.mockResolvedValueOnce(cancelledPdfBuffer)
+
+      await taxReceiptService.processTaxReceiptCancellation({
+        fileId,
+        storageKey,
+      })
+
+      expect(fileServiceMock.downloadFile).toHaveBeenCalledWith(fileId)
+      expect(taxReceiptGeneratorServiceMock.cancelTaxReceipt).toHaveBeenCalledWith(
+        originalPdfBuffer,
+      )
+      expect(fileServiceMock.updateFileContent).toHaveBeenCalledWith(
+        fileId,
+        storageKey,
+        cancelledPdfBuffer,
+      )
     })
   })
 })

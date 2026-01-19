@@ -1,3 +1,4 @@
+export * from './consumers/tax-receipt.consumer'
 export * from './services/donation.service'
 export * from './services/donationAssetType.service'
 export * from './services/donationType.service'

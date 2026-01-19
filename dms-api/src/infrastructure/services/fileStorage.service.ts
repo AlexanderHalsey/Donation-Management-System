@@ -4,8 +4,6 @@ import * as path from 'node:path'
 
 @Injectable()
 export class FileStorageService {
-  constructor() {}
-
   async uploadFile({ name, buffer }: { name: string; buffer: Buffer }): Promise<string> {
     // Placeholder implementation for file upload
     // In a real scenario, this would involve uploading the file to a storage service
@@ -24,7 +22,6 @@ export class FileStorageService {
     // Placeholder implementation for file update
     // In a real scenario, this would involve updating the file in a storage service
     // using the provided fileId and new content.
-    console.log('Updating file at path:', filePath)
     try {
       await fs.access(filePath)
     } catch {

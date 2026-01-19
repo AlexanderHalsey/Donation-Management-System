@@ -90,7 +90,7 @@ const cancelTaxReceipt = async (formData: CancelTaxReceiptFormData) => {
   working.value = true
   await taxReceiptListStore.cancel(formData)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le reçu fiscal a été annulé avec succès.' })
+  $q.notify({ type: 'positive', message: "Le reçu fiscal est en cours d'annulation." })
   // Refetch tax receipts to update the list
   await fetchTaxReceipts(paginationRequest.value)
 }
@@ -99,7 +99,7 @@ const retryFailedTaxReceipt = async (taxReceipt: TaxReceiptListItem) => {
   working.value = true
   await taxReceiptListStore.retryFailedTaxReceiptGeneration(taxReceipt.id)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le reçu fiscal a été régénéré avec succès.' })
+  $q.notify({ type: 'positive', message: 'Le reçu fiscal est en cours de régénération.' })
   // Refetch tax receipts to update the list
   await fetchTaxReceipts(paginationRequest.value)
 }

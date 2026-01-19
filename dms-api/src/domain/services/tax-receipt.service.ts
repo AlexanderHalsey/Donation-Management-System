@@ -4,7 +4,7 @@ import { uniq } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined } from '@shared/utils'
 
-import { PrismaService } from '@/infrastructure'
+import { BullMQService, PrismaService } from '@/infrastructure'
 
 import { FileService } from './file.service'
 import { TaxReceiptGeneratorService } from './tax-receipt-generator.service'
@@ -23,6 +23,7 @@ export class TaxReceiptService {
     private readonly prisma: PrismaService,
     private readonly fileService: FileService,
     private readonly taxReceiptGeneratorService: TaxReceiptGeneratorService,
+    private readonly bullMQService: BullMQService,
   ) {}
 
   async getFilteredList(
@@ -125,14 +126,11 @@ export class TaxReceiptService {
       },
     )
 
-    // To be queued later, catch is temporary until a proper job queue is implemented
-    this.processTaxReceiptGeneration({
+    await this.bullMQService.addTaxReceiptJob('GENERATE', {
       taxReceiptId,
       taxReceiptNumber,
       donationIds,
       taxReceiptType,
-    }).catch((error) => {
-      this.handleTaxReceiptGenerationFailure(taxReceiptId, error)
     })
 
     return taxReceiptId
@@ -191,11 +189,13 @@ export class TaxReceiptService {
         'signatureId',
       ].some((field) => !organisation?.[field as keyof typeof organisation])
     ) {
-      throw new Error('Organisation details are incomplete for tax receipt generation')
+      throw new BadRequestException(
+        'Organisation details are incomplete for tax receipt generation',
+      )
     }
 
     if (donations.length < donationIds.length) {
-      throw new Error('One or more donations not found during tax receipt processing')
+      throw new BadRequestException('One or more donations not found during tax receipt processing')
     }
 
     const [{ buffer: logo }, { buffer: signature }] = await Promise.all([
@@ -268,13 +268,26 @@ export class TaxReceiptService {
           data: { taxReceiptId: null },
         })
 
-        const { buffer: originalBuffer } = await this.fileService.downloadFile(taxReceipt.file.id)
-        const canceledBuffer =
-          await this.taxReceiptGeneratorService.cancelTaxReceipt(originalBuffer)
-        await this.fileService.updateFileContent(taxReceipt.file, canceledBuffer)
+        await this.bullMQService.addTaxReceiptJob('CANCEL', {
+          fileId: taxReceipt.file.id,
+          storageKey: taxReceipt.file.storageKey,
+        })
       },
       { timeout: 2 * 60 * 1000 },
     )
+  }
+
+  async processTaxReceiptCancellation({
+    fileId,
+    storageKey,
+  }: {
+    fileId: string
+    storageKey: string
+  }): Promise<void> {
+    const { buffer: existingPdfBuffer } = await this.fileService.downloadFile(fileId)
+    const canceledPdfBuffer =
+      await this.taxReceiptGeneratorService.cancelTaxReceipt(existingPdfBuffer)
+    await this.fileService.updateFileContent(fileId, storageKey, canceledPdfBuffer)
   }
 
   async handleTaxReceiptGenerationFailure(taxReceiptId: string, _error: Error): Promise<void> {
