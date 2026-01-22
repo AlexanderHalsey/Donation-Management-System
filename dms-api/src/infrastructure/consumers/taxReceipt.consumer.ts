@@ -1,6 +1,6 @@
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq'
 
-import { TaxReceiptService } from '../services/taxReceipt.service'
+import { TaxReceiptService } from '@/domain'
 
 import { TAX_RECEIPT_QUEUE } from '@/infrastructure'
 

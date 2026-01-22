@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "date-fns": "^4.1.0",
-    "es-toolkit": "^1.41.0"
+    "es-toolkit": "^1.41.0",
+    "zod": "^4.3.5"
   }
 }

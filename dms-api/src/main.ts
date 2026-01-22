@@ -11,7 +11,8 @@ import { AppModule } from './app.module'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
-  app.use(json())
+  app.use('/donor-sync-events', json({ limit: '500mb' /* For send all function */ }))
+  app.use(json({ limit: '100kb' }))
 
   app.useGlobalPipes(
     new ValidationPipe({

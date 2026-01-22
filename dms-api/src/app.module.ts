@@ -9,6 +9,7 @@ import {
   DonationMethodController,
   DonationTypeController,
   DonorController,
+  DonorSyncEventController,
   ExportController,
   FileController,
   OrganisationController,
@@ -34,12 +35,12 @@ import {
   DonationService,
   DonationTypeService,
   DonorService,
+  DonorSyncEventService,
   ExportService,
   FileService,
   OrganisationService,
   PaymentModeService,
   PDFRendererService,
-  TaxReceiptConsumer,
   TaxReceiptGeneratorService,
   TaxReceiptService,
 } from '@/domain'
@@ -54,10 +55,13 @@ import {
   TypedSqlService,
 } from '@/infrastructure'
 
+import { DonorSyncConsumer, TaxReceiptConsumer } from '@/infrastructure/consumers'
+
 import {
   DonationAssetTypeCleanupTask,
   DonationMethodCleanupTask,
   DonationTypeCleanupTask,
+  DonorSyncCleanupTask,
   FileCleanupTask,
   OrganisationCleanupTask,
   PaymentModeCleanupTask,
@@ -88,6 +92,7 @@ import {
     DonationMethodController,
     DonationTypeController,
     DonorController,
+    DonorSyncEventController,
     ExportController,
     FileController,
     OrganisationController,
@@ -109,6 +114,9 @@ import {
     DonationTypeService,
     DonorConverter,
     DonorService,
+    DonorSyncCleanupTask,
+    DonorSyncConsumer,
+    DonorSyncEventService,
     ExportService,
     FileCleanupTask,
     FileConverter,

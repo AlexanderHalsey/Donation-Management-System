@@ -52,7 +52,9 @@ const { defineField, errors, handleSubmit, resetForm } = useForm({
         name: props.donationAssetType?.name,
         isDefault: props.donationAssetType?.isDefault,
       }
-    : {},
+    : {
+        isDefault: false,
+      },
 })
 
 const [name, nameAttrs] = defineField('name')

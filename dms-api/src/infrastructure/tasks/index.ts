@@ -1,6 +1,7 @@
 export * from './donationAssetTypeCleanup.task'
 export * from './donationMethodCleanup.task'
 export * from './donationTypeCleanup.task'
+export * from './donorSyncCleanup.task'
 export * from './fileCleanup.task'
 export * from './organisationCleanup.task'
 export * from './paymentModeCleanup.task'

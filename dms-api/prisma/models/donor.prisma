@@ -2,7 +2,7 @@ model Donor {
   id             String       @id @default(uuid()) @db.Uuid
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  externalId     Int
+  externalId     Int          @unique
   civility       String
   lastName       String
   firstName      String?

@@ -4,14 +4,14 @@ import { z } from 'zod'
 export const getDonationFormSchema = (donationTypeOptions: DonationType[]) => {
   return z
     .object({
-      donorId: z.string().uuid(),
-      donatedAt: z.date(),
-      amount: z.number().gt(0),
-      organisationId: z.string().uuid(),
-      donationTypeId: z.string().uuid(),
-      paymentModeId: z.string().uuid(),
-      donationMethodId: z.string().uuid(),
-      donationAssetTypeId: z.string().uuid(),
+      donorId: z.uuid('Obligatoire'),
+      donatedAt: z.date('Obligatoire'),
+      amount: z.number('Obligatoire').gt(0),
+      organisationId: z.uuid('Obligatoire'),
+      donationTypeId: z.uuid('Obligatoire'),
+      paymentModeId: z.uuid('Obligatoire'),
+      donationMethodId: z.uuid('Obligatoire'),
+      donationAssetTypeId: z.uuid('Obligatoire'),
     })
     .superRefine((data, ctx) => {
       if (

@@ -6,6 +6,7 @@ import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService, TypedSqlService } from '@/infrastructure'
 
+import { DonorCreateInput } from '@generated/prisma/models'
 import {
   Donor,
   DonorExport,
@@ -109,5 +110,16 @@ export class DonorService {
       filter,
     )
     return donors
+  }
+
+  async synchronizeDonors({ toUpsert }: { toUpsert: DonorCreateInput[] }): Promise<void> {
+    for (const donor of toUpsert) {
+      await this.prisma.donor.upsert({
+        where: { externalId: donor.externalId },
+        create: donor,
+        update: donor,
+        select: { id: true, externalId: true },
+      })
+    }
   }
 }

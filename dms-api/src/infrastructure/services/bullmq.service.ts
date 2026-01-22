@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectQueue } from '@nestjs/bullmq'
 
+import { chunk } from 'es-toolkit'
+
 import type { JobsOptions } from 'bullmq'
 import type {
   DonorSyncQueue,
@@ -12,7 +14,7 @@ import type {
   TaxReceiptQueueJobName,
 } from '../types'
 
-export const DONOR_SYNC_QUEUE = 'DONOR' satisfies QueueName
+export const DONOR_SYNC_QUEUE = 'DONOR_SYNC' satisfies QueueName
 export const TAX_RECEIPT_QUEUE = 'TAX_RECEIPT' satisfies QueueName
 export const EMAIL_QUEUE = 'EMAIL' satisfies QueueName
 
@@ -23,22 +25,25 @@ export const QUEUE_CONFIGS = {
   /**
    * Donor Sync Queue Configuration
    *
-   * Background sync with external user source that updates donor database.
-   * Characteristics: Background process, external API, can handle delays
-   * Error patterns: Network timeouts, API rate limits, external service downtime
+   * Process DonorSyncEvent records created by incoming webhooks.
+   * Flow: Webhook → DonorSyncEvent in DB → Job processes events → Updates donor table
+   * Characteristics: Background processing, external data sync, idempotent operations
+   * Error patterns: Data validation failures, external ID conflicts, network issues
    *
-   * Strategy: High attempts (5) with exponential backoff for API rate limits,
-   * low priority as it's a background process, moderate history for monitoring.
+   * Strategy: Moderate attempts with exponential backoff for transient issues,
+   * low priority since users don't actively wait for completion.
    */
-  DONOR: {
-    SYNC: {
-      attempts: 5,
+  DONOR_SYNC: {
+    /**
+     * Process batch of donor sync events - handles array of donorSyncEventIds
+     */
+    PROCESS: {
+      attempts: 4,
       backoff: {
         type: 'exponential',
-        delay: 10000,
+        delay: 3000,
       },
-      delay: 5000,
-      removeOnComplete: 20,
+      removeOnComplete: 30,
       removeOnFail: 100,
       priority: 1,
     },
@@ -148,22 +153,47 @@ export class BullMQService {
     @InjectQueue(EMAIL_QUEUE) private readonly emailQueue: EmailQueue,
   ) {}
 
-  async addDonorSyncJob(data: string) {
-    return await this.donorSyncQueue.add('SYNC', data, QUEUE_CONFIGS.DONOR.SYNC)
+  async addDonorSyncJob(data: { donorSyncEventIds: string[] }): Promise<void> {
+    const batchSize = 50
+    for (const chunkedDonorSyncEventIds of chunk(data.donorSyncEventIds, batchSize)) {
+      await this.donorSyncQueue.add(
+        'PROCESS',
+        { donorSyncEventIds: chunkedDonorSyncEventIds },
+        QUEUE_CONFIGS.DONOR_SYNC.PROCESS,
+      )
+    }
   }
 
   async addTaxReceiptJob<T extends TaxReceiptQueueJobName>(
     jobName: T,
     data: TaxReceiptQueueJobData<T>,
-  ) {
-    return await this.taxReceiptQueue.add(jobName, data, QUEUE_CONFIGS.TAX_RECEIPT[jobName])
+  ): Promise<void> {
+    const batchSize = 10
+    if (jobName === 'GENERATE_BATCH') {
+      for (const chunkedData of chunk(
+        data as TaxReceiptQueueJobData<'GENERATE_BATCH'>,
+        batchSize,
+      )) {
+        await this.taxReceiptQueue.add(jobName, chunkedData, QUEUE_CONFIGS.TAX_RECEIPT[jobName])
+      }
+    } else {
+      await this.taxReceiptQueue.add(jobName, data, QUEUE_CONFIGS.TAX_RECEIPT[jobName])
+    }
   }
 
-  async addEmailJob(data: string) {
-    return await this.emailQueue.add('SEND_RECEIPT', data, QUEUE_CONFIGS.EMAIL.SEND_RECEIPT)
+  async addEmailJob(data: string): Promise<void> {
+    await this.emailQueue.add('SEND_RECEIPT', data, QUEUE_CONFIGS.EMAIL.SEND_RECEIPT)
   }
 
-  async getStatus() {
+  async getStatus(): Promise<{
+    healthy: boolean
+    issues: string[]
+    stats: {
+      DONOR: Record<string, number>
+      TAX_RECEIPT: Record<string, number>
+      EMAIL: Record<string, number>
+    } | null
+  }> {
     const issues: string[] = []
     let stats: {
       DONOR: Record<string, number>
