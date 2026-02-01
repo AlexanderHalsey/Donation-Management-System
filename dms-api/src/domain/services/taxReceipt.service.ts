@@ -326,6 +326,18 @@ export class TaxReceiptService {
         fileId,
       },
     })
+
+    if (donations[0].donor.email && taxReceiptType === 'ANNUAL') {
+      try {
+        await this.bullMQService.addEmailJob({
+          to: donations[0].donor.email,
+          taxReceiptNumber,
+          fileId,
+        })
+      } catch (err) {
+        console.error('Failed to add email job', { err })
+      }
+    }
   }
 
   async cancelTaxReceipt(id: string, request: CancelTaxReceiptRequest): Promise<void> {

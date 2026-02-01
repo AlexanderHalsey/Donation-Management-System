@@ -51,11 +51,12 @@ import {
   EMAIL_QUEUE,
   FileStorageService,
   PrismaService,
+  SmtpService,
   TAX_RECEIPT_QUEUE,
   TypedSqlService,
 } from '@/infrastructure'
 
-import { DonorSyncConsumer, TaxReceiptConsumer } from '@/infrastructure/consumers'
+import { DonorSyncConsumer, EmailConsumer, TaxReceiptConsumer } from '@/infrastructure/consumers'
 
 import {
   DonationAssetTypeCleanupTask,
@@ -117,6 +118,7 @@ import {
     DonorSyncCleanupTask,
     DonorSyncConsumer,
     DonorSyncEventService,
+    EmailConsumer,
     ExportService,
     FileCleanupTask,
     FileConverter,
@@ -130,6 +132,7 @@ import {
     PaymentModeService,
     PDFRendererService,
     PrismaService,
+    SmtpService,
     TaxReceiptConsumer,
     TaxReceiptConverter,
     TaxReceiptGeneratorService,

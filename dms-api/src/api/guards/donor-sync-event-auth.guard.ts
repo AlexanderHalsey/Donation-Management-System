@@ -34,17 +34,21 @@ export class DonorSyncEventAuthGuard implements CanActivate {
       throw new UnauthorizedException('Donor Sync credentials not configured')
     }
 
-    const usernameMatch = timingSafeEqual(
-      Buffer.from(credentials.name),
-      Buffer.from(expectedUsername),
-    )
+    try {
+      const usernameMatch = timingSafeEqual(
+        Buffer.from(credentials.name),
+        Buffer.from(expectedUsername),
+      )
 
-    const passwordMatch = timingSafeEqual(
-      Buffer.from(credentials.pass),
-      Buffer.from(expectedPassword),
-    )
+      const passwordMatch = timingSafeEqual(
+        Buffer.from(credentials.pass),
+        Buffer.from(expectedPassword),
+      )
 
-    if (usernameMatch && passwordMatch) return true
+      if (usernameMatch && passwordMatch) return true
+    } catch (_err) {
+      /* */
+    }
 
     throw new UnauthorizedException('Invalid credentials')
   }

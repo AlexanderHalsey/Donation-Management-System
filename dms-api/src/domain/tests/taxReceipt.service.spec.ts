@@ -17,6 +17,7 @@ import type {
   TaxReceipt,
   Donation,
   Donor,
+  Organisation,
 } from '@generated/prisma/client'
 import type { FileMetadata } from '@shared/models'
 
@@ -568,6 +569,83 @@ describe('TaxReceiptService', () => {
           taxReceiptType: 'INDIVIDUAL',
         }),
       ).rejects.toThrow('One or more donations not found during tax receipt processing')
+    })
+
+    describe('email queueing logic', () => {
+      const donationId = 'donation-1'
+      const donor = { id: 'donor-1', firstName: 'John', lastName: 'Doe', email: null }
+      const organisation = {
+        id: 'org-1',
+        title: 'Test Org',
+        address: '123 Test St',
+        postCode: '12345',
+        locality: 'Test City',
+        object: 'Test Object',
+        objectDescription: 'Test Description',
+        signatoryName: 'Test Signatory',
+        signatoryPosition: 'President',
+        logoId: 'logo-file-id',
+        signatureId: 'signature-file-id',
+      }
+      beforeEach(() => {
+        fileServiceMock.downloadFile.mockResolvedValueOnce({
+          buffer: Buffer.from('logo-file-buffer'),
+          metadata: mockDeep<FileMetadata>(),
+        })
+        fileServiceMock.downloadFile.mockResolvedValueOnce({
+          buffer: Buffer.from('signature-file-buffer'),
+          metadata: mockDeep<FileMetadata>(),
+        })
+        fileServiceMock.createFile.mockResolvedValueOnce('file-id')
+        taxReceiptGeneratorServiceMock.generateTaxReceipt.mockResolvedValue(Buffer.from('pdf'))
+      })
+
+      it('does not queue email job if donor has no email or receipt is not annual', async () => {
+        prismaServiceMock.$transaction.mockResolvedValueOnce(
+          mockDeep<[(Donation & { donor: Donor; organisation: Organisation })[]]>([
+            [
+              {
+                id: donationId,
+                donorId: donor.id,
+                donor,
+                organisation,
+              },
+            ],
+          ]),
+        )
+        await taxReceiptService.processTaxReceiptGeneration({
+          taxReceiptId: 'tax-receipt-id-123',
+          taxReceiptNumber: 12345,
+          donationIds: [donationId],
+          taxReceiptType: 'INDIVIDUAL', // not 'ANNUAL'
+        })
+        expect(bullMqServiceMock.addEmailJob).not.toHaveBeenCalled()
+      })
+
+      it('queues email job if donor has email and receipt is annual', async () => {
+        prismaServiceMock.$transaction.mockResolvedValueOnce(
+          mockDeep<[(Donation & { donor: Donor; organisation: Organisation })[]]>([
+            [
+              {
+                id: donationId,
+                donorId: donor.id,
+                donor: {
+                  ...donor,
+                  email: 'john@example.com', // has email
+                },
+                organisation,
+              },
+            ],
+          ]),
+        )
+        await taxReceiptService.processTaxReceiptGeneration({
+          taxReceiptId: 'tax-receipt-id-123',
+          taxReceiptNumber: 12345,
+          donationIds: [donationId],
+          taxReceiptType: 'ANNUAL', // is 'ANNUAL'
+        })
+        expect(bullMqServiceMock.addEmailJob).toHaveBeenCalled()
+      })
     })
   })
 

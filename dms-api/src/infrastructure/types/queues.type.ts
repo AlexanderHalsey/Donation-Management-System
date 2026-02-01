@@ -12,6 +12,12 @@ export type TaxReceiptCancellationQueueData = {
   storageKey: string
 }
 
+export type EmailQueueData = {
+  to: string
+  taxReceiptNumber: number
+  fileId: string
+}
+
 // Discriminated union types for each queue's jobs
 export type DonorSyncQueueJob = BullMQJob<{ donorSyncEventIds: string[] }, void, 'PROCESS'>
 
@@ -21,7 +27,7 @@ export type TaxReceiptQueueJob =
   | BullMQJob<TaxReceiptGenerationQueueData, void, 'RETRY'>
   | BullMQJob<TaxReceiptCancellationQueueData, void, 'CANCEL'>
 
-export type EmailQueueJob = BullMQJob<string, void, 'SEND_RECEIPT'>
+export type EmailQueueJob = BullMQJob<EmailQueueData, void, 'SEND_RECEIPT'>
 
 // Queue name mapping
 export type QueueJobMapping = {

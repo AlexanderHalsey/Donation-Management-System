@@ -23,6 +23,8 @@ services:
     container_name: dms-api
     ports:
       - '3000:3000'
+    env_file:
+      - ./dms-api/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres

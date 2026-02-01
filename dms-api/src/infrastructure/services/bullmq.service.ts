@@ -7,6 +7,7 @@ import type { JobsOptions } from 'bullmq'
 import type {
   DonorSyncQueue,
   EmailQueue,
+  EmailQueueData,
   QueueJobMapping,
   QueueName,
   TaxReceiptQueue,
@@ -181,7 +182,7 @@ export class BullMQService {
     }
   }
 
-  async addEmailJob(data: string): Promise<void> {
+  async addEmailJob(data: EmailQueueData): Promise<void> {
     await this.emailQueue.add('SEND_RECEIPT', data, QUEUE_CONFIGS.EMAIL.SEND_RECEIPT)
   }
 

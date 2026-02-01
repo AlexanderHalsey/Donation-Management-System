@@ -28,3 +28,6 @@ services:
     - redis
     environment:
     - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+
+volumes:
+  redis_data:
