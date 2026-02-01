@@ -1,7 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
+import { uniqBy } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined, type RecursivelyReplaceNullWithUndefined } from '@shared/utils'
+
+import {
+  ELIGIBLE_TAX_RECEIPT_DONATION_FILTER,
+  getTaxReceiptYearEnd,
+  getTaxReceiptYearStart,
+} from './taxReceipt.service'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -14,6 +21,7 @@ import {
   DonationListItem,
   DonationListPaginationRequest,
   DonationListSortOrder,
+  Donor,
 } from '@shared/models'
 
 import { DonationRequest } from '@/api/dtos'
@@ -86,6 +94,72 @@ export class DonationService {
       omit: BASIC_OMIT_FIELDS,
     })
     return this.transformToDonationModel(donation)
+  }
+
+  async getEligibleTaxReceiptYearOrganisations(): Promise<
+    {
+      year: number
+      organisationId: string
+    }[]
+  > {
+    const donations = await this.prisma.donation.findMany({
+      select: { donatedAt: true, organisation: { select: { id: true } } },
+      where: {
+        ...ELIGIBLE_TAX_RECEIPT_DONATION_FILTER,
+        // Only consider donations from previous years
+        donatedAt: { lte: getTaxReceiptYearEnd(new Date().getFullYear() - 1) },
+      },
+    })
+    return uniqBy(
+      donations.map((donation) => ({
+        year: donation.donatedAt.getFullYear(),
+        organisationId: donation.organisation.id,
+      })),
+      (entry) => `${entry.year}-${entry.organisationId}`,
+    )
+  }
+
+  async getEligibleTaxReceiptDonations({
+    year,
+    organisationId,
+  }: {
+    year: number
+    organisationId: string
+  }): Promise<(DonationListItem & { donor: Donor })[]> {
+    const donations = await this.prisma.donation.findMany({
+      include: {
+        ...BASIC_INCLUDE_FIELDS,
+        donor: true,
+      },
+      omit: BASIC_OMIT_FIELDS,
+      where: {
+        ...ELIGIBLE_TAX_RECEIPT_DONATION_FILTER,
+        organisationId,
+        donatedAt: {
+          gte: getTaxReceiptYearStart(year),
+          lte: getTaxReceiptYearEnd(year),
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    })
+    if (!donations.length) {
+      throw new BadRequestException(
+        `No eligible donations found for organisation ID: ${organisationId} in year: ${year}`,
+      )
+    }
+    return donations.map((donation) => {
+      const transformedDonation = this.transformToDonationModel(donation)
+      return {
+        ...transformedDonation,
+        donor: {
+          ...transformedDonation.donor,
+          donationCount: donations.filter((d) => d.donor.id === donation.donor.id).length,
+          donationTotalAmount: donations
+            .filter((d) => d.donor.id === donation.donor.id)
+            .reduce((sum, d) => sum + d.amount, 0),
+        },
+      }
+    })
   }
 
   async createDonation(formData: DonationRequest): Promise<Donation> {

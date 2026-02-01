@@ -19,6 +19,9 @@ export class TaxReceiptConsumer extends WorkerHost {
         await this.taxReceiptService.processTaxReceiptGeneration(job.data)
         break
       case 'GENERATE_BATCH':
+        job.data.forEach(async (data) => {
+          await this.taxReceiptService.processTaxReceiptGeneration(data)
+        })
         break
       case 'RETRY':
         await this.taxReceiptService.processTaxReceiptGeneration(job.data)

@@ -27,7 +27,7 @@ export type QTablePagination = Omit<
 
 const props = defineProps<
   Omit<QTableProps, 'pagination'> & {
-    pagination: QTablePagination
+    pagination?: QTablePagination
   }
 >()
 
@@ -35,13 +35,14 @@ defineEmits<{
   'update:pagination': [pagination: QTablePagination]
 }>()
 
-const qTablePagination = ref<QTablePagination>(props.pagination)
+const qTablePagination = ref<QTablePagination | undefined>(props.pagination)
 const qTableRowsPerPageOptions = ref<number[]>(
   (() => {
+    if (props.rowsPerPageOptions) return props.rowsPerPageOptions as number[]
     const initialOptions = [5, 10, 25, 50, 100]
-    return uniq(initialOptions.concat(props.pagination.rowsPerPage))
+    return uniq(initialOptions.concat(props.pagination?.rowsPerPage ?? []))
       .sort((a, b) => a - b)
-      .filter((option) => option <= (props.pagination.rowsNumber ?? props.rows?.length ?? 0))
+      .filter((option) => option <= (props.pagination?.rowsNumber ?? props.rows?.length ?? 0))
       .concat(0) // 0 means 'All'
   })(),
 )

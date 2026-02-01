@@ -6,7 +6,45 @@
     :working="working"
   >
     <template #actions>
-      <!-- todo add annual receipt btn -->
+      <BtnDropdown
+        v-if="annualReceiptCreationOptionList.length > 0"
+        label="Créer des reçus annuels"
+        icon="add"
+        color="primary"
+        class="q-mr-sm"
+        data-cy="create-annual-tax-receipts-button"
+      >
+        <QList>
+          <QItem
+            v-for="(yearOrganisationPair, index) in annualReceiptCreationOptionList"
+            :to="
+              yearOrganisationPair.isReleased
+                ? `/tax-receipts/annual-create/${yearOrganisationPair.year}/${yearOrganisationPair.organisationId}`
+                : null
+            "
+            :key="index"
+            :clickable="yearOrganisationPair.isReleased"
+            v-close-popup
+          >
+            <QItemSection>
+              <QItemLabel :class="yearOrganisationPair.isReleased ? '' : 'text-grey'">
+                {{ yearOrganisationPair.year }}
+                <span class="q-mx-md">-</span>
+                <QIcon name="account_balance" class="q-mr-md" />
+                {{ getOrganisationRefById(yearOrganisationPair.organisationId).name }}
+
+                <QTooltip
+                  v-if="!yearOrganisationPair.isReleased && annualReceiptReleaseDate"
+                  :offset="[10, 10]"
+                >
+                  La création des reçus fiscaux pour l'année {{ yearOrganisationPair.year }} peut
+                  être effectuée après le <FormattedDate :value="annualReceiptReleaseDate" />.
+                </QTooltip>
+              </QItemLabel>
+            </QItemSection>
+          </QItem>
+        </QList>
+      </BtnDropdown>
       <TaxReceiptListFilter
         :filter="filter"
         :donors="donors"
@@ -33,10 +71,20 @@ import { omit } from 'es-toolkit'
 
 import Page from '@/layouts/Page.vue'
 
+import BtnDropdown from '@/components/ui/BtnDropdown.vue'
+import FormattedDate from '@/components/FormattedDate.vue'
+
 import TaxReceiptListTable from '../components/TaxReceiptListTable.vue'
 import TaxReceiptListFilter from '../components/TaxReceiptListFilter.vue'
 
-import { useDonorListStore, useTaxReceiptListStore } from '@/stores'
+import { getOrganisationRefById } from '@/features/organisations'
+
+import {
+  useAnnualTaxReceiptsStore,
+  useDonorListStore,
+  useOrganisationListStore,
+  useTaxReceiptListStore,
+} from '@/stores'
 
 import type { Breadcrumb, LazySelectOptions } from '@/types'
 import type {
@@ -53,7 +101,9 @@ const breadcrumbs: Breadcrumb[] = [
 
 const $q = useQuasar()
 
+const organisationListStore = useOrganisationListStore()
 const taxReceiptListStore = useTaxReceiptListStore()
+const annualTaxReceiptStore = useAnnualTaxReceiptsStore()
 const donorListStore = useDonorListStore()
 
 const taxReceiptList = computed(() => taxReceiptListStore.taxReceiptList)
@@ -67,6 +117,13 @@ const donors = computed<LazySelectOptions<DonorRefSelect>>(() => ({
   options: donorListStore.donorRefList,
   load: async () => await donorListStore.fetchDonorRefs(),
 }))
+
+const annualReceiptCreationOptionList = computed(
+  () => annualTaxReceiptStore.eligibleTaxReceiptYearOrganisations?.yearOrganisationPairs ?? [],
+)
+const annualReceiptReleaseDate = computed(
+  () => annualTaxReceiptStore.eligibleTaxReceiptYearOrganisations?.releaseDate,
+)
 
 const loading = ref(true)
 const working = ref(false)
@@ -105,7 +162,11 @@ const retryFailedTaxReceipt = async (taxReceipt: TaxReceiptListItem) => {
 }
 
 onMounted(async () => {
-  await fetchTaxReceipts(paginationRequest.value)
+  await Promise.all([
+    fetchTaxReceipts(paginationRequest.value),
+    organisationListStore.fetchOrganisationRefs(),
+    annualTaxReceiptStore.fetchEligibleTaxReceiptYearOrganisations(),
+  ])
   loading.value = false
 })
 </script>

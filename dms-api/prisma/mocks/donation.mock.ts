@@ -20,7 +20,7 @@ export const buildMockDonationCreateManyInput = ({
 }): DonationCreateManyInput => {
   return {
     amount: ((index % 10) + 1) * 10,
-    donatedAt: addDays(new Date(2025, 0, 1), index),
+    donatedAt: addDays(new Date(2023, 0, 1), index),
     donationAssetTypeId,
     donationMethodId,
     donationTypeId,

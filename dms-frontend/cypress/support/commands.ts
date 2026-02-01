@@ -31,6 +31,7 @@ declare global {
   namespace Cypress {
     interface Chainable<Subject> {
       mockCancelTaxReceipt(): Chainable<Subject>
+      mockCreateBulkAnnualTaxReceipts(): Chainable<Subject>
       mockCreateDonation(formData: DonationFormDataMock): Chainable<Subject>
       mockCreateDonationAssetType(formData: DonationAssetTypeFormDataMock): Chainable<Subject>
       mockCreateDonationMethod(formData: DonationMethodFormDataMock): Chainable<Subject>
@@ -61,6 +62,8 @@ declare global {
       ): Chainable<Subject>
       mockDonor(index: number): Chainable<Subject>
       mockDonorRefList(): Chainable<Subject>
+      mockEligibleDonors(): Chainable<Subject>
+      mockEligibleYearOrganisationPairs(empty?: boolean): Chainable<Subject>
       mockOrganisation(index: number): Chainable<Subject>
       mockOrganisationList(): Chainable<Subject>
       mockOrganisationRefList(): Chainable<Subject>
@@ -593,6 +596,73 @@ Cypress.Commands.add('mockRetryFailedTaxReceipt', () => {
     statusCode: 200,
     body: null,
   }).as('retryFailedTaxReceipt')
+})
+
+Cypress.Commands.add('mockEligibleYearOrganisationPairs', (empty = false) => {
+  cy.intercept('GET', `${MOCK_API_HOST}/tax-receipts/eligible-year-organisations`, {
+    statusCode: 200,
+    body: empty
+      ? { yearOrganisationPairs: [], releaseDate: '2025-01-01T00:00:00.000Z' }
+      : {
+          yearOrganisationPairs: [
+            {
+              year: 2024,
+              organisationId: organisations[0].id,
+              isReleased: true,
+            },
+            {
+              year: 2025,
+              organisationId: organisations[0].id,
+              isReleased: false,
+            },
+          ],
+          releaseDate: '2025-01-01T00:00:00.000Z',
+        },
+  }).as('getEligibleYearOrganisationPairs')
+})
+
+Cypress.Commands.add('mockEligibleDonors', () => {
+  const organisation = organisations[0]
+  const donations = buildMockDonations(
+    paymentModes,
+    organisations,
+    donationTypes,
+    donationMethods,
+    donationAssetTypes,
+    donors,
+  ).filter(
+    (donation) =>
+      new Date(donation.donatedAt).getFullYear() === 2024 &&
+      donation.organisation.id === organisation.id,
+  )
+  cy.intercept('GET', `${MOCK_API_HOST}/tax-receipts/eligible-donors/*/*`, {
+    statusCode: 200,
+    body: {
+      eligibleDonors: donors
+        .map((donor) => {
+          const filteredDonations = donations.filter((donation) => donation.donor.id === donor.id)
+          return {
+            ...donor,
+            donationCount: filteredDonations.length,
+            donationTotalAmount: filteredDonations.reduce(
+              (sum, donation) => sum + donation.amount,
+              0,
+            ),
+            donations: filteredDonations,
+          }
+        })
+        .filter((donor) => donor.donations.length > 0),
+    },
+  }).as('getEligibleDonors')
+})
+
+Cypress.Commands.add('mockCreateBulkAnnualTaxReceipts', () => {
+  cy.intercept('POST', `${MOCK_API_HOST}/tax-receipts/annual/bulk/2024/${organisations[0].id}`, {
+    statusCode: 201,
+    body: {
+      taxReceiptIds: ['tax-receipt-1', 'tax-receipt-2', 'tax-receipt-3'],
+    },
+  }).as('createBulkAnnualTaxReceipts')
 })
 
 Cypress.Commands.add('mockCreateDonation', (formData: DonationFormDataMock) => {

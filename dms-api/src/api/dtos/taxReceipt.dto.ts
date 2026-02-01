@@ -3,7 +3,8 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { IsEnum, IsOptional, ValidateNested } from 'class-validator'
 
-import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
+import { DonationListItemDto } from './donation.dto'
+import { DonorDto, DonorRefDto, DonorRefSortOrder } from './donor.dto'
 import { NameSortOrder, SortOrderEnum, type SortOrder } from './sortOrder.dto'
 
 export enum TaxReceiptTypeEnum {
@@ -64,4 +65,8 @@ export class TaxReceiptListSortOrder {
   @ValidateNested()
   @Type(() => TaxReceiptFileSortOrder)
   file?: TaxReceiptFileSortOrder
+}
+
+export class EligibleTaxReceiptDonorDto extends DonorDto {
+  donations: DonationListItemDto[]
 }

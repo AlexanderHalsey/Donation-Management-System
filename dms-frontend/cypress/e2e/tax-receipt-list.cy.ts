@@ -1,6 +1,8 @@
 describe('Tax Receipt List', () => {
   beforeEach(() => {
     cy.mockTaxReceiptList()
+    cy.mockEligibleYearOrganisationPairs()
+    cy.mockOrganisationRefList()
   })
 
   const taxReceiptListTable = '[data-cy="tax-receipt-list-table"]'
@@ -389,6 +391,33 @@ describe('Tax Receipt List', () => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
       cy.get(paginationInfo).should('contain.text', '1-10 of 100')
+    })
+  })
+
+  describe('Annual receipt creation', () => {
+    it('should display an annual receipt creation button when there are eligible year organisation pairs', () => {
+      cy.visit('/tax-receipts')
+      cy.wait('@getEligibleYearOrganisationPairs')
+      cy.get('[data-cy="create-annual-tax-receipts-button"]').should('be.visible').click()
+      cy.get('#q-portal--menu--1 .q-menu').within(() => {
+        cy.get('.q-item .q-item__label').should('have.length', 2)
+        cy.get('.q-item .q-item__label')
+          .eq(0)
+          .should('contain.text', '2024')
+          .should('contain.text', 'Organisation 1')
+          .should('not.have.class', 'text-grey')
+        cy.get('.q-item .q-item__label')
+          .eq(1)
+          .should('contain.text', '2025')
+          .should('contain.text', 'Organisation 1')
+          .should('have.class', 'text-grey')
+      })
+    })
+    it('should not display an annual receipt creation button when there are no eligible year organisation pairs', () => {
+      cy.mockEligibleYearOrganisationPairs(true)
+      cy.visit('/tax-receipts')
+      cy.wait('@getEligibleYearOrganisationPairs')
+      cy.get('[data-cy="create-annual-tax-receipts-button"]').should('not.exist')
     })
   })
 })

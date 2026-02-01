@@ -56,6 +56,11 @@ const router = createRouter({
           component: () => import('@/features/taxReceipts/pages/TaxReceiptList.vue'),
         },
         {
+          path: 'tax-receipts/annual-create/:year/:organisationId',
+          name: 'annual-tax-receipts-create',
+          component: () => import('@/features/taxReceipts/pages/AnnualTaxReceiptsCreate.vue'),
+        },
+        {
           path: 'donation-asset-types',
           name: 'donation-asset-types',
           component: () => import('@/features/donationAssetTypes/pages/DonationAssetTypeList.vue'),

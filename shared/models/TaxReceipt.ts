@@ -1,6 +1,6 @@
 import type { DonationListItem } from './Donation'
-import type { DonorRef } from './Donor'
-import type { BoolFilter, DateTimeFilter, SelectFilter } from './Filters'
+import type { DonorRef, Donor } from './Donor'
+import type { DateTimeFilter, SelectFilter } from './Filters'
 import type { Pagination, PaginationRequest } from './Pagination'
 import type { TaxReceiptListSortOrder } from './SortOrder'
 
@@ -39,4 +39,8 @@ export type TaxReceiptTypeFilter = {
 
 export type TaxReceiptStatusFilter = {
   in?: TaxReceiptStatus[]
+}
+
+export interface EligibleTaxReceiptDonor extends Donor {
+  donations: DonationListItem[]
 }

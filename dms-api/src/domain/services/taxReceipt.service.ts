@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
-import { uniq } from 'es-toolkit'
+import { uniqBy } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined } from '@shared/utils'
 
@@ -16,6 +16,17 @@ import type {
   TaxReceiptType,
 } from '@shared/models'
 import { CancelTaxReceiptRequest } from '@/api/dtos'
+
+export const getTaxReceiptYearStart = (year: number) => `${year}-01-01T00:00:00.000Z`
+export const getTaxReceiptYearEnd = (year: number) => `${year}-12-31T23:59:59.999Z`
+export const TAX_RECEIPT_RELEASE_MONTH_INDEX = 0
+export const TAX_RECEIPT_RELEASE_DAY = 15
+export const ELIGIBLE_TAX_RECEIPT_DONATION_FILTER = {
+  taxReceiptId: null,
+  donor: { isDisabled: false },
+  organisation: { isTaxReceiptEnabled: true },
+  donationType: { isTaxReceiptEnabled: true },
+} as const
 
 @Injectable()
 export class TaxReceiptService {
@@ -61,64 +72,46 @@ export class TaxReceiptService {
     })
   }
 
-  async createTaxReceipt({
-    donationIds,
-    taxReceiptType,
+  taxReceiptReleaseDate(): Date {
+    return new Date(
+      new Date().getFullYear(),
+      TAX_RECEIPT_RELEASE_MONTH_INDEX,
+      TAX_RECEIPT_RELEASE_DAY,
+    )
+  }
+
+  isTaxReceiptYearReleased(year: number): boolean {
+    if (year >= new Date().getFullYear()) return false
+    if (year < new Date().getFullYear() - 1) return true
+    return new Date() >= this.taxReceiptReleaseDate()
+  }
+
+  async createIndividualTaxReceipt({
+    donationId,
   }: {
-    donationIds: string[]
-    taxReceiptType: TaxReceiptType
-  }): Promise<string> {
-    const donations = await this.prisma.donation.findMany({
-      where: { id: { in: donationIds } },
-      include: {
-        organisation: {
-          select: { id: true, isTaxReceiptEnabled: true, logoId: true, signatureId: true },
-        },
-        donationType: { select: { isTaxReceiptEnabled: true } },
+    donationId: string
+  }): Promise<{ taxReceiptId: string }> {
+    const donation = await this.prisma.donation.findUniqueOrThrow({
+      where: {
+        ...ELIGIBLE_TAX_RECEIPT_DONATION_FILTER,
+        id: donationId,
       },
-    })
-
-    if (donations.length !== donationIds.length) {
-      throw new BadRequestException('One or more donations not found')
-    }
-
-    const donorIds = uniq(donations.map((donation) => donation.donorId))
-
-    if (donorIds.length > 1) {
-      throw new BadRequestException(
-        'Donations must belong to the same donor. Current donor IDs: ' + donorIds.join(', '),
-      )
-    }
-
-    donations.forEach((donation) => {
-      if (donation.taxReceiptId) {
-        throw new BadRequestException(
-          'Donation already has a tax receipt associated with it : ' + donation.taxReceiptId,
-        )
-      }
-      if (
-        !donation.organisation.isTaxReceiptEnabled ||
-        !donation.donationType.isTaxReceiptEnabled
-      ) {
-        throw new BadRequestException(
-          'Tax receipts are not enabled for this donation : ' + donation.id,
-        )
-      }
+      select: { donor: { select: { id: true } } },
     })
 
     const { id: taxReceiptId, receiptNumber: taxReceiptNumber } = await this.prisma.$transaction(
       async (tx) => {
         const taxReceipt = await tx.taxReceipt.create({
           data: {
-            type: taxReceiptType,
+            type: 'INDIVIDUAL',
             status: 'PENDING',
-            donorId: donorIds[0],
+            donorId: donation.donor.id,
           },
           select: { id: true, receiptNumber: true },
         })
 
-        await tx.donation.updateMany({
-          where: { id: { in: donationIds } },
+        await tx.donation.update({
+          where: { id: donationId },
           data: { taxReceiptId: taxReceipt.id },
         })
 
@@ -126,14 +119,109 @@ export class TaxReceiptService {
       },
     )
 
-    await this.bullMQService.addTaxReceiptJob('GENERATE', {
-      taxReceiptId,
-      taxReceiptNumber,
-      donationIds,
-      taxReceiptType,
+    try {
+      await this.bullMQService.addTaxReceiptJob('GENERATE', {
+        taxReceiptId,
+        taxReceiptNumber,
+        donationIds: [donationId],
+        taxReceiptType: 'INDIVIDUAL',
+      })
+    } catch (error) {
+      await this.handleTaxReceiptGenerationFailure(taxReceiptId, error)
+      throw error
+    }
+
+    return { taxReceiptId }
+  }
+
+  async createAnnualTaxReceipts({
+    organisationId,
+    donorIds,
+    year,
+  }: {
+    organisationId: string
+    donorIds: string[]
+    year: number
+  }): Promise<{
+    taxReceiptIds: string[]
+  }> {
+    if (!this.isTaxReceiptYearReleased(year)) {
+      throw new BadRequestException(
+        `Annual tax receipts for year ${year} cannot be generated before ${TAX_RECEIPT_RELEASE_MONTH_INDEX + 1}/${TAX_RECEIPT_RELEASE_DAY}/${new Date().getFullYear()}`,
+      )
+    }
+    const donors = await this.prisma.donor.findMany({
+      where: { id: { in: donorIds } },
+      select: {
+        id: true,
+        isDisabled: true,
+        donations: {
+          where: {
+            ...ELIGIBLE_TAX_RECEIPT_DONATION_FILTER,
+            organisationId,
+            donatedAt: {
+              gte: getTaxReceiptYearStart(year),
+              lte: getTaxReceiptYearEnd(year),
+            },
+          },
+          select: { id: true },
+        },
+      },
     })
 
-    return taxReceiptId
+    const taxReceipts = await this.prisma.$transaction(async (tx) => {
+      donors.forEach((donor) => {
+        if (donor.donations.length === 0) {
+          throw new BadRequestException(
+            `No donations found for donor ID ${donor.id} in organisation ID ${organisationId} for year ${year}`,
+          )
+        }
+      })
+
+      const taxReceipts = (
+        await tx.taxReceipt.createManyAndReturn({
+          data: donors.map((donor) => ({
+            type: 'ANNUAL',
+            status: 'PENDING',
+            donorId: donor.id,
+          })),
+          select: { id: true, receiptNumber: true, donorId: true },
+        })
+      ).map((taxReceipt) => ({
+        ...taxReceipt,
+        donationIds: donors
+          .find((donor) => donor.id === taxReceipt.donorId)!
+          .donations.map((donation) => donation.id),
+      }))
+
+      for (const taxReceipt of taxReceipts) {
+        await tx.donation.updateMany({
+          where: { id: { in: taxReceipt.donationIds } },
+          data: { taxReceiptId: taxReceipt.id },
+        })
+      }
+
+      return taxReceipts
+    })
+
+    try {
+      await this.bullMQService.addTaxReceiptJob(
+        'GENERATE_BATCH',
+        taxReceipts.map((taxReceipt) => ({
+          taxReceiptId: taxReceipt.id,
+          taxReceiptNumber: taxReceipt.receiptNumber,
+          donationIds: taxReceipt.donationIds,
+          taxReceiptType: 'ANNUAL',
+        })),
+      )
+    } catch (error) {
+      for (const taxReceipt of taxReceipts) {
+        await this.handleTaxReceiptGenerationFailure(taxReceipt.id, error)
+      }
+      throw error
+    }
+
+    return { taxReceiptIds: taxReceipts.map((tr) => tr.id) }
   }
 
   async processTaxReceiptGeneration({
@@ -164,7 +252,10 @@ export class TaxReceiptService {
       }),
     ])
 
-    const organisations = uniq(donations.map((donation) => donation.organisation))
+    const organisations = uniqBy(
+      donations.map((donation) => donation.organisation),
+      (org) => org.id,
+    )
 
     if (organisations.length > 1) {
       throw new BadRequestException(
@@ -240,7 +331,7 @@ export class TaxReceiptService {
   async cancelTaxReceipt(id: string, request: CancelTaxReceiptRequest): Promise<void> {
     await this.prisma.$transaction(
       async (tx) => {
-        const taxReceipt = await this.prisma.taxReceipt.findUniqueOrThrow({
+        const taxReceipt = await tx.taxReceipt.findUniqueOrThrow({
           where: { id },
           include: { file: true },
         })
@@ -263,11 +354,13 @@ export class TaxReceiptService {
             canceledAt: new Date(),
           },
         })
-        await this.prisma.donation.updateMany({
+
+        await tx.donation.updateMany({
           where: { taxReceiptId: id },
           data: { taxReceiptId: null },
         })
 
+        // If this fails, the entire transaction rolls back automatically
         await this.bullMQService.addTaxReceiptJob('CANCEL', {
           fileId: taxReceipt.file.id,
           storageKey: taxReceipt.file.storageKey,

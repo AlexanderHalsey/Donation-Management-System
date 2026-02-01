@@ -6,7 +6,7 @@ import { mockDeep, mockReset } from 'jest-mock-extended'
 import { DonationService } from '../services/donation.service'
 import { PrismaService } from '@/infrastructure'
 
-import { Prisma } from '@generated/prisma/client'
+import { Donation, DonationType, Donor, Organisation, Prisma } from '@generated/prisma/client'
 
 describe('DonationService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -61,6 +61,114 @@ describe('DonationService', () => {
     await donationService.getById(donationId)
 
     expect(prismaServiceMock.donation.findUniqueOrThrow).toHaveBeenCalledTimes(1)
+  })
+
+  describe('getEligibleTaxReceiptYearOrganisations', () => {
+    it('should return unique year-organisation pairs for eligible donations', async () => {
+      prismaServiceMock.donation.findMany.mockResolvedValueOnce(
+        mockDeep<(Donation & { organisation: Organisation })[]>([
+          {
+            donatedAt: new Date('2024-01-01T00:00:00.000Z'),
+            organisation: { id: 'org-1', name: 'Org 1' },
+          },
+          {
+            donatedAt: new Date('2023-01-01T00:00:00.000Z'),
+            organisation: { id: 'org-2', name: 'Org 2' },
+          },
+          {
+            donatedAt: new Date('2023-01-01T00:00:00.000Z'),
+            organisation: { id: 'org-2', name: 'Org 2' },
+          },
+        ]),
+      )
+
+      const result = await donationService.getEligibleTaxReceiptYearOrganisations()
+      expect(result).toEqual([
+        { year: 2024, organisationId: 'org-1' },
+        { year: 2023, organisationId: 'org-2' },
+      ])
+      expect(prismaServiceMock.donation.findMany).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.donation.findMany).toHaveBeenCalledWith({
+        select: { donatedAt: true, organisation: { select: { id: true } } },
+        where: expect.objectContaining({
+          taxReceiptId: null,
+          donor: { isDisabled: false },
+          organisation: { isTaxReceiptEnabled: true },
+          donationType: { isTaxReceiptEnabled: true },
+          donatedAt: expect.any(Object),
+        }),
+      })
+    })
+  })
+
+  describe('getEligibleTaxReceiptDonations', () => {
+    it('should return eligible donations grouped by donor', async () => {
+      prismaServiceMock.donation.findMany.mockResolvedValueOnce(
+        mockDeep<
+          (Donation & { organisation: Organisation; donor: Donor; donationType: DonationType })[]
+        >([
+          {
+            id: 'donation-1',
+            amount: 100,
+            donatedAt: new Date('2024-01-01T00:00:00.000Z'),
+            donor: { id: 'donor-1', firstName: 'John', lastName: 'Doe', isDisabled: false },
+            organisation: { isTaxReceiptEnabled: true },
+            donationType: { isTaxReceiptEnabled: true },
+          },
+          {
+            id: 'donation-2',
+            amount: 200,
+            donatedAt: new Date('2024-02-01T00:00:00.000Z'),
+            donor: { id: 'donor-1', firstName: 'John', lastName: 'Doe', isDisabled: false },
+            organisation: { isTaxReceiptEnabled: true },
+            donationType: { isTaxReceiptEnabled: true },
+          },
+          {
+            id: 'donation-3',
+            amount: 300,
+            donatedAt: new Date('2024-03-01T00:00:00.000Z'),
+            donor: { id: 'donor-2', firstName: 'Jane', lastName: 'Smith', isDisabled: false },
+            organisation: { isTaxReceiptEnabled: true },
+            donationType: { isTaxReceiptEnabled: true },
+          },
+        ]),
+      )
+
+      const year = 2024
+      const organisationId = 'org-1'
+      const result = await donationService.getEligibleTaxReceiptDonations({
+        year,
+        organisationId,
+      })
+      expect(Array.isArray(result)).toBe(true)
+      expect(result.length).toBe(3)
+      expect(prismaServiceMock.donation.findMany).toHaveBeenCalledTimes(1)
+      expect(prismaServiceMock.donation.findMany).toHaveBeenCalledWith({
+        include: expect.objectContaining({
+          donationType: true,
+          organisation: expect.any(Object),
+          paymentMode: true,
+          donor: true,
+        }),
+        omit: expect.any(Object),
+        where: expect.objectContaining({
+          taxReceiptId: null,
+          donor: { isDisabled: false },
+          organisation: { isTaxReceiptEnabled: true },
+          donationType: { isTaxReceiptEnabled: true },
+          organisationId,
+          donatedAt: expect.any(Object),
+        }),
+        orderBy: { updatedAt: 'desc' },
+      })
+    })
+
+    it('should throw error if no eligible donations found', async () => {
+      prismaServiceMock.donation.findMany.mockResolvedValueOnce([])
+      await expect(
+        donationService.getEligibleTaxReceiptDonations({ year: 2024, organisationId: 'org-1' }),
+      ).rejects.toThrow('No eligible donations found for organisation ID: org-1 in year: 2024')
+    })
   })
 
   it('should validate donation type on create and update', async () => {

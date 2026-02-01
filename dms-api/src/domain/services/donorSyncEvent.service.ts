@@ -59,7 +59,12 @@ export class DonorSyncEventService {
     }
 
     if (donorSyncEventIds.length > 0) {
-      await this.bullMQService.addDonorSyncJob({ donorSyncEventIds })
+      try {
+        await this.bullMQService.addDonorSyncJob({ donorSyncEventIds })
+      } catch (error) {
+        await this.markAsFailed(donorSyncEventIds, `Failed to schedule sync job: ${error.message}`)
+        throw error
+      }
     }
   }
 

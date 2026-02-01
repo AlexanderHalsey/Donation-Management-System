@@ -1,3 +1,5 @@
+import { string } from 'zod'
+
 export interface PaymentModeDto {
   id: string
   name: string
@@ -134,6 +136,10 @@ export interface FileMetadataDto {
   mimeType: string
   hash: string
   status: FileStatusDto
+}
+
+export interface EligibleTaxReceiptDonorDto extends DonorDto {
+  donations: DonationListItemDto[]
 }
 
 /**
@@ -289,6 +295,21 @@ export interface GetTaxReceiptListResponse {
   pagination: TaxReceiptListPagination
 }
 
+export interface GetEligibleTaxReceiptYearOrganisationsResponse {
+  yearOrganisationPairs: {
+    year: number
+    isReleased: boolean
+    organisationId: string
+  }[]
+  releaseDate: string
+}
+
+export interface GetEligibleTaxReceiptDonorsResponse {
+  year: number
+  organisationId: string
+  eligibleDonors: EligibleTaxReceiptDonorDto[]
+}
+
 export interface GetOrganisationListResponse {
   organisations: OrganisationDto[]
 }
@@ -405,4 +426,12 @@ export interface FileUploadResponse {
 
 export interface GetTaxReceiptResponse {
   taxReceiptId: string
+}
+
+export interface BulkAnnualTaxReceiptRequest {
+  donorIds: string[]
+}
+
+export interface BulkAnnualTaxReceiptResponse {
+  taxReceiptIds: string[]
 }

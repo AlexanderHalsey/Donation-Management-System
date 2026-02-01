@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { parse as parseContentDisposition } from 'content-disposition'
 import { saveAs } from 'file-saver'
+import { parseISO } from 'date-fns'
 
 import { withClient } from './client'
 
@@ -13,6 +14,7 @@ import {
   convertDtoToDonationType,
   convertDtoToDonor,
   convertDtoToDonorListItem,
+  convertDtoToEligibleTaxReceiptDonor,
   convertDtoToOrganisation,
   convertDtoToPaymentMode,
   convertDtoToTaxReceiptListItem,
@@ -24,8 +26,10 @@ import type { DonationMethodFormData } from '@/features/donationMethods'
 import type { DonationTypeFormData } from '@/features/donationTypes'
 import type { OrganisationFormData } from '@/features/organisations'
 import type { PaymentModeFormData } from '@/features/paymentModes'
+import type { AnnualTaxReceiptsFormData } from '@/features/taxReceipts'
 
 import type {
+  BulkAnnualTaxReceiptResponse,
   CancelTaxReceiptRequest,
   FileUploadResponse,
   GetDonationAssetTypeListResponse,
@@ -41,6 +45,8 @@ import type {
   GetDonorListResponse,
   GetDonorRefListResponse,
   GetDonorResponse,
+  GetEligibleTaxReceiptDonorsResponse,
+  GetEligibleTaxReceiptYearOrganisationsResponse,
   GetOrganisationListResponse,
   GetOrganisationRefListResponse,
   GetOrganisationResponse,
@@ -67,6 +73,7 @@ import type {
   DonorListPaginationRequest,
   DonorListSortOrder,
   DonorRef,
+  EligibleTaxReceiptDonor,
   Organisation,
   OrganisationRef,
   PaymentMode,
@@ -403,11 +410,51 @@ export const uploadImage = async (file: File): Promise<FileUploadResponse> => {
   )
 }
 
+export const getEligibleTaxReceiptYearOrganisations = async (): Promise<
+  Omit<GetEligibleTaxReceiptYearOrganisationsResponse, 'releaseDate'> & { releaseDate: Date }
+> => {
+  const response = await withClient((client) =>
+    client.get<GetEligibleTaxReceiptYearOrganisationsResponse>(
+      '/tax-receipts/eligible-year-organisations',
+    ),
+  )
+  return {
+    ...response,
+    releaseDate: parseISO(response.releaseDate),
+  }
+}
+
+export const getEligibleTaxReceiptDonors = async (
+  year: number,
+  organisationId: string,
+): Promise<EligibleTaxReceiptDonor[]> => {
+  const response = await withClient((client) =>
+    client.get<GetEligibleTaxReceiptDonorsResponse>(
+      `/tax-receipts/eligible-donors/${year}/${organisationId}`,
+    ),
+  )
+  return response.eligibleDonors.map(convertDtoToEligibleTaxReceiptDonor)
+}
+
 export const postIndividualTaxReceipt = async (donationId: string): Promise<string> => {
   const response = await withClient((client) =>
     client.post<GetTaxReceiptResponse>(`/tax-receipts/individual/${donationId}`),
   )
   return response.taxReceiptId
+}
+
+export const postAnnualBulkTaxReceipts = async (
+  year: number,
+  organisationId: string,
+  formData: AnnualTaxReceiptsFormData,
+): Promise<string[]> => {
+  const response = await withClient((client) =>
+    client.post<BulkAnnualTaxReceiptResponse>(
+      `/tax-receipts/annual/bulk/${year}/${organisationId}`,
+      formData,
+    ),
+  )
+  return response.taxReceiptIds
 }
 
 export const postRetryFailedTaxReceiptGeneration = async (taxReceiptId: string): Promise<void> => {

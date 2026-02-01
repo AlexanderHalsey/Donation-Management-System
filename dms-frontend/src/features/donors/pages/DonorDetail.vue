@@ -61,27 +61,7 @@
               </div>
             </QCardSection>
           </QCard>
-          <QCard class="col-grow">
-            <QCardSection>
-              <div class="text-h6 q-mb-md flex items-center">
-                <QIcon name="location_on" class="q-mr-sm" />
-                Adresse
-              </div>
-              <div v-if="!hasAddressData" class="text-grey-6 text-italic">
-                Aucune adresse renseignée
-              </div>
-              <div v-else class="row q-gutter-xl">
-                <TitledComponent
-                  v-for="field in addressFields"
-                  :key="field.key"
-                  :title="field.label"
-                  class="col-auto"
-                >
-                  {{ donor?.[field.key] || '&nbsp;-' }}
-                </TitledComponent>
-              </div>
-            </QCardSection>
-          </QCard>
+          <DonorAddressCard :donor="donor" class="col-grow" />
         </div>
         <div class="col-12 col-md-5 col-grow">
           <QCard class="full-height">
@@ -137,12 +117,13 @@ import StatsCard from '@/components/StatsCard.vue'
 import FormattedCurrency from '@/components/FormattedCurrency.vue'
 import FormattedDate from '@/components/FormattedDate.vue'
 
+import DonorAddressCard from '../components/DonorAddressCard.vue'
+
 import { useDonorStore } from '@/stores'
 
 import { getDonorFullName } from '../helpers'
 
 import type { Breadcrumb } from '@/types'
-import type { Donor } from '@shared/models'
 
 const breadcrumbs = ref<Breadcrumb[]>([
   { id: 'donor-list', label: 'Liste des donateurs', to: '/donors', icon: 'group' },
@@ -156,19 +137,6 @@ const route = useRoute()
 const donorId = computed(() => route.params.donorId as string)
 
 const donor = computed(() => donorStore.donor)
-
-const addressFields = computed<{ key: keyof Donor; label: string }[]>(() => [
-  { key: 'streetAddress1', label: 'Adresse ligne 1' },
-  { key: 'streetAddress2', label: 'Adresse ligne 2' },
-  { key: 'postalCode', label: 'Code postal' },
-  { key: 'city', label: 'Ville' },
-  { key: 'state', label: 'État/Région' },
-  { key: 'country', label: 'Pays' },
-])
-
-const hasAddressData = computed(() => {
-  return addressFields.value.some((field) => donor.value?.[field.key])
-})
 
 const averageDonationAmount = computed(() => {
   if (!donor.value || donor.value.donationCount === 0) return 0
