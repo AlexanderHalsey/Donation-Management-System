@@ -1,12 +1,16 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { PaymentModeService } from '@/domain'
+
+import { JwtAuthGuard } from '../guards'
 
 import { PaymentModeConverter } from '../converters'
 
 import { PaymentModeRequest, GetPaymentModeListResponse, GetPaymentModeResponse } from '../dtos'
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('payment-modes')
 export class PaymentModeController {
   constructor(

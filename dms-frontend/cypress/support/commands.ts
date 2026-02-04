@@ -64,6 +64,7 @@ declare global {
       mockDonorRefList(): Chainable<Subject>
       mockEligibleDonors(): Chainable<Subject>
       mockEligibleYearOrganisationPairs(empty?: boolean): Chainable<Subject>
+      mockLogin(failure?: boolean): Chainable<Subject>
       mockOrganisation(index: number): Chainable<Subject>
       mockOrganisationList(): Chainable<Subject>
       mockOrganisationRefList(): Chainable<Subject>
@@ -99,6 +100,17 @@ declare global {
     }
   }
 }
+
+Cypress.Commands.add('mockLogin', (failure = false) => {
+  cy.intercept('POST', `${MOCK_API_HOST}/auth/login`, {
+    statusCode: failure ? 401 : 200,
+    body: !failure
+      ? {
+          accessToken: 'mock-access-token',
+        }
+      : null,
+  }).as('login')
+})
 
 const organisations = buildMockOrganisations()
 const paymentModes = buildMockPaymentModes()

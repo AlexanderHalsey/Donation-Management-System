@@ -1,0 +1,49 @@
+import { Injectable } from '@nestjs/common'
+
+import * as bcrypt from 'bcrypt'
+import { omit } from 'es-toolkit'
+
+import { PrismaService } from '@/infrastructure'
+
+import { User as PrismaUser, UserRole as PrismaUserRole } from '@generated/prisma/client'
+import { User, UserRole } from '@shared/models'
+
+const BCRYPT_SALT_ROUNDS = 10
+
+@Injectable()
+export class UserService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findByUserName(username: string): Promise<PrismaUser> {
+    return this.prisma.user.findUniqueOrThrow({
+      where: { username },
+    })
+  }
+
+  async createUser({
+    username,
+    password,
+    role,
+  }: {
+    username: string
+    password: string
+    role: UserRole
+  }): Promise<User> {
+    const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS)
+    const prismaUser = await this.prisma.user.create({
+      data: {
+        username,
+        passwordHash,
+        role: role.toUpperCase() as keyof typeof PrismaUserRole,
+      },
+    })
+    return this.transformToModel(prismaUser)
+  }
+
+  transformToModel(user: PrismaUser): User {
+    return {
+      ...omit(user, ['passwordHash', 'role']),
+      role: user.role.toLowerCase() as UserRole,
+    }
+  }
+}

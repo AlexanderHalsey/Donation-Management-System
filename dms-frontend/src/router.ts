@@ -2,19 +2,23 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainLayout from '@/layouts/MainLayout.vue'
 
-import Login from '@/pages/Login.vue'
+import { Login } from '@/features/auth'
 import NotFound from '@/pages/NotFound.vue'
+
+import { useAuthStore } from './stores'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/login',
+      name: 'Login',
       component: Login,
     },
     {
       path: '/',
       component: MainLayout,
+      meta: { requiresAuth: true },
       children: [
         {
           path: '',
@@ -146,6 +150,17 @@ const router = createRouter({
     },
   ],
   scrollBehavior: () => ({ top: 0, behavior: 'smooth' }),
+})
+
+router.beforeEach((to, _from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+  if (requiresAuth && !authStore.token && import.meta.env.VITE_TEST !== 'true') {
+    next({ path: '/login' })
+  } else {
+    next()
+  }
 })
 
 export default router

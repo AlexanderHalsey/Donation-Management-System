@@ -2,9 +2,10 @@ import { HttpAdapterHost, NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 
-import { PrismaClientExceptionFilter } from './api/filters'
-
+import * as cookieParser from 'cookie-parser'
 import { json } from 'express'
+
+import { PrismaClientExceptionFilter } from './api/filters'
 
 import { AppModule } from './app.module'
 
@@ -22,13 +23,17 @@ async function bootstrap() {
     }),
   )
 
+  app.use(cookieParser())
+
   if (process.env.NODE_ENV !== 'production') {
     app.enableCors({
+      origin: 'http://localhost:5173',
+      credentials: true,
       exposedHeaders: ['content-disposition'],
     })
   }
 
-  const config = new DocumentBuilder().setTitle('DMS API').setVersion('1.0').build()
+  const config = new DocumentBuilder().setTitle('DMS API').setVersion('1.0').addBearerAuth().build()
   const documentFactory = () => SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, documentFactory)
 

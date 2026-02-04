@@ -1,16 +1,17 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { DonorSyncEventAuthGuard } from '../guards'
 
 import { DonorSyncEventService } from '@/domain'
 
+@ApiBearerAuth()
+@UseGuards(DonorSyncEventAuthGuard)
 @Controller('donor-sync-events')
 export class DonorSyncEventController {
   constructor(private readonly donorSyncEventService: DonorSyncEventService) {}
 
   @Post()
-  @UseGuards(DonorSyncEventAuthGuard)
   @ApiOperation({ summary: 'Add Donor Sync events' })
   @ApiResponse({ status: 200, description: 'Donor Sync events received successfully' })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })

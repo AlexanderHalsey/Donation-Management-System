@@ -20,6 +20,7 @@ import {
   convertDtoToTaxReceiptListItem,
 } from './converters'
 
+import type { LoginFormData } from '@/features/auth'
 import type { DonationFormData } from '@/features/donations'
 import type { DonationAssetTypeFormData } from '@/features/donationAssetTypes'
 import type { DonationMethodFormData } from '@/features/donationMethods'
@@ -55,6 +56,7 @@ import type {
   GetTaxReceiptListRequest,
   GetTaxReceiptListResponse,
   GetTaxReceiptResponse,
+  LoginResponse,
 } from '@shared/dtos'
 import type {
   Donation,
@@ -82,6 +84,10 @@ import type {
   TaxReceiptListPagination,
   TaxReceiptListPaginationRequest,
 } from '@shared/models'
+
+export const login = async (formData: LoginFormData): Promise<LoginResponse> => {
+  return await withClient((client) => client.post<LoginResponse>('/auth/login', formData))
+}
 
 export const getDonations = async (
   pagination: DonationListPaginationRequest,

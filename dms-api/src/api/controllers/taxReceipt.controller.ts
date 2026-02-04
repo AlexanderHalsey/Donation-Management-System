@@ -1,11 +1,22 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Put } from '@nestjs/common'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { formatISO } from 'date-fns'
 import { groupBy } from 'es-toolkit'
 
 import { DonationService, TaxReceiptService } from '@/domain'
 import { BullMQService } from '@/infrastructure'
+
+import { JwtAuthGuard } from '../guards'
 
 import { DonationConverter, DonorConverter, TaxReceiptConverter } from '../converters'
 
@@ -20,6 +31,8 @@ import {
   GetTaxReceiptResponse,
 } from '../dtos'
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('tax-receipts')
 export class TaxReceiptController {
   constructor(

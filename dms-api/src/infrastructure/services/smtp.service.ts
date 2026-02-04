@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { createTransport } from 'nodemailer'
 import type { Options as MailOptions } from 'nodemailer/lib/mailer'
 
 @Injectable()
 export class SmtpService {
-  constructor() {}
+  constructor(private readonly configService: ConfigService) {}
 
   async sendMessage({ to, subject, html, attachments }: MailOptions): Promise<{
     messageId: string
@@ -12,13 +13,18 @@ export class SmtpService {
     const transport = createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: this.configService.get<string>('SMTP_USER'),
+        pass: this.configService.get<string>('SMTP_PASS'),
       },
     })
     try {
+      const smtpSender = this.configService.get<string>('SMTP_SENDER')
+      const smtpUser = this.configService.get<string>('SMTP_USER')
+      if (!smtpSender || !smtpUser) {
+        throw new Error('SMTP_SENDER or SMTP_USER environment variable is not set')
+      }
       const result = await transport.sendMail({
-        from: `${process.env.SMTP_SENDER} <${process.env.SMTP_USER}>`,
+        from: `${smtpSender} <${smtpUser}>`,
         to,
         subject,
         html,

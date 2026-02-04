@@ -1,13 +1,17 @@
-import { Controller, Res, Post, Body } from '@nestjs/common'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { Controller, Res, Post, Body, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 import { Response } from 'express'
 
 import { ExportService } from '@/domain'
+
+import { JwtAuthGuard } from '../guards'
 import { ParsedLanguage } from '../decorators'
 
 import { GetExportDonationListRequest, GetExportDonorListRequest } from '@/api/dtos'
 import type { Language } from '@/domain/types'
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('exports')
 export class ExportController {
   constructor(private readonly exportService: ExportService) {}

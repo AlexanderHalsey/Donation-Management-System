@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -26,7 +27,10 @@ import { TaxReceiptOrganisationInfo, TaxReceiptDonation } from '@/domain/types'
 export class TaxReceiptGeneratorService {
   private template: TaxReceiptTemplate
 
-  constructor(private readonly pdfRenderer: PDFRendererService) {
+  constructor(
+    private readonly pdfRenderer: PDFRendererService,
+    private readonly configService: ConfigService,
+  ) {
     this.template = this.selectTemplateForEnvironment()
   }
 
@@ -35,7 +39,8 @@ export class TaxReceiptGeneratorService {
       { name: 'cerfa', template: cerfaTaxReceiptTemplate },
       { name: 'demo', template: demoTaxReceiptTemplate },
     ]
-    const template = templates.find((t) => t.name === process.env.TAX_RECEIPT_TEMPLATE)?.template
+    const templateName = this.configService.get<string>('TAX_RECEIPT_TEMPLATE')
+    const template = templates.find((t) => t.name === templateName)?.template
     if (!template) {
       throw new BadRequestException(
         'Invalid TAX_RECEIPT_TEMPLATE environment variable. Must be "cerfa" or "demo".',

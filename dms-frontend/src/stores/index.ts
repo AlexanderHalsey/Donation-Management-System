@@ -1,4 +1,5 @@
 export * from './annualTaxReceipts'
+export * from './auth'
 export * from './donation'
 export * from './donationAssetType'
 export * from './donationAssetTypeList'

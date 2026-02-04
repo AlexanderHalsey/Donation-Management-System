@@ -435,3 +435,12 @@ export interface BulkAnnualTaxReceiptRequest {
 export interface BulkAnnualTaxReceiptResponse {
   taxReceiptIds: string[]
 }
+
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+export interface LoginResponse {
+  accessToken: string
+}

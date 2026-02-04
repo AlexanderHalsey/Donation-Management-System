@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq'
 
 import * as fs from 'fs'
@@ -18,6 +19,7 @@ export class EmailConsumer extends WorkerHost {
     private readonly fileService: FileService,
     private readonly fileStorageService: FileStorageService,
     private readonly smtpService: SmtpService,
+    private readonly configService: ConfigService,
   ) {
     super()
   }
@@ -25,15 +27,16 @@ export class EmailConsumer extends WorkerHost {
   private async selectHtmlTemplateForEnvironment() {
     if (this.htmlTemplate) return
 
-    if (!process.env.EMAIL_TEMPLATE_STORAGE_KEY) {
+    const templateKey = this.configService.get<string>('EMAIL_TEMPLATE_STORAGE_KEY')
+    if (!templateKey) {
       throw new BadRequestException('EMAIL_TEMPLATE_STORAGE_KEY environment variable is not set.')
     }
-    if (process.env.EMAIL_TEMPLATE_STORAGE_KEY === 'demo') {
+    if (templateKey === 'demo') {
       const emailTemplatePath = path.join(process.cwd(), 'src/assets/demoEmailTemplate.html')
       this.htmlTemplate = fs.readFileSync(emailTemplatePath).toString('utf-8')
     } else {
       this.htmlTemplate = await this.fileStorageService
-        .downloadFile(process.env.EMAIL_TEMPLATE_STORAGE_KEY)
+        .downloadFile(templateKey)
         .then((buffer) => buffer.toString('utf-8'))
     }
   }
@@ -46,7 +49,7 @@ export class EmailConsumer extends WorkerHost {
         await this.smtpService.sendMessage({
           to: data.to,
           subject:
-            process.env.EMAIL_TEMPLATE_STORAGE_KEY === 'demo'
+            this.configService.get<string>('EMAIL_TEMPLATE_STORAGE_KEY') === 'demo'
               ? 'Demo Email'
               : `Reçu fiscal numéro ${data.taxReceiptNumber}`,
           html: this.htmlTemplate!,

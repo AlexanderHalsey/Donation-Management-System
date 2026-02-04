@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import type * as runtime from '@prisma/client/runtime/client'
 
 export interface GetDonorListItemResult {
@@ -53,9 +54,9 @@ type TypedSqlModule = {
 export class TypedSqlService {
   private typedSqlModule: TypedSqlModule | null = null
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     // In development, ensure SQL files are generated to prevent runtime surprises
-    if (process.env.NODE_ENV !== 'production') {
+    if (this.configService.get<string>('NODE_ENV') !== 'production') {
       try {
         require.resolve('../../../prisma/generated/prisma/sql')
       } catch (error) {

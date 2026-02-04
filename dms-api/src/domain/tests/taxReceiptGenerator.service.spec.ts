@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import { TaxReceiptGeneratorService } from '../services/taxReceiptGenerator.service'
+import { ConfigService } from '@nestjs/config'
 import { PDFRendererService } from '../services/pdfRenderer.service'
 import { demoTaxReceiptTemplate, cerfaTaxReceiptTemplate } from '../templates/taxReceiptGeneration'
 
@@ -15,6 +16,12 @@ jest.mock('path')
 
 describe('TaxReceiptGeneratorService', () => {
   const mockPDFRenderer = mockDeep<PDFRendererService>()
+  const mockConfigService = mockDeep<ConfigService>({
+    get: (key: string) => {
+      if (key === 'TAX_RECEIPT_TEMPLATE') return 'demo'
+      return undefined
+    },
+  })
 
   const mockOrganisation = mockDeep<TaxReceiptOrganisationInfo>({
     title: 'Association Test',
@@ -85,16 +92,13 @@ describe('TaxReceiptGeneratorService', () => {
   beforeEach(async () => {
     jest.resetAllMocks()
     mockReset(mockPDFRenderer)
-
-    process.env.TAX_RECEIPT_TEMPLATE = 'demo'
+    mockReset(mockConfigService)
 
     const app: TestingModule = await Test.createTestingModule({
       providers: [
         TaxReceiptGeneratorService,
-        {
-          provide: PDFRendererService,
-          useValue: mockPDFRenderer,
-        },
+        { provide: PDFRendererService, useValue: mockPDFRenderer },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile()
 
@@ -103,20 +107,42 @@ describe('TaxReceiptGeneratorService', () => {
 
   describe('selectTemplateForEnvironment', () => {
     it('should select correct template based on environment variable', () => {
-      process.env.TAX_RECEIPT_TEMPLATE = 'cerfa'
-      const service1 = new TaxReceiptGeneratorService(mockPDFRenderer)
+      const service1 = new TaxReceiptGeneratorService(
+        mockPDFRenderer,
+        mockDeep<ConfigService>({
+          get: (key: string) => {
+            if (key === 'TAX_RECEIPT_TEMPLATE') return 'cerfa'
+            return undefined
+          },
+        }),
+      )
       expect(service1['selectTemplateForEnvironment']()).toEqual(cerfaTaxReceiptTemplate)
 
-      process.env.TAX_RECEIPT_TEMPLATE = 'demo'
-      const service2 = new TaxReceiptGeneratorService(mockPDFRenderer)
+      const service2 = new TaxReceiptGeneratorService(
+        mockPDFRenderer,
+        mockDeep<ConfigService>({
+          get: (key: string) => {
+            if (key === 'TAX_RECEIPT_TEMPLATE') return 'demo'
+            return undefined
+          },
+        }),
+      )
       expect(service2['selectTemplateForEnvironment']()).toEqual(demoTaxReceiptTemplate)
     })
 
     it('should throw error for invalid template', () => {
-      process.env.TAX_RECEIPT_TEMPLATE = 'invalid'
-      expect(() => new TaxReceiptGeneratorService(mockPDFRenderer)).toThrow(
-        'Invalid TAX_RECEIPT_TEMPLATE environment variable. Must be "cerfa" or "demo".',
-      )
+      expect(
+        () =>
+          new TaxReceiptGeneratorService(
+            mockPDFRenderer,
+            mockDeep<ConfigService>({
+              get: (key: string) => {
+                if (key === 'TAX_RECEIPT_TEMPLATE') return 'invalid'
+                return undefined
+              },
+            }),
+          ),
+      ).toThrow('Invalid TAX_RECEIPT_TEMPLATE environment variable. Must be "cerfa" or "demo".')
     })
   })
 
@@ -194,7 +220,7 @@ describe('TaxReceiptGeneratorService', () => {
     })
 
     it('should add CERFA information when present in template', () => {
-      const serviceWithCerfa = new TaxReceiptGeneratorService(mockPDFRenderer)
+      const serviceWithCerfa = new TaxReceiptGeneratorService(mockPDFRenderer, mockConfigService)
       serviceWithCerfa['template'] = {
         ...demoTaxReceiptTemplate,
         content: {

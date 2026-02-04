@@ -1,7 +1,19 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { DonationService } from '@/domain'
+
+import { JwtAuthGuard } from '../guards'
 
 import { DonationConverter } from '../converters'
 
@@ -12,6 +24,8 @@ import {
   GetDonationResponse,
 } from '../dtos'
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('donations')
 export class DonationController {
   constructor(

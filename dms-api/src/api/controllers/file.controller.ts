@@ -6,16 +6,21 @@ import {
   Post,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger'
 import { Response } from 'express'
 import { FileInterceptor } from '@nestjs/platform-express'
 
 import { FileService } from '@/domain'
 
+import { JwtAuthGuard } from '../guards'
+
 import { FileUploadRequest, FileUploadResponse } from '../dtos'
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('files')
 export class FileController {
   constructor(private readonly fileService: FileService) {}

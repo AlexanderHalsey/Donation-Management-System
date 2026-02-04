@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common'
 import { BullModule } from '@nestjs/bullmq'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
+import { PassportModule } from '@nestjs/passport'
+import { JwtService } from '@nestjs/jwt'
 
 import {
+  AuthController,
   DonationAssetTypeController,
   DonationController,
   DonationMethodController,
@@ -15,7 +18,8 @@ import {
   OrganisationController,
   PaymentModeController,
   TaxReceiptController,
-} from './api/controllers'
+  UserController,
+} from '@/api/controllers'
 
 import {
   DonationAssetTypeConverter,
@@ -29,7 +33,10 @@ import {
   TaxReceiptConverter,
 } from '@/api/converters'
 
+import { JwtRefreshStrategy, JwtStrategy, LocalStrategy } from '@/api/guards'
+
 import {
+  AuthService,
   DonationAssetTypeService,
   DonationMethodService,
   DonationService,
@@ -43,6 +50,7 @@ import {
   PDFRendererService,
   TaxReceiptGeneratorService,
   TaxReceiptService,
+  UserService,
 } from '@/domain'
 
 import {
@@ -86,8 +94,10 @@ import {
     BullModule.registerQueue({ name: DONOR_SYNC_QUEUE }),
     BullModule.registerQueue({ name: TAX_RECEIPT_QUEUE }),
     BullModule.registerQueue({ name: EMAIL_QUEUE }),
+    PassportModule,
   ],
   controllers: [
+    AuthController,
     DonationAssetTypeController,
     DonationController,
     DonationMethodController,
@@ -99,8 +109,10 @@ import {
     OrganisationController,
     PaymentModeController,
     TaxReceiptController,
+    UserController,
   ],
   providers: [
+    AuthService,
     BullMQService,
     DonationAssetTypeCleanupTask,
     DonationAssetTypeConverter,
@@ -124,6 +136,27 @@ import {
     FileConverter,
     FileService,
     FileStorageService,
+    JwtStrategy,
+    JwtRefreshStrategy,
+    {
+      provide: 'JWT_SERVICE',
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) =>
+        new JwtService({
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: { expiresIn: configService.get<number>('JWT_TOKEN_LIFETIME_MS') },
+        }),
+    },
+    {
+      provide: 'JWT_REFRESH_SERVICE',
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) =>
+        new JwtService({
+          secret: configService.get<string>('JWT_REFRESH_SECRET'),
+          signOptions: { expiresIn: configService.get<number>('JWT_REFRESH_TOKEN_LIFETIME_MS') },
+        }),
+    },
+    LocalStrategy,
     OrganisationCleanupTask,
     OrganisationConverter,
     OrganisationService,
@@ -138,6 +171,7 @@ import {
     TaxReceiptGeneratorService,
     TaxReceiptService,
     TypedSqlService,
+    UserService,
   ],
 })
 export class AppModule {}

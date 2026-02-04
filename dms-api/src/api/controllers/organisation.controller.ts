@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { OrganisationService } from '@/domain'
+
+import { JwtAuthGuard } from '../guards'
 
 import { OrganisationConverter } from '../converters'
 
@@ -12,6 +14,8 @@ import {
   OrganisationRequest,
 } from '../dtos'
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('organisations')
 export class OrganisationController {
   constructor(

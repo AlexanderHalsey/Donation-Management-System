@@ -1,10 +1,10 @@
-import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 import { mockDeep, mockReset } from 'jest-mock-extended'
 
 import { EmailConsumer } from '../consumers/email.consumer'
 
 import { FileService } from '../../domain/services/file.service'
+import { ConfigService } from '@nestjs/config'
 import { FileStorageService } from '../services/fileStorage.service'
 import { SmtpService } from '../services/smtp.service'
 
@@ -16,6 +16,12 @@ describe('EmailConsumer', () => {
   const fileServiceMock = mockDeep<FileService>()
   const fileStorageServiceMock = mockDeep<FileStorageService>()
   const smtpServiceMock = mockDeep<SmtpService>()
+  const configServiceMock = mockDeep<ConfigService>({
+    get: jest.fn((key: string) => {
+      if (key === 'EMAIL_TEMPLATE_STORAGE_KEY') return 'demo'
+      return undefined
+    }),
+  })
   let emailConsumer: EmailConsumer
 
   beforeEach(async () => {
@@ -23,14 +29,15 @@ describe('EmailConsumer', () => {
     mockReset(fileServiceMock)
     mockReset(fileStorageServiceMock)
     mockReset(smtpServiceMock)
+    mockReset(configServiceMock)
 
     const app: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot()],
       providers: [
         EmailConsumer,
         { provide: FileService, useValue: fileServiceMock },
         { provide: FileStorageService, useValue: fileStorageServiceMock },
         { provide: SmtpService, useValue: smtpServiceMock },
+        { provide: ConfigService, useValue: configServiceMock },
       ],
     }).compile()
 
@@ -39,7 +46,7 @@ describe('EmailConsumer', () => {
 
   describe('process', () => {
     it('should send email with attachment when SEND_RECEIPT job is processed', async () => {
-      process.env.EMAIL_TEMPLATE_STORAGE_KEY = 'demo'
+      configServiceMock.get.mockReturnValueOnce('demo')
       fileServiceMock.downloadFile.mockResolvedValue({
         buffer: Buffer.from('pdf'),
         metadata: mockDeep<FileMetadata>({ name: 'receipt.pdf', mimeType: 'application/pdf' }),
@@ -71,7 +78,7 @@ describe('EmailConsumer', () => {
     })
 
     it('should not throw if SEND_RECEIPT job is processed and template is loaded from storage', async () => {
-      process.env.EMAIL_TEMPLATE_STORAGE_KEY = 'some-storage-key'
+      configServiceMock.get.mockReturnValueOnce('some-storage-key')
       fileServiceMock.downloadFile.mockResolvedValue({
         buffer: Buffer.from('pdf'),
         metadata: mockDeep<FileMetadata>({ name: 'receipt2.pdf', mimeType: 'application/pdf' }),

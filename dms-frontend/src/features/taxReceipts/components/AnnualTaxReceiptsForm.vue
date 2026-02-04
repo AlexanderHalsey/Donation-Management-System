@@ -144,6 +144,7 @@ import Table from '@/components/ui/Table.vue'
 import FormattedCurrency from '@/components/FormattedCurrency.vue'
 import FormattedDate from '@/components/FormattedDate.vue'
 
+import AnnualTaxReceiptsDialog from './AnnualTaxReceiptsDialog.vue'
 import { OrganisationTag } from '@/features/organisations'
 import { DonorAddressCard, getDonorFullName } from '@/features/donors'
 
@@ -154,7 +155,6 @@ import { annualTaxReceiptsFormSchema } from '../schemas'
 import type { AnnualTaxReceiptsFormData } from '../types'
 import type { EligibleTaxReceiptDonor, OrganisationRef } from '@shared/models'
 import type { QTableProps } from 'quasar'
-import AnnualTaxReceiptsDialog from './AnnualTaxReceiptsDialog.vue'
 
 const props = defineProps({
   eligibleDonors: {
