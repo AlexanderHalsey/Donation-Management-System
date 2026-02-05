@@ -56,6 +56,7 @@
       :taxReceiptList="taxReceiptList"
       :pagination="pagination"
       :loading="tableLoading"
+      :userRole="userRole"
       @update:pagination="fetchTaxReceipts"
       @cancel:taxReceipt="cancelTaxReceipt"
       @retry-failed:tax-receipt="retryFailedTaxReceipt"
@@ -81,6 +82,7 @@ import { getOrganisationRefById } from '@/features/organisations'
 
 import {
   useAnnualTaxReceiptsStore,
+  useAuthStore,
   useDonorListStore,
   useOrganisationListStore,
   useTaxReceiptListStore,
@@ -100,6 +102,9 @@ const breadcrumbs: Breadcrumb[] = [
 ]
 
 const $q = useQuasar()
+
+const authStore = useAuthStore()
+const userRole = computed(() => authStore.userRole)
 
 const organisationListStore = useOrganisationListStore()
 const taxReceiptListStore = useTaxReceiptListStore()
@@ -165,7 +170,9 @@ onMounted(async () => {
   await Promise.all([
     fetchTaxReceipts(paginationRequest.value),
     organisationListStore.fetchOrganisationRefs(),
-    annualTaxReceiptStore.fetchEligibleTaxReceiptYearOrganisations(),
+    userRole.value === 'admin'
+      ? annualTaxReceiptStore.fetchEligibleTaxReceiptYearOrganisations()
+      : Promise.resolve(),
   ])
   loading.value = false
 })

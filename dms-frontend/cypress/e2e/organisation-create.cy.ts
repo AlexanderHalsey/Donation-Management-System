@@ -1,6 +1,10 @@
 import { v4 } from 'uuid'
 
 describe('Organisation Create', () => {
+  beforeEach(() => {
+    cy.mockRefreshToken({})
+  })
+
   const createOrganisationBtn = '[data-cy="create-organisation"]'
   const formField = '[data-cy="form-field"]'
 
@@ -99,5 +103,12 @@ describe('Organisation Create', () => {
 
     cy.location('pathname').should('eq', '/organisations')
     cy.get('.q-notification').should('contain.text', "L'organisation a été créée avec succès.")
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/organisations/create')
+    cy.location('pathname').should('not.include', '/organisations/create')
+    cy.location('pathname').should('include', '/403')
   })
 })

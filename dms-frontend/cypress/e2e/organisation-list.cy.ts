@@ -1,5 +1,6 @@
 describe('Organisation List', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockOrganisationList()
   })
 
@@ -45,5 +46,12 @@ describe('Organisation List', () => {
       .within(() => {
         cy.get('td').eq(0).should('contain.text', 'Organisation 1')
       })
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/organisations')
+    cy.location('pathname').should('not.include', '/organisations')
+    cy.location('pathname').should('include', '/403')
   })
 })

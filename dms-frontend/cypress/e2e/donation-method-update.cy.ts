@@ -1,5 +1,6 @@
 describe('Donation Method Update', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationMethod(0)
   })
 
@@ -58,5 +59,12 @@ describe('Donation Method Update', () => {
 
     cy.location('pathname').should('eq', '/donation-methods')
     cy.get('.q-notification').should('contain.text', 'La forme de don a été supprimée avec succès.')
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-methods/donation-method-id-1')
+    cy.location('pathname').should('not.include', '/donation-methods/donation-method-id-1')
+    cy.location('pathname').should('include', '/403')
   })
 })

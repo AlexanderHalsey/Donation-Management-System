@@ -1,5 +1,6 @@
 describe('Payment Mode Update', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockPaymentMode(0)
   })
 
@@ -57,5 +58,12 @@ describe('Payment Mode Update', () => {
       'contain.text',
       'Le mode de paiement a été supprimé avec succès.',
     )
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/payment-modes/payment-mode-id-1')
+    cy.location('pathname').should('not.include', '/payment-modes/payment-mode-id-1')
+    cy.location('pathname').should('include', '/403')
   })
 })

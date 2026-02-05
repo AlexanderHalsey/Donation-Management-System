@@ -1,5 +1,6 @@
 describe('Donation Method Create', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationMethodList()
   })
 
@@ -37,5 +38,12 @@ describe('Donation Method Create', () => {
 
     cy.location('pathname').should('eq', '/donation-methods')
     cy.get('.q-notification').should('contain.text', 'La forme de don a été créée avec succès.')
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-methods/create')
+    cy.location('pathname').should('not.include', '/donation-methods/create')
+    cy.location('pathname').should('include', '/403')
   })
 })

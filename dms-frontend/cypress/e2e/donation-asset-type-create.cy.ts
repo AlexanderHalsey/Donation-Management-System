@@ -1,4 +1,7 @@
 describe('Donation Asset Type Create', () => {
+  beforeEach(() => {
+    cy.mockRefreshToken({})
+  })
   const createDonationAssetTypeBtn = '[data-cy="create-donation-asset-type"]'
   const formField = '[data-cy="form-field"]'
 
@@ -34,5 +37,12 @@ describe('Donation Asset Type Create', () => {
       'have.text',
       'La nature du don a été créée avec succès.',
     )
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-asset-types/create')
+    cy.location('pathname').should('not.include', '/donation-asset-types/create')
+    cy.location('pathname').should('include', '/403')
   })
 })

@@ -1,5 +1,6 @@
 describe('Donation List', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationList()
     cy.mockOrganisationRefList()
   })
@@ -194,6 +195,18 @@ describe('Donation List', () => {
     cy.mockDonationList()
     cy.get('.q-dialog .q-btn').eq(1).click() // confirm delete
     cy.get('.q-notification').should('contain.text', 'Le don a été supprimé avec succès.')
+  })
+  it('should not allow deleting a donation if the user is not an admin', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donations')
+    cy.wait(['@getDonationList', '@getOrganisationRefList'])
+
+    cy.get(donationListItem)
+      .eq(3)
+      .within(() => {
+        cy.get('td').eq(6).find('button').click() // Click action button
+      })
+    cy.get('#q-portal--menu--1 .q-item').eq(2).should('not.exist') // Delete action should not be visible
   })
   describe('Filters', () => {
     const getFilterMenu = () =>

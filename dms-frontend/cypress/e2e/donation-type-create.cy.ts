@@ -1,5 +1,6 @@
 describe('Donation Type Create', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationTypeList()
     cy.mockOrganisationRefList()
   })
@@ -78,5 +79,12 @@ describe('Donation Type Create', () => {
       .find('.q-checkbox')
       .should('be.visible')
       .should('not.have.class', 'q-checkbox--truthy')
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-types/create')
+    cy.location('pathname').should('not.include', '/donation-types/create')
+    cy.location('pathname').should('include', '/403')
   })
 })

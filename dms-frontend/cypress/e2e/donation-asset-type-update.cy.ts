@@ -1,5 +1,6 @@
 describe('Donation Asset Type Update', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationAssetType(0)
   })
 
@@ -61,5 +62,12 @@ describe('Donation Asset Type Update', () => {
       'contain.text',
       'La nature du don a été supprimée avec succès.',
     )
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-asset-types/donation-asset-type-id-1')
+    cy.location('pathname').should('not.include', '/donation-asset-types/donation-asset-type-id-1')
+    cy.location('pathname').should('include', '/403')
   })
 })

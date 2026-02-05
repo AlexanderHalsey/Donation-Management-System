@@ -5,7 +5,8 @@ import { DonationMethodService } from '@/domain'
 
 import { DonationMethodConverter } from '../converters'
 
-import { JwtAuthGuard } from '../guards'
+import { JwtAuthGuard, RolesGuard } from '../guards'
+import { Roles } from '../decorators'
 
 import {
   DonationMethodRequest,
@@ -48,6 +49,8 @@ export class DonationMethodController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new donation method' })
   @ApiResponse({ status: 201, type: GetDonationMethodResponse })
@@ -62,6 +65,8 @@ export class DonationMethodController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update an existing donation method' })
   @ApiResponse({ status: 200, type: GetDonationMethodResponse })
@@ -77,6 +82,8 @@ export class DonationMethodController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id/disable')
   @ApiOperation({ summary: 'Disable a donation method' })
   @ApiResponse({ status: 200, type: GetDonationMethodResponse })

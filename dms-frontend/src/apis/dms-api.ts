@@ -86,7 +86,13 @@ import type {
 } from '@shared/models'
 
 export const login = async (formData: LoginFormData): Promise<LoginResponse> => {
-  return await withClient((client) => client.post<LoginResponse>('/auth/login', formData))
+  return await withClient((client) =>
+    client.post<LoginResponse>('/auth/login', formData, { withCredentials: true }),
+  )
+}
+
+export const logout = async (): Promise<void> => {
+  await withClient((client) => client.post('/auth/logout', undefined, { withCredentials: true }))
 }
 
 export const getDonations = async (

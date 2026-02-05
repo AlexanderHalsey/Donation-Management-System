@@ -13,7 +13,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { DonationService } from '@/domain'
 
-import { JwtAuthGuard } from '../guards'
+import { JwtAuthGuard, RolesGuard } from '../guards'
+import { Roles } from '../decorators'
 
 import { DonationConverter } from '../converters'
 
@@ -97,6 +98,8 @@ export class DonationController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Delete(':donationId')
   @ApiOperation({ summary: 'Delete a donation by ID' })
   @ApiResponse({ status: 200, description: 'Donation deleted successfully' })

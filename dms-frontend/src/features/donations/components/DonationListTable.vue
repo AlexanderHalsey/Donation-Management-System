@@ -34,6 +34,7 @@
         <DonationListItemActions
           v-if="!row.taxReceiptId"
           :donation="row"
+          :user-role="userRole"
           @delete:donation="$emit('delete:donation', $event)"
           @create:tax-receipt="$emit('create:tax-receipt', $event)"
         />
@@ -62,6 +63,7 @@ import type {
   DonationListPaginationRequest,
   DonationListSortOrder,
   OrganisationRef,
+  UserRole,
 } from '@shared/models'
 
 const props = defineProps({
@@ -76,6 +78,10 @@ const props = defineProps({
   organisations: {
     type: Array as PropType<OrganisationRef[]>,
     required: true,
+  },
+  userRole: {
+    type: String as PropType<UserRole | null>,
+    default: undefined,
   },
   loading: {
     type: Boolean,

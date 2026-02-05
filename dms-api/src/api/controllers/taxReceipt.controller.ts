@@ -16,7 +16,8 @@ import { groupBy } from 'es-toolkit'
 import { DonationService, TaxReceiptService } from '@/domain'
 import { BullMQService } from '@/infrastructure'
 
-import { JwtAuthGuard } from '../guards'
+import { JwtAuthGuard, RolesGuard } from '../guards'
+import { Roles } from '../decorators'
 
 import { DonationConverter, DonorConverter, TaxReceiptConverter } from '../converters'
 
@@ -70,6 +71,8 @@ export class TaxReceiptController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Get('eligible-year-organisations')
   @ApiOperation({ summary: 'Get eligible years for annual tax receipts' })
   @ApiResponse({
@@ -90,6 +93,8 @@ export class TaxReceiptController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Get('eligible-donors/:year/:organisationId')
   @ApiOperation({ summary: 'Get eligible tax receipt donors for a given year and organisation' })
   @ApiResponse({ status: 200, description: 'Eligible tax receipt donors retrieved successfully' })
@@ -133,6 +138,8 @@ export class TaxReceiptController {
     })
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Post('annual/bulk/:year/:organisationId')
   @ApiOperation({ summary: 'Generate annual bulk tax receipts for a given year and organisation' })
   @ApiResponse({ status: 200, description: 'Annual bulk tax receipts generation started' })
@@ -146,6 +153,8 @@ export class TaxReceiptController {
     return await this.taxReceiptService.createAnnualTaxReceipts({ organisationId, donorIds, year })
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id/cancel')
   @ApiOperation({ summary: 'Cancel a tax receipt' })
   @ApiResponse({ status: 200, description: 'Tax receipt canceled successfully' })

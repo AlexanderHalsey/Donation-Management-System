@@ -30,7 +30,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<LoginUserResponse> {
     const { accessToken, refreshToken } = await this.authService.issueTokens(user)
-    this.setRefreshTokenCookie(res, refreshToken)
+    this.setRefreshTokenCookie({ res, refreshToken })
     return { accessToken }
   }
 
@@ -45,17 +45,35 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<LoginUserResponse> {
     const { accessToken, refreshToken } = await this.authService.issueTokens(user)
-    this.setRefreshTokenCookie(res, refreshToken)
+    this.setRefreshTokenCookie({ res, refreshToken })
     return { accessToken }
   }
 
-  private setRefreshTokenCookie(res: Response, refreshToken: string) {
+  @UseGuards(JwtRefreshAuthGuard)
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout a user' })
+  @ApiResponse({ status: 200, description: 'User logged out successfully' })
+  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
+  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
+  async logout(@Res({ passthrough: true }) res: Response): Promise<void> {
+    this.setRefreshTokenCookie({ res, refreshToken: '', expired: true })
+  }
+
+  private setRefreshTokenCookie({
+    res,
+    refreshToken,
+    expired = false,
+  }: {
+    res: Response
+    refreshToken: string
+    expired?: boolean
+  }) {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'strict',
-      path: '/auth/refresh',
-      maxAge: this.configService.get<number>('JWT_REFRESH_TOKEN_LIFETIME_MS'),
+      path: '/auth',
+      maxAge: !expired ? this.configService.get<number>('JWT_REFRESH_TOKEN_LIFETIME_MS') : 0,
     })
   }
 }

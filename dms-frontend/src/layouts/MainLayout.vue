@@ -20,7 +20,10 @@
 
         <HelpBtn />
         <!-- language -->
-        <!-- user disconnect -->
+        <div>
+          <Btn dense flat round icon="logout" color="primary" class="q-ml-lg" @click="logout" />
+          <QTooltip :delay="100"> Déconnexion </QTooltip>
+        </div>
       </QToolbar>
     </QHeader>
 
@@ -43,7 +46,10 @@
         <div v-for="group of menuItems" :key="group.group">
           <QList padding class="menu-list q-pt-md q-mx-md">
             <div v-if="group.label" class="q-mt-md">
-              <div class="text-grey-7 q-ml-md">
+              <div
+                class="text-grey-7"
+                :class="{ 'q-ml-md': !leftDrawerMini, 'q-ml-sm': leftDrawerMini }"
+              >
                 {{ group.label }}
               </div>
             </div>
@@ -79,21 +85,30 @@
 import { computed, provide, ref } from 'vue'
 
 import { useQuasar } from 'quasar'
+import { useAuthStore } from '@/stores'
 
 import HelpBtn from './components/HelpBtn.vue'
 import DMSTitle from './components/DMSTitle.vue'
 
 import { setBreadcrumbsInjectionKey } from '@/symbols'
 import type { Breadcrumb, MenuItem } from '@/types'
+import Btn from '@/components/ui/Btn.vue'
+import { useRouter } from 'vue-router'
 
 const $q = useQuasar()
+const authStore = useAuthStore()
+const router = useRouter()
 
-const menuItems: {
-  group: string
-  label?: string
-  items: MenuItem[]
-}[] = [
+const userRole = computed(() => authStore.userRole)
+
+const menuItems = computed<
   {
+    group: string
+    label?: string
+    items: MenuItem[]
+  }[]
+>(() => {
+  const mainGroup = {
     group: 'main',
     items: [
       { label: 'Tableau de bord', icon: 'speed', to: '/dashboard' },
@@ -101,8 +116,8 @@ const menuItems: {
       { label: 'Donateurs', icon: 'group', to: '/donors' },
       { label: 'Reçus fiscaux', icon: 'receipt_long', to: '/tax-receipts' },
     ],
-  },
-  {
+  }
+  const adminGroup = {
     group: 'admin',
     label: 'Admin',
     items: [
@@ -112,8 +127,13 @@ const menuItems: {
       { label: 'Formes de don', icon: 'shape_line', to: '/donation-methods' },
       { label: 'Natures de don', icon: 'category', to: '/donation-asset-types' },
     ],
-  },
-]
+  }
+  if (userRole.value === 'admin') {
+    return [mainGroup, adminGroup]
+  } else {
+    return [mainGroup]
+  }
+})
 
 const breadcrumbs = ref<Breadcrumb[]>([])
 provide(setBreadcrumbsInjectionKey, (newBreadcrumbs: Breadcrumb[]) => {
@@ -136,6 +156,11 @@ const leftDrawerComputed = computed(() => ($q.screen.gt.sm ? null : leftDrawer.v
 const menuScrollVisible = ref(false)
 const setMenuScrollVisible = ({ verticalPosition }: { verticalPosition: number }) => {
   menuScrollVisible.value = verticalPosition > 0
+}
+
+const logout = async () => {
+  await authStore.logout()
+  await router.push({ name: 'login' })
 }
 </script>
 

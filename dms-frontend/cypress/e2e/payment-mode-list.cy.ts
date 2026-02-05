@@ -1,5 +1,6 @@
 describe('Payment Mode List', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockPaymentModeList()
   })
 
@@ -46,5 +47,12 @@ describe('Payment Mode List', () => {
       .within(() => {
         cy.get('td').eq(0).should('contain.text', 'Payment Mode 1')
       })
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/payment-modes')
+    cy.location('pathname').should('not.include', '/payment-modes')
+    cy.location('pathname').should('include', '/403')
   })
 })

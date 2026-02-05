@@ -3,7 +3,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { DonationTypeService } from '@/domain'
 
-import { JwtAuthGuard } from '../guards'
+import { JwtAuthGuard, RolesGuard } from '../guards'
+import { Roles } from '../decorators'
 
 import { DonationTypeConverter } from '../converters'
 
@@ -44,6 +45,8 @@ export class DonationTypeController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new donation type' })
   @ApiResponse({ status: 201, type: GetDonationTypeResponse })
@@ -56,6 +59,8 @@ export class DonationTypeController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update an existing donation type' })
   @ApiResponse({ status: 200, type: GetDonationTypeResponse })
@@ -71,6 +76,8 @@ export class DonationTypeController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id/disable')
   @ApiOperation({ summary: 'Disable a donation type' })
   @ApiResponse({ status: 200, type: GetDonationTypeResponse })

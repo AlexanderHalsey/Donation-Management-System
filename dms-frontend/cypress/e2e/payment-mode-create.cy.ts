@@ -1,5 +1,6 @@
 describe('Payment Mode Create', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockPaymentModeList()
   })
 
@@ -32,5 +33,12 @@ describe('Payment Mode Create', () => {
 
     cy.location('pathname').should('eq', '/payment-modes')
     cy.get('.q-notification').should('contain.text', 'Le mode de paiement a été créé avec succès.')
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/payment-modes/create')
+    cy.location('pathname').should('not.include', '/payment-modes/create')
+    cy.location('pathname').should('include', '/403')
   })
 })

@@ -33,10 +33,12 @@ export class AuthService {
       accessToken: this.jwtService.sign({
         username: user.username,
         sub: user.id,
+        role: user.role,
       } satisfies JwtPayload),
       refreshToken: this.jwtRefreshService.sign({
         username: user.username,
         sub: user.id,
+        role: user.role,
       } satisfies JwtPayload),
     }
   }

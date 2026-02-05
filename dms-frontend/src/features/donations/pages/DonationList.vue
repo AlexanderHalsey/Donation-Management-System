@@ -19,6 +19,7 @@
       :donationList="donationList"
       :pagination="pagination"
       :organisations="organisations"
+      :user-role="userRole"
       :loading="tableLoading"
       @update:pagination="fetchDonations"
       @delete:donation="deleteDonation"
@@ -44,6 +45,7 @@ import DonationListTable from '../components/DonationListTable.vue'
 import DonationListFilter from '../components/DonationListFilter.vue'
 
 import {
+  useAuthStore,
   useDonationListStore,
   useDonationStore,
   useDonationTypeListStore,
@@ -68,6 +70,9 @@ const breadcrumbs: Breadcrumb[] = [
 
 const $q = useQuasar()
 const router = useRouter()
+
+const authStore = useAuthStore()
+const userRole = computed(() => authStore.userRole)
 
 const donationListStore = useDonationListStore()
 const donationStore = useDonationStore()

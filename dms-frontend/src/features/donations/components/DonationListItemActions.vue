@@ -26,6 +26,7 @@
         <QItemSection> Générer un reçu </QItemSection>
       </QItem>
       <QItem
+        v-if="userRole === 'admin'"
         clickable
         v-close-popup
         class="text-red-8"
@@ -51,12 +52,16 @@ import { computed, ref, type PropType } from 'vue'
 import Btn from '@/components/ui/Btn.vue'
 import DeleteDonationDialog from './DeleteDonationDialog.vue'
 
-import type { DonationListItem } from '@shared/models'
+import type { DonationListItem, UserRole } from '@shared/models'
 
 const props = defineProps({
   donation: {
     type: Object as PropType<DonationListItem>,
     required: true,
+  },
+  userRole: {
+    type: String as PropType<UserRole | null>,
+    default: undefined,
   },
 })
 defineEmits<{

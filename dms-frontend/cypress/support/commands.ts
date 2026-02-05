@@ -70,6 +70,7 @@ declare global {
       mockOrganisationRefList(): Chainable<Subject>
       mockPaymentMode(index: number): Chainable<Subject>
       mockPaymentModeList(): Chainable<Subject>
+      mockRefreshToken(req: { role?: 'admin' | 'standard'; failure?: boolean }): Chainable<Subject>
       mockRetryFailedTaxReceipt(): Chainable<Subject>
       mockTaxReceiptList(
         pagination?: TaxReceiptListPaginationRequest,
@@ -106,11 +107,29 @@ Cypress.Commands.add('mockLogin', (failure = false) => {
     statusCode: failure ? 401 : 200,
     body: !failure
       ? {
-          accessToken: 'mock-access-token',
+          accessToken:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1vY2tVc2VyIiwic3ViIjoiMmQzOWQzMTItZGYyOC00NjMxLWFjZTMtMzI4NTJjMTdhZTZkIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzcwMjg1NDU2LCJleHAiOjE3NzA4OTAyNTZ9.3dFTkJHFg5UX7Hz38XW8UMfSNnzO65KANYfPtdve_sc',
         }
       : null,
   }).as('login')
 })
+
+Cypress.Commands.add(
+  'mockRefreshToken',
+  ({ role = 'admin', failure = false }: { role?: string; failure?: boolean } = {}) => {
+    cy.intercept('POST', `${MOCK_API_HOST}/auth/refresh`, {
+      statusCode: failure ? 401 : 200,
+      body: !failure
+        ? {
+            accessToken:
+              role === 'admin'
+                ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1vY2tVc2VyIiwic3ViIjoiMmQzOWQzMTItZGYyOC00NjMxLWFjZTMtMzI4NTJjMTdhZTZkIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzcwMjg1NDU2LCJleHAiOjE3NzA4OTAyNTZ9.3dFTkJHFg5UX7Hz38XW8UMfSNnzO65KANYfPtdve_sc'
+                : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1vY2tVc2VyIiwic3ViIjoiMmQzOWQzMTItZGYyOC00NjMxLWFjZTMtMzI4NTJjMTdhZTZkIiwicm9sZSI6InN0YW5kYXJkIiwiaWF0IjoxNzcwMjg1NDU2LCJleHAiOjE3NzA4OTAyNTZ9.ciGqxlikHeELhtr28avYYQETuKcV_IBIkMqGaxejHQM',
+          }
+        : null,
+    }).as('refreshToken')
+  },
+)
 
 const organisations = buildMockOrganisations()
 const paymentModes = buildMockPaymentModes()

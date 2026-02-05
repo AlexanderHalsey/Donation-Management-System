@@ -3,7 +3,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { PaymentModeService } from '@/domain'
 
-import { JwtAuthGuard } from '../guards'
+import { JwtAuthGuard, RolesGuard } from '../guards'
+import { Roles } from '../decorators'
 
 import { PaymentModeConverter } from '../converters'
 
@@ -32,6 +33,8 @@ export class PaymentModeController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get payment mode by ID' })
   @ApiResponse({ status: 200, type: GetPaymentModeResponse })
@@ -44,6 +47,8 @@ export class PaymentModeController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new payment mode' })
   @ApiResponse({ status: 201, type: GetPaymentModeResponse })
@@ -56,6 +61,8 @@ export class PaymentModeController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update an existing payment mode' })
   @ApiResponse({ status: 200, type: GetPaymentModeResponse })
@@ -71,6 +78,8 @@ export class PaymentModeController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id/disable')
   @ApiOperation({ summary: 'Disable a payment mode' })
   @ApiResponse({ status: 200, type: GetPaymentModeResponse })

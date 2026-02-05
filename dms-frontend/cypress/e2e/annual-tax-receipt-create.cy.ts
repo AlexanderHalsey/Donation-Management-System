@@ -1,5 +1,6 @@
 describe('Annual Tax Receipt Create', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockTaxReceiptList()
     cy.mockEligibleYearOrganisationPairs()
     cy.mockEligibleDonors()
@@ -88,5 +89,12 @@ describe('Annual Tax Receipt Create', () => {
       'contain.text',
       'Les reçus fiscaux annuels sont en cours de création. Des emails seront envoyés une fois le processus terminé.',
     )
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/tax-receipts/annual-create/2024/1')
+    cy.location('pathname').should('not.include', '/tax-receipts/annual-create')
+    cy.location('pathname').should('include', '/403')
   })
 })

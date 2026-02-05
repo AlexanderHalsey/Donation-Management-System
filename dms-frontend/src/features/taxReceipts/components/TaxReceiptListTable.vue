@@ -33,6 +33,7 @@
         <TaxReceiptListItemActions
           v-if="!row.taxReceiptId"
           :taxReceipt="row"
+          :user-role="userRole"
           @cancel:taxReceipt="$emit('cancel:taxReceipt', $event)"
           @retry-failed:tax-receipt="$emit('retry-failed:tax-receipt', $event)"
         />
@@ -62,6 +63,7 @@ import type {
   TaxReceiptListPagination,
   TaxReceiptListPaginationRequest,
   TaxReceiptListSortOrder,
+  UserRole,
 } from '@shared/models'
 import type { CancelTaxReceiptFormData } from '../types'
 
@@ -73,6 +75,10 @@ const props = defineProps({
   pagination: {
     type: Object as PropType<TaxReceiptListPagination>,
     required: true,
+  },
+  userRole: {
+    type: String as PropType<UserRole | null>,
+    default: undefined,
   },
   loading: {
     type: Boolean,

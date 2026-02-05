@@ -1,8 +1,18 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+
+import { logout as apiLogout } from '@/apis/dms-api'
+
+import * as jwtDecode from 'jwt-decode'
+
+import type { UserRole } from '@shared/models'
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(null)
+
+  const userRole = computed<UserRole | null>(
+    () => jwtDecode.jwtDecode<{ role: UserRole }>(accessToken.value ?? '').role ?? null,
+  )
 
   function setToken(newToken: string) {
     accessToken.value = newToken
@@ -12,9 +22,16 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = null
   }
 
+  const logout = async () => {
+    await apiLogout()
+    clearToken()
+  }
+
   return {
-    token: accessToken,
-    setToken,
     clearToken,
+    logout,
+    setToken,
+    token: accessToken,
+    userRole,
   }
 })

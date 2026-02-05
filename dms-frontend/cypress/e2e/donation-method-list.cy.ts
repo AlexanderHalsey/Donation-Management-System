@@ -1,5 +1,6 @@
 describe('Donation Method List', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationMethodList()
   })
 
@@ -65,5 +66,12 @@ describe('Donation Method List', () => {
       .within(() => {
         cy.get('td').eq(0).should('contain.text', 'Donation Method 5')
       })
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-methods')
+    cy.location('pathname').should('not.include', '/donation-methods')
+    cy.location('pathname').should('include', '/403')
   })
 })

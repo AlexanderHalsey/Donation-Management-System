@@ -1,5 +1,6 @@
 describe('Donation Asset Type List', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationAssetTypeList()
   })
 
@@ -65,5 +66,12 @@ describe('Donation Asset Type List', () => {
       .within(() => {
         cy.get('td').eq(0).should('contain.text', 'Donation Asset Type 4')
       })
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-asset-types')
+    cy.location('pathname').should('not.include', '/donation-asset-types')
+    cy.location('pathname').should('include', '/403')
   })
 })

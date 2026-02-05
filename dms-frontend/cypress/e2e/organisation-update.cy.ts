@@ -2,6 +2,7 @@ import { v4 } from 'uuid'
 
 describe('Organisation Update', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockOrganisation(0)
   })
 
@@ -122,5 +123,12 @@ describe('Organisation Update', () => {
 
     cy.location('pathname').should('eq', '/organisations')
     cy.get('.q-notification').should('contain.text', "L'organisation a été supprimée avec succès.")
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/organisations/organisation-id-1')
+    cy.location('pathname').should('not.include', '/organisations/organisation-id-1')
+    cy.location('pathname').should('include', '/403')
   })
 })

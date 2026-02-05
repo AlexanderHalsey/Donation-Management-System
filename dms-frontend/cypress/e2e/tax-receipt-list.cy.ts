@@ -1,5 +1,6 @@
 describe('Tax Receipt List', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockTaxReceiptList()
     cy.mockEligibleYearOrganisationPairs()
     cy.mockOrganisationRefList()
@@ -223,6 +224,25 @@ describe('Tax Receipt List', () => {
     })
     cy.wait(['@cancelTaxReceipt', '@getTaxReceiptList'])
     cy.get('.q-notification').should('contain.text', "Le reçu fiscal est en cours d'annulation.")
+  })
+  it('should not allow cancelling a tax receipt if the user is not an admin', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/tax-receipts')
+    cy.wait('@getTaxReceiptList')
+    cy.get(taxReceiptListItem)
+      .eq(1)
+      .within(() => {
+        cy.get('td').eq(6).find('button').should('not.be.visible')
+      })
+    cy.get(taxReceiptListItem)
+      .eq(2)
+      .within(() => {
+        cy.get('td').eq(6).find('button').click()
+      })
+    cy.get('#q-portal--menu--1 .q-list').within(() => {
+      // no cancel option
+      cy.get('.q-item').should('have.length', 1).eq(0).should('contain.text', 'Réessayer')
+    })
   })
   describe('Filters', () => {
     const getFilterMenu = () => cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children()

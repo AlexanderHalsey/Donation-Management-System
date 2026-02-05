@@ -1,5 +1,6 @@
 describe('Donation Type List', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationTypeList()
     cy.mockOrganisationRefList()
   })
@@ -50,5 +51,12 @@ describe('Donation Type List', () => {
       .within(() => {
         cy.get('td').eq(0).should('contain.text', 'Donation Type 1')
       })
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-types')
+    cy.location('pathname').should('not.include', '/donation-types')
+    cy.location('pathname').should('include', '/403')
   })
 })

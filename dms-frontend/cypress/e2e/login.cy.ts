@@ -1,4 +1,7 @@
 describe('Login', () => {
+  beforeEach(() => {
+    cy.mockRefreshToken({ failure: true })
+  })
   const errorMessage = '.q-field--error .q-field__bottom .q-field__messages'
   it('should require authentication', () => {
     cy.visit('/login')
@@ -28,5 +31,17 @@ describe('Login', () => {
     cy.mockLogin()
     cy.get('button[type="submit"]').should('be.visible').click()
     cy.location('pathname').should('include', '/dashboard')
+  })
+  it('should redirect to dashboard if already authenticated', () => {
+    cy.mockRefreshToken({})
+    cy.visit('/login')
+    cy.location('pathname').should('not.include', '/login')
+    cy.location('pathname').should('include', '/dashboard')
+  })
+  it('should redirect to login if not authenticated', () => {
+    cy.mockRefreshToken({ failure: true })
+    cy.visit('/dashboard')
+    cy.location('pathname').should('not.include', '/dashboard')
+    cy.location('pathname').should('include', '/login')
   })
 })

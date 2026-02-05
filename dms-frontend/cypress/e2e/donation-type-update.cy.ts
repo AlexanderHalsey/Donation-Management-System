@@ -1,5 +1,6 @@
 describe('Donation Type Update', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonationType(0)
     cy.mockOrganisationRefList()
   })
@@ -91,5 +92,12 @@ describe('Donation Type Update', () => {
       .find('.q-checkbox')
       .should('be.visible')
       .should('not.have.class', 'q-checkbox--truthy')
+  })
+
+  it('should not allow a standard user to access the page', () => {
+    cy.mockRefreshToken({ role: 'standard' })
+    cy.visit('/donation-types/donation-type-id-1')
+    cy.location('pathname').should('not.include', '/donation-types/donation-type-id-1')
+    cy.location('pathname').should('include', '/403')
   })
 })

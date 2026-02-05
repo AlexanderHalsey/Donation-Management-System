@@ -1,5 +1,6 @@
 describe('Donation Create', () => {
   beforeEach(() => {
+    cy.mockRefreshToken({})
     cy.mockDonorRefList()
     cy.mockOrganisationRefList()
     cy.mockDonationTypeList()

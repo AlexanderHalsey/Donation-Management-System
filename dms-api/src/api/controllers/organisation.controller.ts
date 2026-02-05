@@ -3,7 +3,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 import { OrganisationService } from '@/domain'
 
-import { JwtAuthGuard } from '../guards'
+import { JwtAuthGuard, RolesGuard } from '../guards'
+import { Roles } from '../decorators'
 
 import { OrganisationConverter } from '../converters'
 
@@ -23,6 +24,8 @@ export class OrganisationController {
     private readonly organisationConverter: OrganisationConverter,
   ) {}
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Get()
   @ApiOperation({ summary: 'Get organisations' })
   @ApiResponse({ status: 200, type: [GetOrganisationListResponse] })
@@ -48,6 +51,8 @@ export class OrganisationController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get organisation by ID' })
   @ApiResponse({ status: 200, type: GetOrganisationResponse })
@@ -60,6 +65,8 @@ export class OrganisationController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new organisation' })
   @ApiResponse({ status: 201, type: GetOrganisationResponse })
@@ -72,6 +79,8 @@ export class OrganisationController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update an existing organisation' })
   @ApiResponse({ status: 200, type: GetOrganisationResponse })
@@ -87,6 +96,8 @@ export class OrganisationController {
     }
   }
 
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @Put(':id/disable')
   @ApiOperation({ summary: 'Disable an organisation' })
   @ApiResponse({ status: 200, type: GetOrganisationResponse })
