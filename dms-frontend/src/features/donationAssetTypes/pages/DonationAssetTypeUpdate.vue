@@ -54,7 +54,7 @@ const breadcrumbs: Breadcrumb[] = [
     id: 'donation-asset-type-list',
     label: 'Liste des natures de don',
     to: '/donation-asset-types',
-    icon: 'category',
+    icon: 'payments',
   },
   { id: 'donation-asset-type-update', label: 'Modifier la nature du don', icon: 'edit' },
 ]

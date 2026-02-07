@@ -64,7 +64,7 @@ import type { Breadcrumb } from '@/types'
 
 const tab = ref('donations')
 
-const breadcrumbs: Breadcrumb[] = [{ id: 'dashboard', label: 'Tableau de bord', icon: 'speed' }]
+const breadcrumbs: Breadcrumb[] = [{ id: 'dashboard', label: 'Tableau de bord', icon: 'bar_chart' }]
 
 const dashboardStore = useDashboardStore()
 

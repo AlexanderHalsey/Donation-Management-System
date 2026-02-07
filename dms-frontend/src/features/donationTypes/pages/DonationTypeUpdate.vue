@@ -55,7 +55,7 @@ const breadcrumbs: Breadcrumb[] = [
     id: 'donation-type-list',
     label: 'Liste des types de don',
     to: '/donation-types',
-    icon: 'volunteer_activism',
+    icon: 'favorite',
   },
   { id: 'donation-type-update', label: 'Modifier le type de don', icon: 'edit' },
 ]

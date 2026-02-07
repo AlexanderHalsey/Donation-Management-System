@@ -29,7 +29,7 @@ const breadcrumbs: Breadcrumb[] = [
   {
     id: 'donation-asset-type-list',
     label: 'Liste des natures de don',
-    icon: 'category',
+    icon: 'payments',
   },
 ]
 

@@ -27,7 +27,7 @@ const breadcrumbs: Breadcrumb[] = [
   {
     id: 'donation-method-list',
     label: 'Liste des formes de don',
-    icon: 'shape_line',
+    icon: 'article',
   },
 ]
 

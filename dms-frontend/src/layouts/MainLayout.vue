@@ -111,7 +111,7 @@ const menuItems = computed<
   const mainGroup = {
     group: 'main',
     items: [
-      { label: 'Tableau de bord', icon: 'speed', to: '/dashboard' },
+      { label: 'Tableau de bord', icon: 'bar_chart', to: '/dashboard' },
       { label: 'Dons', icon: 'volunteer_activism', to: '/donations' },
       { label: 'Donateurs', icon: 'group', to: '/donors' },
       { label: 'Reçus fiscaux', icon: 'receipt_long', to: '/tax-receipts' },
@@ -122,10 +122,10 @@ const menuItems = computed<
     label: 'Admin',
     items: [
       { label: 'Organisations', icon: 'account_balance', to: '/organisations' },
-      { label: 'Types de don', icon: 'volunteer_activism', to: '/donation-types' },
+      { label: 'Types de don', icon: 'favorite', to: '/donation-types' },
       { label: 'Modes de paiement', icon: 'point_of_sale', to: '/payment-modes' },
-      { label: 'Formes de don', icon: 'shape_line', to: '/donation-methods' },
-      { label: 'Natures de don', icon: 'category', to: '/donation-asset-types' },
+      { label: 'Formes de don', icon: 'article', to: '/donation-methods' },
+      { label: 'Natures de don', icon: 'payments', to: '/donation-asset-types' },
     ],
   }
   if (userRole.value === 'admin') {
