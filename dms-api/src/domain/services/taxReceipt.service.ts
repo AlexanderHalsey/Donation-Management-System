@@ -13,6 +13,7 @@ import type {
   TaxReceiptListItem,
   TaxReceiptListFilter,
   TaxReceiptListPaginationRequest,
+  TaxReceiptStatus,
   TaxReceiptType,
 } from '@shared/models'
 import { CancelTaxReceiptRequest } from '@/api/dtos'
@@ -70,6 +71,21 @@ export class TaxReceiptService {
       ...taxReceipt,
       donationIds: taxReceipt.donations.map((donation) => donation.id),
     })
+  }
+
+  async getTaxReceiptStatusCounts(): Promise<Record<TaxReceiptStatus, number>> {
+    const result = await this.prisma.taxReceipt.groupBy({
+      by: ['status'],
+      _count: { id: true },
+    })
+
+    return result.reduce(
+      (acc, item) => {
+        acc[item.status] = item._count.id
+        return acc
+      },
+      {} as Record<TaxReceiptStatus, number>,
+    )
   }
 
   taxReceiptReleaseDate(): Date {

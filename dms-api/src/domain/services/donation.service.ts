@@ -263,6 +263,34 @@ export class DonationService {
     }))
   }
 
+  async getDonationStats(minDate?: Date): Promise<{ count: number; amount: number }> {
+    const result = await this.prisma.donation.aggregate({
+      where: minDate ? { donatedAt: { gte: minDate } } : undefined,
+      _sum: { amount: true },
+      _count: { id: true },
+    })
+    return {
+      count: result._count.id,
+      amount: result._sum.amount || 0,
+    }
+  }
+
+  async getDonationDistribution(
+    groupBy: 'paymentModeId' | 'organisationId' | 'donationTypeId',
+  ): Promise<{ id: string; count: number; amount: number }[]> {
+    const result = await this.prisma.donation.groupBy({
+      by: [groupBy],
+      _sum: { amount: true },
+      _count: { id: true },
+    })
+
+    return result.map((item) => ({
+      id: item[groupBy],
+      count: item._count.id,
+      amount: item._sum.amount || 0,
+    }))
+  }
+
   private async _validateDonationType(formData: DonationRequest) {
     await this.prisma.donationType.findUniqueOrThrow({
       where: { id: formData.donationTypeId, organisationId: formData.organisationId },

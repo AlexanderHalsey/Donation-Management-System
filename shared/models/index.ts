@@ -1,3 +1,4 @@
+export * from './DashboardSummaries'
 export * from './Donation'
 export * from './DonationAssetType'
 export * from './DonationMethod'

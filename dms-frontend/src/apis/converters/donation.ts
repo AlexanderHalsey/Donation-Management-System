@@ -7,8 +7,20 @@ import { convertDtoToDonationType } from './donationType'
 import { convertDtoToPaymentMode } from './paymentMode'
 
 import type { DonationFormData } from '@/features/donations'
-import type { DonationDto, DonationListItemDto, DonationRequest } from '@shared/dtos'
-import type { Donation, DonationListItem } from '@shared/models'
+import type {
+  DonationDto,
+  DonationListItemDto,
+  DonationRefDto,
+  DonationRequest,
+} from '@shared/dtos'
+import type { Donation, DonationListItem, DonationRef } from '@shared/models'
+
+export const convertDtoToDonationRef = (dto: DonationRefDto): DonationRef => {
+  return {
+    ...dto,
+    donatedAt: parseISO(dto.donatedAt),
+  }
+}
 
 export const convertDtoToDonationListItem = (dto: DonationListItemDto): DonationListItem => {
   return {

@@ -19,6 +19,7 @@ import {
   PaymentModeController,
   TaxReceiptController,
   UserController,
+  SummaryController,
 } from '@/api/controllers'
 
 import {
@@ -110,6 +111,7 @@ import {
     PaymentModeController,
     TaxReceiptController,
     UserController,
+    SummaryController,
   ],
   providers: [
     AuthService,

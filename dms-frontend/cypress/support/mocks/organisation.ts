@@ -2,7 +2,7 @@ import { v4 } from 'uuid'
 
 import { buildMockFile } from './file'
 
-import type { Organisation } from '@shared/models'
+import type { OrganisationDto } from '@shared/dtos'
 
 export type OrganisationFormDataMock = {
   name: string
@@ -19,11 +19,11 @@ export type OrganisationFormDataMock = {
   signatureId?: string
 }
 
-export function buildMockOrganisations(): Organisation[] {
+export function buildMockOrganisations(): OrganisationDto[] {
   return Array.from({ length: 2 }).map((_, index) => ({
     id: v4(),
-    createdAt: new Date(2024, 0, index + 1),
-    updatedAt: new Date(2024, 1, index + 1),
+    createdAt: new Date(2024, 0, index + 1).toISOString(),
+    updatedAt: new Date(2024, 1, index + 1).toISOString(),
     name: `Organisation ${index + 1}`,
     isTaxReceiptEnabled: index % 2 === 0,
     title: `Title ${index + 1}`,

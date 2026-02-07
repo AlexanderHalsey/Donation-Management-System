@@ -4,6 +4,7 @@
     :columns="headers"
     v-model:pagination="pagination"
     row-key="id"
+    no-data-label="Aucun element à afficher"
     data-cy="payment-mode-list-table"
   >
     <template #body-cell-actions="{ row }">

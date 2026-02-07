@@ -11,15 +11,18 @@ import { DonorRefDto, DonorRefSortOrder } from './donor.dto'
 
 import { SortOrderEnum, SortOrder } from './sortOrder.dto'
 
-export class DonationListItemDto {
+export class DonationRefDto {
   id: string
-  updatedAt: string
   donatedAt: string
   amount: number
+  donor: DonorRefDto
+}
+
+export class DonationListItemDto extends DonationRefDto {
+  updatedAt: string
   paymentMode: PaymentModeDto
   organisation: OrganisationRefDto
   donationType: DonationTypeDto
-  donor: DonorRefDto
   isTaxReceiptEnabled: boolean
   taxReceiptId?: string
 }

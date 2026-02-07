@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 
-import type { FileMetadata } from '@shared/models'
+import type { FileMetadataDto } from '@shared/dtos'
 
 export type FileUploadResponseMock = {
   id: string
@@ -12,10 +12,10 @@ export function buildMockImage(): FileUploadResponseMock {
   }
 }
 
-export function buildMockFile({ name }: { name?: string } = {}): FileMetadata {
+export function buildMockFile({ name }: { name?: string } = {}): FileMetadataDto {
   return {
     id: v4(),
-    uploadedAt: new Date(),
+    uploadedAt: new Date().toISOString(),
     expiresAt: undefined,
     storageKey: 'mock/storage/key',
     name: name ?? 'mock-image.png',

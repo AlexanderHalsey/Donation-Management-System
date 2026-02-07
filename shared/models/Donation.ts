@@ -8,15 +8,18 @@ import type { Pagination, PaginationRequest } from './Pagination'
 import type { PaymentMode } from './PaymentMode'
 import type { DonationListSortOrder } from './SortOrder'
 
-export interface DonationListItem {
+export interface DonationRef {
   id: string
-  updatedAt: Date
   donatedAt: Date
   amount: number
+  donor: DonorRef
+}
+
+export interface DonationListItem extends DonationRef {
+  updatedAt: Date
   paymentMode: PaymentMode
   organisation: OrganisationRef
   donationType: DonationType
-  donor: DonorRef
   isTaxReceiptEnabled: boolean
   taxReceiptId?: string
 }

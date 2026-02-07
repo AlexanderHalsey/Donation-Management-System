@@ -13,14 +13,28 @@
           Réinitialiser
         </Btn>
       </div>
-      <div>
-        <div class="text-bold q-mb-sm">Donateur</div>
-        <SelectFilterComponent
-          :model-value="filter?.id"
-          :options="donorRefs.options"
-          :lazy-load="donorRefs.load"
-          @update:model-value="updateFilter({ ...filter, id: $event })"
-        />
+      <div class="row">
+        <div class="col">
+          <div class="text-bold q-mb-sm">Donateur</div>
+          <SelectFilterComponent
+            :model-value="filter?.id"
+            :options="donorRefs.options"
+            :lazy-load="donorRefs.load"
+            @update:model-value="updateFilter({ ...filter, id: $event })"
+          />
+        </div>
+        <div class="col">
+          <div class="text-bold q-mb-sm">Désactivé</div>
+          <YesNoCheckbox
+            :model-value="filter?.isDisabled?.equals"
+            @update:model-value="
+              updateFilter({
+                ...filter,
+                isDisabled: { equals: $event },
+              })
+            "
+          />
+        </div>
       </div>
       <QSeparator class="q-mt-xs q-mb-sm" />
       <div class="col">
@@ -55,6 +69,7 @@ import Btn from '@/components/ui/Btn.vue'
 import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
 import FloatFilterComponent from '@/components/FloatFilter.vue'
 import SelectFilterComponent from '@/components/SelectFilter.vue'
+import YesNoCheckbox from '@/components/YesNoCheckbox.vue'
 
 import type { LazySelectOptions } from '@/types'
 import type { DonorListFilter, DonorRefSelect } from '@shared/models'
@@ -78,7 +93,7 @@ const updateFilter = debounce((newFilter?: DonorListFilter) => {
   const simplifyFilterForComparison = <T extends object>(obj: T): T | undefined => {
     const simplifiedObject = Object.entries(obj)
       .filter(([_, value]) => {
-        if (typeof value === 'number' || isDate(value)) return true
+        if (['number', 'boolean'].includes(typeof value) || isDate(value)) return true
         return !isEmpty(typeof value === 'object' ? simplifyFilterForComparison(value) : value)
       })
       .reduce((acc, [key, value]) => {
@@ -97,6 +112,7 @@ const filterCount = computed(
   () =>
     [
       !!props.filter?.id?.in,
+      props.filter?.isDisabled?.equals !== undefined,
       !!props.filter?.donatedAt?.lte,
       !!props.filter?.donatedAt?.gte,
       !!props.filter?.totalAmount?.lte,

@@ -11,6 +11,7 @@ import {
   convertDtoToDonationAssetType,
   convertDtoToDonationListItem,
   convertDtoToDonationMethod,
+  convertDtoToDonationRef,
   convertDtoToDonationType,
   convertDtoToDonor,
   convertDtoToDonorListItem,
@@ -33,6 +34,7 @@ import type {
   BulkAnnualTaxReceiptResponse,
   CancelTaxReceiptRequest,
   FileUploadResponse,
+  GetDashboardSummaryResponse,
   GetDonationAssetTypeListResponse,
   GetDonationAssetTypeResponse,
   GetDonationListRequest,
@@ -59,6 +61,7 @@ import type {
   LoginResponse,
 } from '@shared/dtos'
 import type {
+  DashboardSummaries,
   Donation,
   DonationAssetType,
   DonationListFilter,
@@ -93,6 +96,25 @@ export const login = async (formData: LoginFormData): Promise<LoginResponse> => 
 
 export const logout = async (): Promise<void> => {
   await withClient((client) => client.post('/auth/logout', undefined, { withCredentials: true }))
+}
+
+export const getDashboardSummaries = async (): Promise<DashboardSummaries> => {
+  const response = await withClient((client) =>
+    client.get<GetDashboardSummaryResponse>('/summaries'),
+  )
+  return {
+    ...response,
+    currentWeekDonations: {
+      ...response.currentWeekDonations,
+      donations: response.currentWeekDonations.donations.map(convertDtoToDonationRef),
+    },
+    topDonors: {
+      byAmount: response.topDonors.byAmount.map(convertDtoToDonorListItem),
+      byCount: response.topDonors.byCount.map(convertDtoToDonorListItem),
+    },
+    disabledDonorsWithDonations:
+      response.disabledDonorsWithDonations.map(convertDtoToDonorListItem),
+  }
 }
 
 export const getDonations = async (

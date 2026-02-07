@@ -47,6 +47,18 @@ describe('DonorService', () => {
     )
 
     expect(prismaServiceMock.$queryRawTyped).toHaveBeenCalledTimes(1)
+    expect(typedSqlServiceMock.getDonorListItem).toHaveBeenCalledWith(
+      null,
+      null,
+      null,
+      null,
+      10,
+      null,
+      'updatedAt',
+      'desc',
+      10,
+      0,
+    )
   })
 
   it('should get donor ref items', async () => {

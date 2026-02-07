@@ -3,17 +3,16 @@ import { v4 } from 'uuid'
 import { sortBy } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
 
+import type { DonationListFilter, DonationListSortOrder } from '@shared/models'
 import type {
-  Donation,
-  DonationAssetType,
-  DonationListFilter,
-  DonationListSortOrder,
-  DonationMethod,
-  DonationType,
-  DonorRef,
-  Organisation,
-  PaymentMode,
-} from '@shared/models'
+  DonationAssetTypeDto,
+  DonationDto,
+  DonationMethodDto,
+  DonationTypeDto,
+  DonorRefDto,
+  OrganisationDto,
+  PaymentModeDto,
+} from '@shared/dtos'
 
 export type DonationListFilterMock = Omit<
   DonationListFilter,
@@ -26,22 +25,22 @@ export type DonationListFilterMock = Omit<
 }
 
 export function buildMockDonations(
-  paymentModes: PaymentMode[],
-  organisations: Organisation[],
-  donationTypes: DonationType[],
-  donationMethods: DonationMethod[],
-  donationAssetTypes: DonationAssetType[],
-  donorRefs: DonorRef[],
+  paymentModes: PaymentModeDto[],
+  organisations: OrganisationDto[],
+  donationTypes: DonationTypeDto[],
+  donationMethods: DonationMethodDto[],
+  donationAssetTypes: DonationAssetTypeDto[],
+  donorRefs: DonorRefDto[],
   orderBy?: DonationListSortOrder,
   filter?: DonationListFilterMock,
-): Donation[] {
+): DonationDto[] {
   const totalCount = 100 as const
 
   let donations = Array.from({ length: totalCount }).map((_, index) => ({
     id: v4(),
-    createdAt: addDays(new Date(2024, 0, 1), index),
-    updatedAt: addDays(new Date(2024, 1, 1), index),
-    donatedAt: addDays(new Date(2024, 0, 1), index),
+    createdAt: addDays(new Date(2024, 0, 1), index).toISOString(),
+    updatedAt: addDays(new Date(2024, 1, 1), index).toISOString(),
+    donatedAt: addDays(new Date(2024, 0, 1), index).toISOString(),
     isTaxReceiptEnabled: index % 4 === 0,
     amount: ((index % 10) + 1) * 10,
     paymentMode: paymentModes[index % paymentModes.length],
@@ -57,8 +56,10 @@ export function buildMockDonations(
       (typeof filter?.amount?.gte === 'number' && donation.amount < filter.amount.gte) ||
       (typeof filter?.amount?.lte === 'number' && donation.amount > filter.amount.lte) ||
       (filter?.amount?.equals !== undefined && donation.amount !== filter.amount.equals) ||
-      (typeof filter?.donatedAt?.gte === 'object' && donation.donatedAt < filter.donatedAt.gte) ||
-      (typeof filter?.donatedAt?.lte === 'object' && donation.donatedAt > filter.donatedAt.lte) ||
+      (typeof filter?.donatedAt?.gte === 'object' &&
+        new Date(donation.donatedAt) < filter.donatedAt.gte) ||
+      (typeof filter?.donatedAt?.lte === 'object' &&
+        new Date(donation.donatedAt) > filter.donatedAt.lte) ||
       (filter?.donor?.isDisabled?.equals !== undefined &&
         donation.donor.isDisabled !== filter.donor.isDisabled.equals) ||
       (filter?.donorId?.in !== undefined &&

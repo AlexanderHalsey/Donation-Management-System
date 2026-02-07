@@ -1,4 +1,4 @@
-import type { DateTimeFilter, FloatFilter, SelectFilter } from './Filters'
+import type { BoolFilter, DateTimeFilter, FloatFilter, SelectFilter } from './Filters'
 import type { Pagination, PaginationRequest } from './Pagination'
 import type { DonorListSortOrder } from './SortOrder'
 
@@ -51,5 +51,6 @@ export type DonorListPagination = Pagination<DonorListSortOrder>
 export interface DonorListFilter {
   id?: SelectFilter
   donatedAt?: DateTimeFilter
+  isDisabled?: BoolFilter
   totalAmount?: FloatFilter
 }

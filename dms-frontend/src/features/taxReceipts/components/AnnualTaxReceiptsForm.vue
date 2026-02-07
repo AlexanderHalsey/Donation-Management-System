@@ -8,6 +8,7 @@
       :selected-rows-label="selectedRowsLabel"
       selection="multiple"
       :selected="donorIds"
+      no-data-label="Aucun element à afficher"
       v-model:expanded="expanded"
     >
       <template #header="props">
@@ -95,6 +96,7 @@
                   row-key="id"
                   :rows-per-page-options="[0]"
                   class="q-my-md"
+                  no-data-label="Aucun element à afficher"
                   data-cy="donation-table"
                 >
                   <template #body-cell-donatedAt="{ row }">

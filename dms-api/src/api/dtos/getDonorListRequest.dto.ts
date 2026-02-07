@@ -5,7 +5,7 @@ import { Type } from 'class-transformer'
 import { DonorListSortOrder } from './donor.dto'
 
 import { PaginationRequest } from './pagination.dto'
-import { DateTimeFilter, FloatFilter, UuidFilter } from './filter.dto'
+import { BoolFilter, DateTimeFilter, FloatFilter, UuidFilter } from './filter.dto'
 
 export class DonorListPaginationRequest extends PaginationRequest {
   @ApiProperty({ type: DonorListSortOrder, required: false })
@@ -24,6 +24,11 @@ export class DonorListFilter {
   @ValidateNested()
   @Type(() => DateTimeFilter)
   donatedAt?: DateTimeFilter
+
+  @ApiProperty({ type: BoolFilter, required: false })
+  @ValidateNested()
+  @Type(() => BoolFilter)
+  isDisabled?: BoolFilter
 
   @ApiProperty({ type: FloatFilter, required: false })
   @ValidateNested()

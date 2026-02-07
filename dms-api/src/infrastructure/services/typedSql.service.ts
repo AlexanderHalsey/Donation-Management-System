@@ -19,6 +19,7 @@ type GetDonorListItemFunction = (
   startDate: Date | null,
   endDate: Date | null,
   donorIds: string | null,
+  isDisabled: boolean | null,
   minAmount: number | null,
   maxAmount: number | null,
   orderByField: string,

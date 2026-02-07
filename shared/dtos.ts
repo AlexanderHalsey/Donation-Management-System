@@ -1,5 +1,3 @@
-import { string } from 'zod'
-
 export interface PaymentModeDto {
   id: string
   name: string
@@ -105,15 +103,18 @@ export interface TaxReceiptListItemDto {
   canceledReason?: string
 }
 
-export interface DonationListItemDto {
+export interface DonationRefDto {
   id: string
-  updatedAt: string
   donatedAt: string
   amount: number
+  donor: DonorRefDto
+}
+
+export interface DonationListItemDto extends DonationRefDto {
+  updatedAt: string
   paymentMode: PaymentModeDto
   organisation: OrganisationRefDto
   donationType: DonationTypeDto
-  donor: DonorRefDto
   isTaxReceiptEnabled: boolean
   taxReceiptId?: string
 }
@@ -228,6 +229,7 @@ export interface DonationListFilter {
 export interface DonorListFilter {
   id?: SelectFilter
   donatedAt?: DateTimeFilter
+  isDisabled?: BoolFilter
   totalAmount?: FloatFilter
 }
 
@@ -263,6 +265,36 @@ export interface FloatFilter {
 
 export interface BoolFilter {
   equals?: boolean
+}
+
+export interface ChartItemDto {
+  name: string
+  count: number
+  amount: number
+}
+
+export interface GetDashboardSummaryResponse {
+  totalDonations: {
+    allTime: { count: number; amount: number }
+    thisYear: { count: number; amount: number }
+    thisMonth: { count: number; amount: number }
+  }
+  currentWeekDonations: {
+    count: number
+    amount: number
+    donations: DonationRefDto[]
+  }
+  topDonors: {
+    byAmount: DonorListItemDto[]
+    byCount: DonorListItemDto[]
+  }
+  disabledDonorsWithDonations: DonorListItemDto[]
+  donationCharts: {
+    paymentModes: ChartItemDto[]
+    organisations: ChartItemDto[]
+    donationTypes: ChartItemDto[]
+  }
+  taxReceiptStatusCounts: Record<TaxReceiptStatus, number>
 }
 
 export interface GetDonationListRequest {

@@ -7,6 +7,7 @@
     row-key="id"
     :table-row-class-fn="rowClassFn"
     class="donation-list-table"
+    no-data-label="Aucun element à afficher"
     @update:pagination="updatePagination"
   >
     <template #body-cell-donor="{ row }">

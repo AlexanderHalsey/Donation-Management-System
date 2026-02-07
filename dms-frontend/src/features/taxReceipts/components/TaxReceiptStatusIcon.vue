@@ -1,6 +1,11 @@
 <template>
   <div>
-    <QIcon :name="statusOption.icon" :color="statusOption.color" size="xs" />
+    <QIcon
+      :name="statusOption.icon"
+      :color="statusOption.color"
+      size="xs"
+      class="flex items-center"
+    />
     <QTooltip :delay="100" :offset="[10, 10]">
       {{ statusOption.name }}
     </QTooltip>

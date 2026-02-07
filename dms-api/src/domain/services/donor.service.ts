@@ -31,6 +31,7 @@ export class DonorService {
     const startDate = filter?.donatedAt?.gte || null
     const endDate = filter?.donatedAt?.lte || null
     const donorIds = filter?.id?.in ? filter.id.in.join(',') : null
+    const isDisabled = filter?.isDisabled?.equals ?? null
     const minAmount = filter?.totalAmount?.gte || null
     const maxAmount = filter?.totalAmount?.lte || null
 
@@ -47,6 +48,7 @@ export class DonorService {
         startDate,
         endDate,
         donorIds,
+        isDisabled,
         minAmount,
         maxAmount,
         orderByField,

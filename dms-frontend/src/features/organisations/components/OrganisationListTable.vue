@@ -4,6 +4,7 @@
     :columns="headers"
     v-model:pagination="pagination"
     row-key="id"
+    no-data-label="Aucun element à afficher"
     data-cy="organisation-list-table"
   >
     <template #body-cell-name="{ row }">

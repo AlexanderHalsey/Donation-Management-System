@@ -9,7 +9,7 @@ export const TAX_RECEIPT_STATUS_OPTIONS: {
   { id: 'PENDING', name: 'En attente de génération', icon: 'hourglass_empty', color: 'blue' },
   {
     id: 'PROCESSING',
-    name: 'En cours de traitement de génération',
+    name: 'En cours de génération',
     icon: 'autorenew',
     color: 'amber',
   },

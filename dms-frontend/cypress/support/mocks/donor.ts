@@ -1,8 +1,9 @@
 import { v4 } from 'uuid'
-
-import type { Donor, DonorListFilter, DonorListSortOrder } from '@shared/models'
 import { sortBy } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
+
+import type { DonorListFilter, DonorListSortOrder } from '@shared/models'
+import type { DonorDto } from '@shared/dtos'
 
 export type DonorListFilterMock = Omit<DonorListFilter, 'id'> & {
   id?: { in?: number[] }
@@ -11,11 +12,11 @@ export type DonorListFilterMock = Omit<DonorListFilter, 'id'> & {
 export function buildMockDonors(
   orderBy?: DonorListSortOrder,
   filter?: DonorListFilterMock,
-): Donor[] {
+): DonorDto[] {
   let donors = Array.from({ length: 30 }).map((_, index) => ({
     id: v4(),
-    createdAt: new Date(2024, 0, index + 1),
-    updatedAt: new Date(2024, 1, index + 1),
+    createdAt: new Date(2024, 0, index + 1).toISOString(),
+    updatedAt: new Date(2024, 1, index + 1).toISOString(),
     externalId: index + 1,
     firstName: index % 50 !== 49 ? `FirstName${index + 1}` : undefined,
     lastName: `LastName${index + 1}`,

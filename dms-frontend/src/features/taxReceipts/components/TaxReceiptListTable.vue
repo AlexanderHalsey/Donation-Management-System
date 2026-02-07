@@ -5,6 +5,7 @@
     :pagination="computedPagination"
     :loading="loading"
     row-key="id"
+    no-data-label="Aucun element à afficher"
     data-cy="tax-receipt-list-table"
     @update:pagination="updatePagination"
   >

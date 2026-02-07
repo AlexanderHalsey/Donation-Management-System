@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import { MOCK_API_HOST } from './constants'
 import {
+  buildMockDashboardSummaries,
   buildMockDonations,
   buildMockDonationAssetTypes,
   buildMockDonationMethods,
@@ -39,6 +40,7 @@ declare global {
       mockCreateIndividualTaxReceipt(): Chainable<Subject>
       mockCreateOrganisation(formData: OrganisationFormDataMock): Chainable<Subject>
       mockCreatePaymentMode(formData: PaymentModeFormDataMock): Chainable<Subject>
+      mockDashboardSummaries(includeDisabledDonors?: boolean): Chainable<Subject>
       mockDeleteDonation(): Chainable<Subject>
       mockDisableDonationAssetType(donationAssetTypeId: string): Chainable<Subject>
       mockDisableDonationMethod(donationMethodId: string): Chainable<Subject>
@@ -137,6 +139,13 @@ const donationTypes = buildMockDonationTypes(organisations)
 const donationMethods = buildMockDonationMethods()
 const donationAssetTypes = buildMockDonationAssetTypes()
 const donors = buildMockDonors()
+
+Cypress.Commands.add('mockDashboardSummaries', (includeDisabledDonors = false) => {
+  cy.intercept('GET', `${MOCK_API_HOST}/summaries`, {
+    statusCode: 200,
+    body: buildMockDashboardSummaries(includeDisabledDonors),
+  })
+})
 
 Cypress.Commands.add('mockOrganisationRefList', () => {
   cy.intercept('GET', `${MOCK_API_HOST}/organisations/refs`, {

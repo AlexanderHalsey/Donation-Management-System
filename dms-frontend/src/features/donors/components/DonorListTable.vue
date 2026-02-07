@@ -5,6 +5,7 @@
     :pagination="computedPagination"
     :loading="loading"
     row-key="id"
+    no-data-label="Aucun element à afficher"
     @update:pagination="updatePagination"
   >
     <template #body-cell-lastName="{ row }">

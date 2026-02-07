@@ -5,11 +5,11 @@ import { get } from 'es-toolkit/compat'
 
 import type {
   DonorRef,
-  TaxReceiptListItem,
   TaxReceiptListFilter,
   TaxReceiptListSortOrder,
   TaxReceiptStatus,
 } from '@shared/models'
+import type { TaxReceiptListItemDto } from '@shared/dtos'
 
 export type TaxReceiptListFilterMock = Omit<TaxReceiptListFilter, 'donorId'> & {
   donorId?: { in?: number[] }
@@ -19,13 +19,13 @@ export function buildMockTaxReceipts(
   donorRefs: DonorRef[],
   orderBy?: TaxReceiptListSortOrder,
   filter?: TaxReceiptListFilterMock,
-): TaxReceiptListItem[] {
+): TaxReceiptListItemDto[] {
   const totalCount = 100 as const
 
-  let taxReceipts: TaxReceiptListItem[] = Array.from({ length: totalCount }).map((_, index) => ({
+  let taxReceipts: TaxReceiptListItemDto[] = Array.from({ length: totalCount }).map((_, index) => ({
     id: v4(),
-    createdAt: addDays(new Date(2024, 0, 1), index),
-    updatedAt: addDays(new Date(2024, 1, 1), index),
+    createdAt: addDays(new Date(2024, 0, 1), index).toISOString(),
+    updatedAt: addDays(new Date(2024, 1, 1), index).toISOString(),
     donor: donorRefs[index % donorRefs.length],
     receiptNumber: index + 1000,
     status: (['PENDING', 'PROCESSING', 'FAILED', 'COMPLETED', 'CANCELED'] as TaxReceiptStatus[])[
@@ -42,8 +42,10 @@ export function buildMockTaxReceipts(
     if (
       (filter?.donorId?.in !== undefined &&
         !filter.donorId.in.includes(donorRefs.indexOf(taxReceipt.donor))) ||
-      (typeof filter?.createdAt?.gte === 'object' && taxReceipt.createdAt < filter.createdAt.gte) ||
-      (typeof filter?.createdAt?.lte === 'object' && taxReceipt.createdAt > filter.createdAt.lte) ||
+      (typeof filter?.createdAt?.gte === 'object' &&
+        new Date(taxReceipt.createdAt) < filter.createdAt.gte) ||
+      (typeof filter?.createdAt?.lte === 'object' &&
+        new Date(taxReceipt.createdAt) > filter.createdAt.lte) ||
       (filter?.status?.in !== undefined && !filter.status.in.includes(taxReceipt.status)) ||
       (filter?.type?.equals !== undefined && filter.type.equals !== taxReceipt.type)
     ) {

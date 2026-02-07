@@ -78,6 +78,31 @@ describe('TaxReceiptService', () => {
     expect(prismaServiceMock.taxReceipt.findUniqueOrThrow).toHaveBeenCalledTimes(1)
   })
 
+  it('should return tax receipt status counts', async () => {
+    prismaServiceMock.taxReceipt.groupBy.mockResolvedValueOnce(
+      mockDeep<
+        (TaxReceipt & {
+          _count: { id: number }
+          _sum: undefined
+          _avg: undefined
+          _max: undefined
+          _min: undefined
+        })[]
+      >([
+        { status: 'COMPLETED', _count: { id: 10 } },
+        { status: 'PENDING', _count: { id: 5 } },
+      ]),
+    )
+
+    const result = await taxReceiptService.getTaxReceiptStatusCounts()
+
+    expect(result).toEqual({ COMPLETED: 10, PENDING: 5 })
+    expect(prismaServiceMock.taxReceipt.groupBy).toHaveBeenCalledWith({
+      by: ['status'],
+      _count: { id: true },
+    })
+  })
+
   describe('createIndividualTaxReceipt', () => {
     beforeEach(() => {
       prismaServiceMock.$transaction.mockImplementationOnce(async (cb) => {

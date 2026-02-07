@@ -348,4 +348,92 @@ describe('DonationService', () => {
 
     expect(prismaServiceMock.donation.findMany).toHaveBeenCalledTimes(1)
   })
+
+  describe('getDonationStats', () => {
+    it('should return donation stats', async () => {
+      const mockAggregateResult = mockDeep<
+        Prisma.GetDonationAggregateType<{
+          where: { donatedAt: { gte: Date } } | undefined
+          _sum: { amount: true }
+          _count: { id: true }
+          _avg: undefined
+          _max: undefined
+          _min: undefined
+        }>
+      >({
+        _sum: { amount: 1000 },
+        _count: { id: 10 },
+      })
+      prismaServiceMock.donation.aggregate.mockResolvedValueOnce(mockAggregateResult)
+
+      const result = await donationService.getDonationStats()
+
+      expect(result).toEqual({ count: 10, amount: 1000 })
+      expect(prismaServiceMock.donation.aggregate).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return donation stats with a minDate', async () => {
+      const mockAggregateResult = mockDeep<
+        Prisma.GetDonationAggregateType<{
+          where: { donatedAt: { gte: Date } } | undefined
+          _sum: { amount: true }
+          _count: { id: true }
+          _avg: undefined
+          _max: undefined
+          _min: undefined
+        }>
+      >({
+        _sum: { amount: 500 },
+        _count: { id: 5 },
+      })
+      prismaServiceMock.donation.aggregate.mockResolvedValueOnce(mockAggregateResult)
+      const minDate = new Date()
+
+      const result = await donationService.getDonationStats(minDate)
+
+      expect(result).toEqual({ count: 5, amount: 500 })
+      expect(prismaServiceMock.donation.aggregate).toHaveBeenCalledWith({
+        where: { donatedAt: { gte: minDate } },
+        _sum: { amount: true },
+        _count: { id: true },
+      })
+    })
+  })
+
+  it('should return donation distribution by paymentModeId', async () => {
+    const groupBy = 'paymentModeId'
+    const mockGroupByResult = mockDeep<
+      (Donation & {
+        _sum: { amount: number }
+        _count: { id: number }
+        _avg: undefined
+        _max: undefined
+        _min: undefined
+      })[]
+    >([
+      {
+        paymentModeId: 'pm1',
+        _sum: { amount: 1000 },
+        _count: { id: 10 },
+      },
+      {
+        paymentModeId: 'pm2',
+        _sum: { amount: 2000 },
+        _count: { id: 20 },
+      },
+    ])
+    prismaServiceMock.donation.groupBy.mockResolvedValueOnce(mockGroupByResult)
+
+    const result = await donationService.getDonationDistribution(groupBy)
+
+    expect(result).toEqual([
+      { id: 'pm1', count: 10, amount: 1000 },
+      { id: 'pm2', count: 20, amount: 2000 },
+    ])
+    expect(prismaServiceMock.donation.groupBy).toHaveBeenCalledWith({
+      by: [groupBy],
+      _sum: { amount: true },
+      _count: { id: true },
+    })
+  })
 })
