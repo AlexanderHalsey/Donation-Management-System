@@ -1,6 +1,6 @@
 <template>
   <div class="column q-gutter-md">
-    <FormField name="name" label="Nom interne">
+    <FormField name="name" label="Nom interne" required>
       <Input id="name" v-model="name" :error="errors.name" v-bind="nameAttrs" />
     </FormField>
 
@@ -107,7 +107,7 @@ const emit = defineEmits<{
   (e: 'submit', formData: OrganisationFormData): void
 }>()
 
-const { defineField, errors, handleSubmit, resetForm } = useForm({
+const { defineField, errors, handleSubmit, resetForm, setErrors } = useForm({
   validationSchema: toTypedSchema(organisationFormSchema),
   initialValues: props.organisation
     ? {
@@ -146,6 +146,6 @@ const validate = handleSubmit((formData) => {
   emit('submit', formData)
 })
 
-defineExpose({ validate })
+defineExpose({ setErrors, validate })
 onBeforeUnmount(() => resetForm())
 </script>

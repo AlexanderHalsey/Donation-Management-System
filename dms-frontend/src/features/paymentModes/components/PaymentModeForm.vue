@@ -1,6 +1,6 @@
 <template>
   <div class="column">
-    <FormField name="name" label="Nom">
+    <FormField name="name" label="Nom" required>
       <Input id="name" v-model="name" :error="errors.name" v-bind="nameAttrs" />
     </FormField>
   </div>
@@ -27,7 +27,7 @@ const emit = defineEmits<{
   (e: 'submit', formData: PaymentModeFormData): void
 }>()
 
-const { defineField, errors, handleSubmit, resetForm } = useForm({
+const { defineField, errors, handleSubmit, resetForm, setErrors } = useForm({
   validationSchema: toTypedSchema(paymentModeFormSchema),
   initialValues: props.paymentMode
     ? {
@@ -42,6 +42,6 @@ const validate = handleSubmit((formData) => {
   emit('submit', formData)
 })
 
-defineExpose({ validate })
+defineExpose({ setErrors, validate })
 onBeforeUnmount(() => resetForm())
 </script>

@@ -58,10 +58,7 @@ const createPaymentMode = async (formData: PaymentModeFormData) => {
     await paymentModeStore.createPaymentMode(formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      $q.notify({
-        type: 'negative',
-        message: 'Un mode de paiement avec ce nom existe déjà. Veuillez en choisir un autre.',
-      })
+      paymentModeForm.value?.setErrors({ name: 'Un mode de paiement avec ce nom existe déjà.' })
     }
     working.value = false
     throw error

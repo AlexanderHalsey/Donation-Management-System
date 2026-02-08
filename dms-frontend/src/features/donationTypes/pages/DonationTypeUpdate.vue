@@ -80,10 +80,7 @@ const updateDonationType = async (formData: DonationTypeFormData) => {
     await donationTypeStore.updateDonationType(donationTypeId.value, formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      $q.notify({
-        type: 'negative',
-        message: 'Un type de don avec ce nom existe déjà. Veuillez en choisir un autre.',
-      })
+      donationTypeForm.value?.setErrors({ name: 'Un type de don avec ce nom existe déjà.' })
     }
     working.value = false
     throw error

@@ -1,9 +1,9 @@
 <template>
   <div class="column">
-    <FormField name="name" label="Nom">
+    <FormField name="name" label="Nom" required>
       <Input id="name" v-model="name" :error="errors.name" v-bind="nameAttrs" />
     </FormField>
-    <FormField name="organisationId" label="Organisation">
+    <FormField name="organisationId" label="Organisation" required>
       <Select
         :id="'organisationId'"
         :model-value="organisation"
@@ -67,7 +67,7 @@ const emit = defineEmits<{
   (e: 'submit', formData: DonationTypeFormData): void
 }>()
 
-const { defineField, errors, handleSubmit, resetForm } = useForm({
+const { defineField, errors, handleSubmit, resetForm, setErrors } = useForm({
   validationSchema: toTypedSchema(donationTypeFormSchema),
   initialValues: props.donationType
     ? {
@@ -100,6 +100,6 @@ const validate = handleSubmit((formData) => {
   emit('submit', formData)
 })
 
-defineExpose({ validate })
+defineExpose({ setErrors, validate })
 onBeforeUnmount(() => resetForm())
 </script>

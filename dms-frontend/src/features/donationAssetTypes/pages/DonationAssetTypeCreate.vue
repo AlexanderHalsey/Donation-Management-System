@@ -58,9 +58,8 @@ const createDonationAssetType = async (formData: DonationAssetTypeFormData) => {
     await donationAssetTypeStore.createDonationAssetType(formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      $q.notify({
-        type: 'negative',
-        message: 'Une nature de don avec ce nom existe déjà. Veuillez en choisir une autre.',
+      donationAssetTypeForm.value?.setErrors({
+        name: 'Une nature de don avec ce nom existe déjà.',
       })
     }
     working.value = false

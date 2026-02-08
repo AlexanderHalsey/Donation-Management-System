@@ -77,9 +77,8 @@ const updateOrganisation = async (formData: OrganisationFormData) => {
     await organisationStore.updateOrganisation(organisationId.value, formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      $q.notify({
-        type: 'negative',
-        message: 'Une organisation avec ce nom existe déjà. Veuillez en choisir un autre.',
+      organisationForm.value?.setErrors({
+        name: 'Une organisation avec ce nom existe déjà.',
       })
     }
     working.value = false
