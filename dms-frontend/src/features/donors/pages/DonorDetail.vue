@@ -1,5 +1,17 @@
 <template>
   <Page :title="title" :breadcrumbs="breadcrumbs" :loading="loading">
+    <template #actions>
+      <Btn
+        v-if="donor && isDonorExternalProviderEnabled"
+        outline
+        icon="contact_page"
+        color="primary"
+        :href="donorExternalProviderUrl + donor.externalId"
+        target="_blank"
+      >
+        Accéder au profil {{ donorExternalProviderName }}
+      </Btn>
+    </template>
     <div v-if="donor" style="max-width: 1200px">
       <div class="row q-col-gutter-md">
         <div class="col" style="display: flex; flex-direction: column">
@@ -55,7 +67,7 @@
                   </a>
                   <span v-else>-</span>
                 </TitledComponent>
-                <TitledComponent title="Dernière mise à jour" class="col">
+                <TitledComponent title="Dernière mise à jour" class="col-auto">
                   <FormattedDate :value="donor.updatedAt" pattern="date-time" />
                 </TitledComponent>
               </div>
@@ -112,6 +124,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import Page from '@/layouts/Page.vue'
+
+import Btn from '@/components/ui/Btn.vue'
 import TitledComponent from '@/components/TitledComponent.vue'
 import StatsCard from '@/components/StatsCard.vue'
 import FormattedCurrency from '@/components/FormattedCurrency.vue'
@@ -137,6 +151,11 @@ const route = useRoute()
 const donorId = computed(() => route.params.donorId as string)
 
 const donor = computed(() => donorStore.donor)
+
+const isDonorExternalProviderEnabled =
+  import.meta.env.VITE_DONOR_EXTERNAL_PROVIDER_ENABLED === 'true'
+const donorExternalProviderName = import.meta.env.VITE_DONOR_EXTERNAL_PROVIDER_NAME
+const donorExternalProviderUrl = import.meta.env.VITE_DONOR_EXTERNAL_PROVIDER_URL
 
 const averageDonationAmount = computed(() => {
   if (!donor.value || donor.value.donationCount === 0) return 0

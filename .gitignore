@@ -51,9 +51,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files (commit base configs, ignore local overrides)
-.env.local
-.env.*.local
-dms-api/.env
+.env*
 
 # temp directory
 .temp

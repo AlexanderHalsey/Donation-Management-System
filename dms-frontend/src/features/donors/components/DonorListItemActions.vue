@@ -5,14 +5,14 @@
       <QItem
         clickable
         v-close-popup
-        :href="externalProvider.url + donor.externalId"
+        :href="donorExternalProviderUrl + donor.externalId"
         target="_blank"
         style="padding: 8px 12px; border-radius: 6px"
       >
         <QItemSection style="flex: unset">
           <QIcon name="contact_page" />
         </QItemSection>
-        <QItemSection> Accèder au profil {{ externalProvider.name }} </QItemSection>
+        <QItemSection> Accéder au profil {{ donorExternalProviderName }} </QItemSection>
       </QItem>
     </QList>
   </QMenu>
@@ -32,11 +32,8 @@ defineProps({
   },
 })
 
-// TODO : implement external provider
-const externalProvider = ref<{ name: string; url: string }>({
-  name: 'External Provider',
-  url: 'https://external-provider.com/profile/',
-})
+const donorExternalProviderName = import.meta.env.VITE_DONOR_EXTERNAL_PROVIDER_NAME
+const donorExternalProviderUrl = import.meta.env.VITE_DONOR_EXTERNAL_PROVIDER_URL
 
 const showAction = ref<boolean>(false)
 const clickShowAction = (event: Event) => {

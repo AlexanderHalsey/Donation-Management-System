@@ -20,7 +20,7 @@
     <template #body-cell-donationTotalAmount="{ row }">
       <td class="text-right"><FormattedCurrency :value="row.donationTotalAmount" /></td>
     </template>
-    <template #body-cell-actions="{ row }">
+    <template v-if="isDonorExternalProviderEnabled" #body-cell-actions="{ row }">
       <td>
         <DonorListItemActions :donor="row" />
       </td>
@@ -61,6 +61,9 @@ const emit = defineEmits<{
   'update:pagination': [pagination: DonorListPaginationRequest]
 }>()
 
+const isDonorExternalProviderEnabled =
+  import.meta.env.VITE_DONOR_EXTERNAL_PROVIDER_ENABLED === 'true'
+
 const headers: QTableProps['columns'] = [
   {
     name: 'lastName',
@@ -93,13 +96,17 @@ const headers: QTableProps['columns'] = [
     sortable: true,
     headerStyle: 'width: 180px',
   },
-  {
-    name: 'actions',
-    label: '',
-    field: 'id',
-    align: 'right',
-    headerStyle: 'width: 50px',
-  },
+  ...(isDonorExternalProviderEnabled
+    ? [
+        {
+          name: 'actions',
+          label: '',
+          field: 'id',
+          align: 'right',
+          headerStyle: 'width: 50px',
+        } satisfies NonNullable<QTableProps['columns']>[number],
+      ]
+    : []),
 ]
 
 const computedPagination = computed<QTablePagination>(() => {
