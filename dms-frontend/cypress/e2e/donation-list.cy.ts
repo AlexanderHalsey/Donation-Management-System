@@ -176,6 +176,7 @@ describe('Donation List', () => {
       })
     cy.mockCreateIndividualTaxReceipt()
     cy.mockTaxReceiptList()
+    cy.mockEligibleYearOrganisationPairs()
     cy.get('#q-portal--menu--1 .q-item').eq(1).click() // Click create individual tax receipt action
     cy.url().should('match', /\/tax-receipts/)
     cy.get('.q-notification').should('contain.text', 'Le reçu fiscal est en cours de génération.')
