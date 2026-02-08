@@ -18,16 +18,26 @@
       <Input id="title" v-model="title" :error="errors.title" v-bind="titleAttrs" />
     </FormField>
 
-    <FormField name="address" label="Adresse">
-      <Input id="address" v-model="address" :error="errors.address" v-bind="addressAttrs" />
+    <FormField name="streetAddress" label="Adresse">
+      <Input
+        id="streetAddress"
+        v-model="streetAddress"
+        :error="errors.streetAddress"
+        v-bind="streetAddressAttrs"
+      />
     </FormField>
 
-    <FormField name="locality" label="Ville">
-      <Input id="locality" v-model="locality" :error="errors.locality" v-bind="localityAttrs" />
+    <FormField name="city" label="Ville">
+      <Input id="city" v-model="city" :error="errors.city" v-bind="cityAttrs" />
     </FormField>
 
-    <FormField name="postCode" label="Code postal">
-      <Input id="postCode" v-model="postCode" :error="errors.postCode" v-bind="postCodeAttrs" />
+    <FormField name="postalCode" label="Code postal">
+      <Input
+        id="postalCode"
+        v-model="postalCode"
+        :error="errors.postalCode"
+        v-bind="postalCodeAttrs"
+      />
     </FormField>
 
     <FormField name="logoId" label="Logo">
@@ -121,9 +131,9 @@ const { defineField, errors, handleSubmit, resetForm, setErrors } = useForm({
 const [name, nameAttrs] = defineField('name')
 const [isTaxReceiptEnabled, isTaxReceiptEnabledAttrs] = defineField('isTaxReceiptEnabled')
 const [title, titleAttrs] = defineField('title')
-const [address, addressAttrs] = defineField('address')
-const [locality, localityAttrs] = defineField('locality')
-const [postCode, postCodeAttrs] = defineField('postCode')
+const [streetAddress, streetAddressAttrs] = defineField('streetAddress')
+const [city, cityAttrs] = defineField('city')
+const [postalCode, postalCodeAttrs] = defineField('postalCode')
 
 const [logoId, logoIdAttrs] = defineField('logoId')
 const logo = ref<{ id: string; name: string } | undefined>(props.organisation?.logo)

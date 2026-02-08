@@ -11,9 +11,9 @@ export interface Organisation extends OrganisationRef {
   createdAt: Date
   updatedAt: Date
   title?: string
-  address?: string
-  locality?: string
-  postCode?: string
+  streetAddress?: string
+  city?: string
+  postalCode?: string
   logo?: FileMetadata
   object?: string
   objectDescription?: string

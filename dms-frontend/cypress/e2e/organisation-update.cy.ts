@@ -52,7 +52,7 @@ describe('Organisation Update', () => {
     // Change address
     cy.get(formField).eq(3).find('input').clear()
     cy.get(formField).eq(3).find('input').type('456 Updated Street')
-    // Change locality
+    // Change city
     cy.get(formField).eq(4).find('input').clear()
     cy.get(formField).eq(4).find('input').type('Updated City')
 
@@ -93,9 +93,9 @@ describe('Organisation Update', () => {
       name: 'Updated Organisation',
       isTaxReceiptEnabled: true,
       title: 'Updated Title',
-      address: '456 Updated Street',
-      locality: 'Updated City',
-      postCode: '75002',
+      streetAddress: '456 Updated Street',
+      city: 'Updated City',
+      postalCode: '75002',
       logoId: v4(),
       object: 'Updated Object',
       objectDescription: 'Updated description for this organisation.',

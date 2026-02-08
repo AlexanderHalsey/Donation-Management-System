@@ -68,9 +68,9 @@ const headers: QTableProps['columns'] = [
     headerStyle: 'width: 240px',
   },
   {
-    name: 'locality',
+    name: 'city',
     label: 'Ville',
-    field: 'locality',
+    field: 'city',
     align: 'left',
     sortable: true,
     headerStyle: 'width: 200px',

@@ -25,9 +25,9 @@ describe('TaxReceiptGeneratorService', () => {
 
   const mockOrganisation = mockDeep<TaxReceiptOrganisationInfo>({
     title: 'Association Test',
-    address: '123 Rue de la Paix',
-    postCode: '75001',
-    locality: 'Paris',
+    streetAddress: '123 Rue de la Paix',
+    postalCode: '75001',
+    city: 'Paris',
     object: 'Aide humanitaire',
     objectDescription: "Organisme d'aide humanitaire international",
     signatoryName: 'Jean Dupont',
@@ -258,9 +258,9 @@ describe('TaxReceiptGeneratorService', () => {
         startY: 100,
         logo: Buffer.from('logo-data'),
         title: 'Test Organisation',
-        address: '123 Test Street',
-        postCode: '12345',
-        locality: 'Test City',
+        streetAddress: '123 Test Street',
+        postalCode: '12345',
+        city: 'Test City',
       }
 
       mockPDFRenderer.addSection.mockImplementation(({ cb }) => cb(50))
@@ -447,7 +447,7 @@ describe('TaxReceiptGeneratorService', () => {
         signatoryName: 'John Doe',
         signatoryPosition: 'President',
         signature: Buffer.from('signature-data'),
-        locality: 'New York',
+        city: 'New York',
       }
 
       mockPDFRenderer.addSection.mockImplementation(({ cb }) => cb(50))
@@ -544,7 +544,7 @@ describe('TaxReceiptGeneratorService', () => {
           signatoryName: mockOrganisation.signatoryName,
           signatoryPosition: mockOrganisation.signatoryPosition,
           signature: mockOrganisation.signature,
-          locality: mockOrganisation.locality,
+          city: mockOrganisation.city,
           startY: 400,
         }),
       )

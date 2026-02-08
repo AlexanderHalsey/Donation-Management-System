@@ -72,7 +72,7 @@ export interface TaxReceiptTemplate {
       recognitionTextIndividual: (date: Date) => string
       recognitionTextAnnual: (year: number) => string
       taxCertification: string
-      taxCertificationLocation: (locality: string) => string
+      taxCertificationLocation: (city: string) => string
     }
   }
   cancelledWatermark: {

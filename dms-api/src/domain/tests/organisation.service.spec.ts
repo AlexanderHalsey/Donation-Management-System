@@ -88,9 +88,9 @@ describe('OrganisationService', () => {
         name: 'New Organisation',
         isTaxReceiptEnabled: false,
         title: 'Organisation Title',
-        address: '123 Main St',
-        locality: 'City',
-        postCode: '12345',
+        streetAddress: '123 Main St',
+        city: 'City',
+        postalCode: '12345',
       }
       prismaServiceMock.organisation.create.mockResolvedValueOnce(mockDeep<Organisation>())
 
@@ -109,9 +109,9 @@ describe('OrganisationService', () => {
         name: 'New Organisation',
         isTaxReceiptEnabled: true,
         title: 'Organisation Title',
-        address: '123 Main St',
-        locality: 'City',
-        postCode: '12345',
+        streetAddress: '123 Main St',
+        city: 'City',
+        postalCode: '12345',
         logoId: 'logo-file-id',
         signatureId: 'signature-file-id',
       }

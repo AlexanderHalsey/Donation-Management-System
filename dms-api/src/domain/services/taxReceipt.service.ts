@@ -285,9 +285,9 @@ export class TaxReceiptService {
     if (
       [
         'title',
-        'address',
-        'postCode',
-        'locality',
+        'streetAddress',
+        'postalCode',
+        'city',
         'object',
         'objectDescription',
         'signatoryName',
@@ -314,9 +314,9 @@ export class TaxReceiptService {
       taxReceiptNumber,
       organisation: {
         title: organisation.title!,
-        address: organisation.address!,
-        postCode: organisation.postCode!,
-        locality: organisation.locality!,
+        streetAddress: organisation.streetAddress!,
+        postalCode: organisation.postalCode!,
+        city: organisation.city!,
         object: organisation.object!,
         objectDescription: organisation.objectDescription!,
         signatoryName: organisation.signatoryName!,

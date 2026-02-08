@@ -70,8 +70,7 @@ export const demoTaxReceiptTemplate = {
         `The organization acknowledges receipt of donations between January 1, ${year} and December 31, ${year}`,
       taxCertification:
         'The organization certifies that this donation qualifies for tax-deductible status under applicable tax regulations. No goods or services were provided in exchange for this donation.',
-      taxCertificationLocation: (locality: string) =>
-        `${locality}, ${formatDate(new Date(), 'en-US')}`,
+      taxCertificationLocation: (city: string) => `${city}, ${formatDate(new Date(), 'en-US')}`,
     },
   },
   cancelledWatermark: {

@@ -18,17 +18,17 @@ export class OrganisationRequest {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  address?: string
+  streetAddress?: string
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  locality?: string
+  city?: string
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  postCode?: string
+  postalCode?: string
 
   @ApiProperty({ required: false })
   @IsOptional()

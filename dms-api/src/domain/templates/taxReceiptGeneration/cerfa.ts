@@ -78,8 +78,8 @@ export const cerfaTaxReceiptTemplate = {
         `L'association bénéficiaire reconnaît avoir reçu comme dons entre le 01/01/${year} et le 31/12/${year}`,
       taxCertification:
         "Le bénéficiaire certifie sur les dons et versements qu'il reçoit ouvrent droit à la réduction d'impôt prévue à l'article 200 du CGI, 238 bis du CGI, 885-0 V bis A.",
-      taxCertificationLocation: (locality: string) =>
-        `A ${locality} le : ${formatDate(new Date(), 'fr-FR')}`,
+      taxCertificationLocation: (city: string) =>
+        `A ${city} le : ${formatDate(new Date(), 'fr-FR')}`,
     },
   },
   cancelledWatermark: {

@@ -11,9 +11,9 @@ export class OrganisationDto extends OrganisationRefDto {
   createdAt: string
   updatedAt: string
   title?: string
-  address?: string
-  locality?: string
-  postCode?: string
+  streetAddress?: string
+  city?: string
+  postalCode?: string
   logo?: FileMetadataDto
   object?: string
   objectDescription?: string

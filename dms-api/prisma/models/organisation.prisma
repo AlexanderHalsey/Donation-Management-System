@@ -4,9 +4,9 @@ model Organisation {
   updatedAt           DateTime       @updatedAt
   name                String         @unique
   title               String?
-  address             String?
-  locality            String?
-  postCode            String?
+  streetAddress       String?
+  city                String?
+  postalCode          String?
   logoId              String?        @unique @db.Uuid
   object              String?
   objectDescription   String?

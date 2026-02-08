@@ -23,9 +23,9 @@ export interface TaxReceiptOptions {
 
 export interface TaxReceiptOrganisationInfo {
   title: string
-  address: string
-  postCode: string
-  locality: string
+  streetAddress: string
+  postalCode: string
+  city: string
   object: string
   objectDescription: string
   signatoryName: string

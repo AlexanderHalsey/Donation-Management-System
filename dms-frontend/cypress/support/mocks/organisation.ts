@@ -8,9 +8,9 @@ export type OrganisationFormDataMock = {
   name: string
   isTaxReceiptEnabled: boolean
   title?: string
-  address?: string
-  locality?: string
-  postCode?: string
+  streetAddress?: string
+  city?: string
+  postalCode?: string
   logoId?: string
   object?: string
   objectDescription?: string
@@ -27,9 +27,9 @@ export function buildMockOrganisations(): OrganisationDto[] {
     name: `Organisation ${index + 1}`,
     isTaxReceiptEnabled: index % 2 === 0,
     title: `Title ${index + 1}`,
-    address: `Address ${index + 1}`,
-    locality: `Locality ${index + 1}`,
-    postCode: `PostCode ${index + 1}`,
+    streetAddress: `Address ${index + 1}`,
+    city: `Locality ${index + 1}`,
+    postalCode: `PostCode ${index + 1}`,
     logo: index === 0 ? buildMockFile({ name: 'logo.png' }) : undefined,
     object: `Object ${index + 1}`,
     objectDescription: `Object Description ${index + 1}`,

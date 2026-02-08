@@ -5,9 +5,9 @@ const ORGANISATION_NAMES = ['Helping Hands', 'Global Aid', 'Community Care'] as 
 export const buildMockOrganisationCreateInput = (index: number): OrganisationCreateInput => ({
   name: ORGANISATION_NAMES[index],
   title: `Organisation Title ${index}`,
-  address: `1234 Mock St, Mock City, MC 12345`,
-  locality: `Mock City`,
-  postCode: `MC12345`,
+  streetAddress: `1234 Mock St`,
+  city: `Mock City`,
+  postalCode: `MC12345`,
   object: `Organisation ${index} Object`,
   objectDescription: `Description for Organisation ${index}`,
   signatoryName: `Signatory ${index}`,

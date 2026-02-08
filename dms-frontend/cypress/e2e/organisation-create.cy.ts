@@ -18,8 +18,8 @@ describe('Organisation Create', () => {
       .should('not.exist')
     cy.get(formField).eq(2).find('.q-field input').should('have.value', '') // title
     cy.get(formField).eq(3).find('.q-field input').should('have.value', '') // address
-    cy.get(formField).eq(4).find('.q-field input').should('have.value', '') // locality
-    cy.get(formField).eq(5).find('.q-field input').should('have.value', '') // postCode
+    cy.get(formField).eq(4).find('.q-field input').should('have.value', '') // city
+    cy.get(formField).eq(5).find('.q-field input').should('have.value', '') // postalCode
     cy.get(formField).eq(6).find('.q-field input').should('have.value', '') // logoId
     cy.get(formField).eq(7).find('.q-field input').should('have.value', '') // object
     cy.get(formField).eq(8).find('.q-field textarea').should('have.value', '') // objectDescription
@@ -49,7 +49,7 @@ describe('Organisation Create', () => {
     // Enter address
     cy.get(formField).eq(3).find('input').type('123 Main Street')
 
-    // Enter locality
+    // Enter city
     cy.get(formField).eq(4).find('input').type('Paris')
 
     // Enter post code
@@ -89,9 +89,9 @@ describe('Organisation Create', () => {
       name: 'New Organisation',
       isTaxReceiptEnabled: false,
       title: 'Organisation Title',
-      address: '123 Main Street',
-      locality: 'Paris',
-      postCode: '75001',
+      streetAddress: '123 Main Street',
+      city: 'Paris',
+      postalCode: '75001',
       logoId: v4(),
       object: 'Charitable Organisation',
       objectDescription: 'A charitable organisation focused on helping the community.',

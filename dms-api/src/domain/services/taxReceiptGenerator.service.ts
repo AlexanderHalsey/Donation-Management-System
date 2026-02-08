@@ -155,16 +155,16 @@ export class TaxReceiptGeneratorService {
     startY,
     logo,
     title,
-    address,
-    postCode,
-    locality,
+    streetAddress,
+    postalCode,
+    city,
   }: {
     startY: number
     logo: Buffer
     title: string
-    address: string
-    postCode: string
-    locality: string
+    streetAddress: string
+    postalCode: string
+    city: string
   }): number {
     return this.pdfRenderer.addSection({
       startY,
@@ -186,7 +186,7 @@ export class TaxReceiptGeneratorService {
         })
         return (
           this.pdfRenderer.addText({
-            text: `${address}\n${postCode} ${locality}`,
+            text: `${streetAddress}\n${postalCode} ${city}`,
             y: y + this.template.layout.orgInfo.paddingTop,
             x: this.template.positions.orgInfo.x,
           }) + this.template.layout.orgInfo.paddingBottom
@@ -352,13 +352,13 @@ export class TaxReceiptGeneratorService {
     signatoryName,
     signatoryPosition,
     signature,
-    locality,
+    city,
   }: {
     startY: number
     signatoryName: string
     signatoryPosition: string
     signature: Buffer
-    locality: string
+    city: string
   }): number {
     return this.pdfRenderer.addSection({
       startY,
@@ -369,7 +369,7 @@ export class TaxReceiptGeneratorService {
         })
         y =
           this.pdfRenderer.addText({
-            text: this.template.content.templates.taxCertificationLocation(locality),
+            text: this.template.content.templates.taxCertificationLocation(city),
             y: y + this.template.layout.signatureDate.paddingTop,
             ...this.template.positions.signatureDate,
           }) + this.template.layout.signatureDate.paddingBottom
