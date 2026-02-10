@@ -6,6 +6,7 @@
     class="dms-table"
     v-model:pagination="qTablePagination"
     :rows-per-page-options="qTableRowsPerPageOptions"
+    :no-data-label="t('placeholders.noTableResults')"
     @request="$emit('update:pagination', $event.pagination)"
   >
     <template v-for="(_, slot) of $slots" #[slot]="scope">
@@ -16,9 +17,13 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from '@/composables'
+
 import { omit, uniq } from 'es-toolkit'
 
 import type { QTableProps } from 'quasar'
+
+const { t } = useI18n()
 
 export type QTablePagination = Omit<
   Required<NonNullable<QTableProps['pagination']>>,

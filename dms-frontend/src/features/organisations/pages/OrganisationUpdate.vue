@@ -1,5 +1,5 @@
 <template>
-  <Page title="Modifier l'organisation" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.updateOrganisation')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
       <Btn
         outline
@@ -8,7 +8,7 @@
         data-cy="delete-organisation"
         @click="deleteOrganisationDialog?.open()"
       >
-        Supprimer
+        {{ t('actions.delete') }}
       </Btn>
       <Btn
         color="primary"
@@ -16,7 +16,7 @@
         data-cy="update-organisation"
         @click="organisationForm?.validate()"
       >
-        Mettre à jour
+        {{ t('actions.update') }}
       </Btn>
     </template>
     <OrganisationForm
@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -49,14 +50,16 @@ import { useOrganisationStore } from '@/stores'
 import type { OrganisationFormData } from '../types'
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'organisation-list',
-    label: 'Liste des organisations',
+    label: t('labels.listOfOrganisations'),
     to: '/organisations',
     icon: 'account_balance',
   },
-  { id: 'organisation-update', label: "Modifier l'organisation", icon: 'edit' },
+  { id: 'organisation-update', label: t('labels.updateOrganisation'), icon: 'edit' },
 ]
 
 const organisationStore = useOrganisationStore()
@@ -78,14 +81,14 @@ const updateOrganisation = async (formData: OrganisationFormData) => {
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
       organisationForm.value?.setErrors({
-        name: 'Une organisation avec ce nom existe déjà.',
+        name: t('errors.organisationAlreadyExists'),
       })
     }
     working.value = false
     throw error
   }
   working.value = false
-  $q.notify({ type: 'positive', message: "L'organisation a été mise à jour avec succès." })
+  $q.notify({ type: 'positive', message: t('notifications.organisationUpdated') })
   await router.push({ name: 'organisations' })
 }
 
@@ -93,7 +96,7 @@ const deleteOrganisation = async () => {
   working.value = true
   await organisationStore.deleteOrganisation(organisationId.value)
   working.value = false
-  $q.notify({ type: 'positive', message: "L'organisation a été supprimée avec succès." })
+  $q.notify({ type: 'positive', message: t('notifications.organisationDeleted') })
   await router.push({ name: 'organisations' })
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <Page title="Modifier le mode de paiement" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.updatePaymentMode')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
       <Btn
         outline
@@ -8,7 +8,7 @@
         data-cy="delete-payment-mode"
         @click="deletePaymentModeDialog?.open()"
       >
-        Supprimer
+        {{ t('actions.delete') }}
       </Btn>
       <Btn
         color="primary"
@@ -16,7 +16,7 @@
         data-cy="update-payment-mode"
         @click="paymentModeForm?.validate()"
       >
-        Mettre à jour
+        {{ t('actions.update') }}
       </Btn>
     </template>
     <PaymentModeForm ref="paymentModeForm" :paymentMode="paymentMode" @submit="updatePaymentMode" />
@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -45,14 +46,20 @@ import { usePaymentModeStore } from '@/stores'
 import type { PaymentModeFormData } from '../types'
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'payment-mode-list',
-    label: 'Liste des modes de paiement',
+    label: t('labels.listOfPaymentModes'),
     to: '/payment-modes',
     icon: 'point_of_sale',
   },
-  { id: 'payment-mode-update', label: 'Modifier le mode de paiement', icon: 'edit' },
+  {
+    id: 'payment-mode-update',
+    label: t('labels.updatePaymentMode'),
+    icon: 'edit',
+  },
 ]
 
 const paymentModeStore = usePaymentModeStore()
@@ -73,13 +80,13 @@ const updatePaymentMode = async (formData: PaymentModeFormData) => {
     await paymentModeStore.updatePaymentMode(paymentModeId.value, formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      paymentModeForm.value?.setErrors({ name: 'Un mode de paiement avec ce nom existe déjà.' })
+      paymentModeForm.value?.setErrors({ name: t('errors.paymentModeAlreadyExists') })
     }
     working.value = false
     throw error
   }
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le mode de paiement a été mis à jour avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.paymentModeUpdated') })
   await router.push({ name: 'payment-modes' })
 }
 
@@ -87,7 +94,7 @@ const deletePaymentMode = async () => {
   working.value = true
   await paymentModeStore.deletePaymentMode(paymentModeId.value)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le mode de paiement a été supprimé avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.paymentModeDeleted') })
   await router.push({ name: 'payment-modes' })
 }
 

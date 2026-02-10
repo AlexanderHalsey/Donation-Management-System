@@ -2,20 +2,24 @@
   <QDialog v-model="cancelDialog" maximized>
     <QCard style="width: 660px; height: auto">
       <QCardSection class="text-bold" style="font-size: 18px">
-        {{ isCanceled ? 'Reçu annulé' : "Confirmer l'annulation" }}
+        {{
+          isCanceled ? t('labels.cancelledTaxReceipt') : t('actions.confirmTaxReceiptCancellation')
+        }}
       </QCardSection>
       <QCardSection v-if="!isCanceled" class="text-center text-italic">
-        Êtes-vous sûr de vouloir annuler ce reçu fiscal ? Cette action est irréversible.
+        {{ t('questions.sureToCancelTaxReceipt') }}
       </QCardSection>
       <QCardSection v-if="!isCanceled">
-        <label for="canceledReason" class="text-bold text-right"> Raison de l'annulation </label>
+        <label for="canceledReason" class="text-bold text-right">
+          {{ t('labels.cancellationReason') }}
+        </label>
 
         <Input
           type="textarea"
           :id="'canceledReason'"
           v-model="canceledReason"
           v-bind="canceledReasonAttrs"
-          hint="Veuillez indiquer la raison de l'annulation du reçu fiscal."
+          :hint="t('placeholders.cancellationReasonHint')"
           :error="errors.canceledReason"
           maxlength="500"
           rows="5"
@@ -24,18 +28,18 @@
       </QCardSection>
       <QCardSection v-else class="flex items-center text-center">
         <label for="canceledReason" class="text-bold text-right q-pr-lg">
-          Raison de l'annulation :
+          {{ t('labels.cancellationReason') }} :
         </label>
         <div>
           {{ taxReceipt.canceledReason }}
         </div>
       </QCardSection>
       <QCardActions align="right">
-        <Btn flat :label="isCanceled ? 'Fermer' : 'Annuler'" v-close-popup />
+        <Btn flat :label="isCanceled ? t('common.close') : t('common.cancel')" v-close-popup />
         <Btn
           v-if="!isCanceled"
           flat
-          label="Confirmer"
+          :label="t('common.confirm')"
           color="red"
           class="text-white"
           @click="validate()"
@@ -47,6 +51,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Btn from '@/components/ui/Btn.vue'
 import Input from '@/components/ui/Input.vue'
@@ -57,6 +62,8 @@ import { cancelTaxReceiptSchema } from '../schemas'
 
 import type { CancelTaxReceiptFormData } from '../types'
 import type { TaxReceiptListItem } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   taxReceipt: {

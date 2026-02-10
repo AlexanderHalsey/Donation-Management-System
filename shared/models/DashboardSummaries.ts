@@ -1,6 +1,6 @@
-import { DonorListItem } from './Donor'
-import { DonationRef } from './Donation'
-import { TaxReceiptStatus } from './TaxReceipt'
+import type { DonorListItem } from './Donor'
+import type { DonationRef } from './Donation'
+import type { TaxReceiptStatus } from './TaxReceipt'
 
 export interface AmountAndCount {
   count: number

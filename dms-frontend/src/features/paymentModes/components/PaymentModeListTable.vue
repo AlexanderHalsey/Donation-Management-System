@@ -4,7 +4,6 @@
     :columns="headers"
     v-model:pagination="pagination"
     row-key="id"
-    no-data-label="Aucun element à afficher"
     data-cy="payment-mode-list-table"
   >
     <template #body-cell-actions="{ row }">
@@ -20,6 +19,7 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 
@@ -27,6 +27,8 @@ import PaymentModeListItemActions from './PaymentModeListItemActions.vue'
 
 import type { QTableProps } from 'quasar'
 import type { PaymentMode } from '@shared/models'
+
+const { t } = useI18n()
 
 defineProps({
   paymentModeList: {
@@ -42,7 +44,7 @@ defineEmits<{
 const headers: QTableProps['columns'] = [
   {
     name: 'name',
-    label: 'Nom',
+    label: t('common.name'),
     field: 'name',
     align: 'left',
     sortable: true,

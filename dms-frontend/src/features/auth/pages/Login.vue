@@ -6,23 +6,23 @@
         <Input
           v-model="username"
           name="username"
-          label="Nom d'utilisateur"
+          :label="t('labels.username')"
           :error="errors.username"
           class="q-mb-md"
           data-cy="username-input"
         />
         <Input
           v-model="password"
-          label="Mot de passe"
+          :label="t('labels.password')"
           name="password"
           type="password"
           :error="errors.password"
           data-cy="password-input"
         />
         <div class="q-mt-md text-center">
-          <Btn color="primary" @click="onSubmit" type="submit" data-cy="login-button"
-            >Connexion</Btn
-          >
+          <Btn color="primary" @click="onSubmit" type="submit" data-cy="login-button">
+            {{ t('common.login') }}
+          </Btn>
         </div>
       </form>
     </QCardSection>
@@ -31,6 +31,8 @@
 
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
+import { useI18n } from '@/composables'
+
 import { useAuthStore } from '@/stores/auth'
 
 import Btn from '@/components/ui/Btn.vue'
@@ -45,6 +47,8 @@ import { loginSchema } from '../schemas'
 import { login } from '@/apis/dms-api'
 
 import type { LoginFormData } from '../types'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -63,8 +67,8 @@ const onSubmit = handleSubmit(async ({ username, password }) => {
     await router.push({ path: '/' })
   } catch (error) {
     console.error('Login failed:', error)
-    setFieldError('username', 'Nom d’utilisateur ou mot de passe incorrect')
-    setFieldError('password', 'Nom d’utilisateur ou mot de passe incorrect')
+    setFieldError('username', t('errors.incorrectCredentials'))
+    setFieldError('password', t('errors.incorrectCredentials'))
   }
 })
 </script>

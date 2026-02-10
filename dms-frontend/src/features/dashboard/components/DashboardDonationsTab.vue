@@ -7,10 +7,10 @@
         class="q-pa-md text-center"
         data-cy="total-donations"
       >
-        <div class="text-caption text-grey">Total (depuis toujours)</div>
+        <div class="text-caption text-grey">{{ t('labels.totalAllTime') }}</div>
         <div class="text-h6">
           <QIcon name="volunteer_activism" class="text-primary q-mr-sm" />
-          {{ totalDonations!.allTime.count }} dons
+          {{ totalDonations!.allTime.count }} {{ t('nouns.donation', 2).toLowerCase() }}
         </div>
         <div class="text-h6">
           <QIcon name="euro" class="text-positive q-mr-sm" />
@@ -25,10 +25,10 @@
         class="q-pa-md text-center"
         data-cy="total-year-donations"
       >
-        <div class="text-caption text-grey">Cette année</div>
+        <div class="text-caption text-grey">{{ t('labels.thisYear') }}</div>
         <div class="text-h6">
           <QIcon name="volunteer_activism" class="text-primary q-mr-sm" />
-          {{ totalDonations!.thisYear.count }} dons
+          {{ totalDonations!.thisYear.count }} {{ t('nouns.donation', 2).toLowerCase() }}
         </div>
         <div class="text-h6 text-center">
           <QIcon name="euro" class="text-positive q-mr-sm" />
@@ -43,10 +43,10 @@
         class="q-pa-md text-center"
         data-cy="total-month-donations"
       >
-        <div class="text-caption text-grey">Ce mois</div>
+        <div class="text-caption text-grey">{{ t('labels.thisMonth') }}</div>
         <div class="text-h6">
           <QIcon name="volunteer_activism" class="text-primary q-mr-sm" />
-          {{ totalDonations!.thisMonth.count }} dons
+          {{ totalDonations!.thisMonth.count }} {{ t('nouns.donation', 2).toLowerCase() }}
         </div>
         <div class="text-h6">
           <QIcon name="euro" class="text-positive q-mr-sm" />
@@ -62,9 +62,9 @@
         data-cy="current-week-donations"
       >
         <template #title>
-          Dons du semaine
+          {{ t('labels.donationsOfWeek') }}
           <div class="text-subtitle2 q-mt-md q-mb-lg">
-            {{ currentWeekDonations?.count ?? 0 }} dons |
+            {{ currentWeekDonations?.count ?? 0 }} {{ t('nouns.donation', 2).toLowerCase() }} |
             <FormattedCurrency :value="currentWeekDonations?.amount ?? 0" />
           </div>
         </template>
@@ -74,7 +74,6 @@
           row-key="id"
           flat
           dense
-          no-data-label="Aucun don pour cette semaine"
           v-model:pagination="currentWeekDonationPagination"
           :rows-per-page-options="[]"
         >
@@ -104,14 +103,14 @@
         data-cy="donation-charts"
       >
         <template #title>
-          Répartition des dons
+          {{ t('labels.donationsChartTitle') }}
           <div class="flex text-subtitle2 text-grey q-mt-sm">
             <div class="flex q-mr-xl">
-              <span class="q-mr-sm q-mt-sm">Regrouper par :</span>
+              <span class="q-mr-sm q-mt-sm">{{ t('labels.groupBy') }}:</span>
               <Select v-model="chartModeOption" :options="chartModeOptions" />
             </div>
             <div class="flex">
-              <span class="q-mr-sm q-mt-sm">Valeur :</span>
+              <span class="q-mr-sm q-mt-sm">{{ t('labels.value') }}:</span>
               <Select v-model="chartValueOption" :options="chartValueOptions" />
             </div>
           </div>
@@ -124,7 +123,9 @@
                 value: chartValueOption.id,
               })
             "
-            :options="getChartOptions({ value: chartValueOption.id })"
+            :options="
+              getChartOptions({ value: chartValueOption.id, amountLabel: t('labels.amount') })
+            "
           />
         </div>
       </LoadingCard>
@@ -134,12 +135,14 @@
 
 <script setup lang="ts">
 import { computed, ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { Bar } from 'vue-chartjs'
 
 import FormattedCurrency from '@/components/FormattedCurrency.vue'
 import FormattedDate from '@/components/FormattedDate.vue'
 import LoadingCard from '@/components/LoadingCard.vue'
+import Select from '@/components/ui/Select.vue'
 import Table from '@/components/ui/Table.vue'
 
 import { DonorLink } from '@/features/donors'
@@ -148,7 +151,8 @@ import { getChartOptions, getChartData } from '../helpers/chart'
 
 import type { QTableColumn } from 'quasar'
 import type { DashboardSummaries } from '@shared/models'
-import Select from '@/components/ui/Select.vue'
+
+const { t } = useI18n()
 
 defineProps({
   totalDonations: {
@@ -168,22 +172,28 @@ defineProps({
 const chartModeOptions = computed<
   { id: keyof DashboardSummaries['donationCharts']; name: string }[]
 >(() => [
-  { id: 'organisations', name: 'Organisation' },
-  { id: 'donationTypes', name: 'Type de don' },
-  { id: 'paymentModes', name: 'Mode de paiement' },
+  { id: 'organisations', name: t('nouns.organisation') },
+  { id: 'donationTypes', name: t('nouns.donationType') },
+  { id: 'paymentModes', name: t('nouns.paymentMode') },
 ])
 const chartModeOption = ref<(typeof chartModeOptions.value)[number]>(chartModeOptions.value[0])
 
 const chartValueOptions = computed<{ id: 'count' | 'amount'; name: string }[]>(() => [
-  { id: 'count', name: 'Nombre de dons' },
-  { id: 'amount', name: 'Montant' },
+  { id: 'count', name: t('labels.numberOfDonations') },
+  { id: 'amount', name: t('labels.amount') },
 ])
 const chartValueOption = ref<(typeof chartValueOptions.value)[number]>(chartValueOptions.value[0])
 
 const currentWeekDonationColumns: QTableColumn[] = [
-  { name: 'donor', required: true, label: 'Donateur', align: 'left', field: 'donor' },
-  { name: 'donatedAt', required: true, label: 'Date du don', align: 'left', field: 'donatedAt' },
-  { name: 'amount', required: true, label: 'Montant', align: 'left', field: 'amount' },
+  { name: 'donor', required: true, label: t('nouns.donor'), align: 'left', field: 'donor' },
+  {
+    name: 'donatedAt',
+    required: true,
+    label: t('labels.donatedAt'),
+    align: 'left',
+    field: 'donatedAt',
+  },
+  { name: 'amount', required: true, label: t('labels.amount'), align: 'left', field: 'amount' },
 ]
 
 const currentWeekDonationPagination = ref({

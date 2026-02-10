@@ -1,10 +1,10 @@
 <template>
   <div class="flex q-gutter-md">
     <DatePickerInput
-      v-for="[key, label] of ([
-        ['gte', 'de'],
-        ['lte', 'à'],
-      ] as const)"
+      v-for="[key, label] of [
+        ['gte', t('prepositions.from')],
+        ['lte', t('prepositions.to')],
+      ] as const"
       :key="key"
       :model-value="props.modelValue?.[key]"
       :label="label"
@@ -23,11 +23,14 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { endOfDay, startOfDay } from 'date-fns'
 import DatePickerInput, { dateOptions } from './ui/DatePickerInput.vue'
 
 import type { DateTimeFilter } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: {

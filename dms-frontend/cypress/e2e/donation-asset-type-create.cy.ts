@@ -6,13 +6,13 @@ describe('Donation Asset Type Create', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an empty form', () => {
-    cy.visit('/donation-asset-types/create')
+    cy.visitPage('/donation-asset-types/create')
     cy.get(formField).should('have.length', 2).eq(0).should('have.value', '')
     cy.get(formField).eq(1).find('input[type="checkbox"]').should('not.be.checked')
   })
 
   it('should show validation errors', () => {
-    cy.visit('/donation-asset-types/create')
+    cy.visitPage('/donation-asset-types/create')
     cy.get(createDonationAssetTypeBtn).click()
 
     cy.get('.q-field--error .q-field__bottom .q-field__messages')
@@ -21,7 +21,7 @@ describe('Donation Asset Type Create', () => {
   })
 
   it('should submit the form successfully', () => {
-    cy.visit('/donation-asset-types/create')
+    cy.visitPage('/donation-asset-types/create')
 
     cy.get(formField).eq(0).find('.q-field').type('New Donation Asset Type')
 
@@ -41,7 +41,7 @@ describe('Donation Asset Type Create', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-asset-types/create')
+    cy.visitPage('/donation-asset-types/create')
     cy.location('pathname').should('not.include', '/donation-asset-types/create')
     cy.location('pathname').should('include', '/403')
   })

@@ -1,5 +1,5 @@
 <template>
-  <Page title="Modifier la forme de don" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.updateDonationMethod')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
       <Btn
         outline
@@ -8,7 +8,7 @@
         data-cy="delete-donation-method"
         @click="deleteDonationMethodDialog?.open()"
       >
-        Supprimer
+        {{ t('actions.delete') }}
       </Btn>
       <Btn
         color="primary"
@@ -16,7 +16,7 @@
         data-cy="update-donation-method"
         @click="donationMethodForm?.validate()"
       >
-        Mettre à jour
+        {{ t('actions.update') }}
       </Btn>
     </template>
     <DonationMethodForm
@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -49,15 +50,17 @@ import { useDonationMethodStore } from '@/stores'
 import type { DonationMethodFormData } from '../types'
 import type { Breadcrumb } from '@/types'
 
-const breadcrumbs: Breadcrumb[] = [
+const { t } = useI18n()
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
   {
     id: 'donation-method-list',
-    label: 'Liste des formes de don',
+    label: t('labels.listOfDonationMethods'),
     to: '/donation-methods',
     icon: 'article',
   },
-  { id: 'donation-method-update', label: 'Modifier la forme de don', icon: 'edit' },
-]
+  { id: 'donation-method-update', label: t('labels.updateDonationMethod'), icon: 'edit' },
+])
 
 const donationMethodStore = useDonationMethodStore()
 
@@ -77,13 +80,13 @@ const updateDonationMethod = async (formData: DonationMethodFormData) => {
     await donationMethodStore.updateDonationMethod(donationMethodId.value, formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      donationMethodForm.value?.setErrors({ name: 'Une forme de don avec ce nom existe déjà.' })
+      donationMethodForm.value?.setErrors({ name: t('errors.donationMethodAlreadyExists') })
     }
     working.value = false
     throw error
   }
   working.value = false
-  $q.notify({ type: 'positive', message: 'La forme de don a été mise à jour avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationMethodUpdated') })
   await router.push({ name: 'donation-methods' })
 }
 
@@ -91,7 +94,7 @@ const deleteDonationMethod = async () => {
   working.value = true
   await donationMethodStore.deleteDonationMethod(donationMethodId.value)
   working.value = false
-  $q.notify({ type: 'positive', message: 'La forme de don a été supprimée avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationMethodDeleted') })
   await router.push({ name: 'donation-methods' })
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <BtnDropdown outline color="primary" icon="filter_alt" label="Filtres">
+  <BtnDropdown outline color="primary" icon="filter_alt" :label="t('common.filters')">
     <template #label>
       <QBadge v-if="filterCount" color="red-8" rounded class="q-ml-sm">
         {{ filterCount }}
@@ -8,16 +8,16 @@
     </template>
     <div class="q-px-md q-py-sm">
       <div class="row justify-between items-center q-mb-lg">
-        <div class="text-bold" style="font-size: 18px">Filtres des dons</div>
+        <div class="text-bold" style="font-size: 18px">{{ t('labels.donationFilters') }}</div>
         <Btn flat size="md" color="primary" icon="refresh" @click="updateFilter()">
-          Réinitialiser
+          {{ t('common.reset') }}
         </Btn>
       </div>
 
       <div class="row">
         <div class="col-4">
           <div>
-            <div class="text-bold q-mb-sm">Donateur</div>
+            <div class="text-bold q-mb-sm">{{ t('nouns.donor') }}</div>
             <SelectFilterComponent
               :model-value="filter?.donor?.id"
               :options="donors.options"
@@ -29,7 +29,7 @@
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div>
-            <div class="text-bold q-mb-sm">Mode de paiement</div>
+            <div class="text-bold q-mb-sm">{{ t('nouns.paymentMode') }}</div>
             <SelectFilterComponent
               :model-value="filter?.paymentModeId"
               :options="paymentModes.options"
@@ -47,7 +47,7 @@
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div>
-            <div class="text-bold q-mb-sm">Organisation</div>
+            <div class="text-bold q-mb-sm">{{ t('nouns.organisation') }}</div>
             <SelectFilterComponent
               :model-value="filter?.organisationId"
               @update:model-value="updateFilter({ ...filter, organisationId: $event })"
@@ -69,7 +69,7 @@
         <QSeparator vertical class="q-mx-md" />
         <div class="col" style="width: 510px">
           <div>
-            <div class="text-bold q-mb-sm">Date du don</div>
+            <div class="text-bold q-mb-sm">{{ t('labels.donatedAt') }}</div>
             <DateTimeFilterComponent
               :model-value="filter?.donatedAt"
               @update:model-value="updateFilter({ ...filter, donatedAt: $event })"
@@ -77,7 +77,7 @@
           </div>
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div>
-            <div class="text-bold q-mb-sm">Montant</div>
+            <div class="text-bold q-mb-sm">{{ t('labels.amount') }}</div>
             <FloatFilterComponent
               :model-value="filter?.amount"
               @update:model-value="updateFilter({ ...filter, amount: $event })"
@@ -86,7 +86,7 @@
           <QSeparator class="q-mt-xs q-mb-sm" />
           <div class="row">
             <div>
-              <div class="text-bold q-mb-sm">Type de don</div>
+              <div class="text-bold q-mb-sm">{{ t('nouns.donationType') }}</div>
               <SelectFilterComponent
                 :model-value="filter?.donationTypeId"
                 :options="donationTypes.options"
@@ -98,7 +98,7 @@
                     <QItemSection>
                       <QItemLabel>{{ scope.opt.label }}</QItemLabel>
                       <QItemLabel caption class="flex items-center">
-                        Organisation :
+                        {{ t('nouns.organisation') }} :
                         <OrganisationTag
                           :organisation="getOrganisationRefByDonationTypeId(scope.opt.value)"
                           :organisation-options="organisations"
@@ -112,7 +112,7 @@
             </div>
             <QSeparator vertical class="q-mx-md" />
             <div>
-              <div class="text-bold q-mb-sm">Donateurs désactivés</div>
+              <div class="text-bold q-mb-sm">{{ t('labels.disabledDonors') }}</div>
               <YesNoCheckbox
                 :model-value="filter?.donor?.isDisabled?.equals"
                 @update:model-value="
@@ -132,6 +132,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { debounce, isEqual } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -159,6 +160,8 @@ import type {
   OrganisationRef,
   PaymentMode,
 } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   organisations: {

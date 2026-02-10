@@ -1,5 +1,5 @@
 <template>
-  <QLayout view="lHh LpR lFr">
+  <QLayout view="lHh LpR lFr" :key="refresh">
     <QHeader reveal bordered class="bg-white text-primary">
       <QToolbar>
         <QBtn dense flat round icon="menu" color="primary" @click="toggleLeftDrawer" />
@@ -19,11 +19,8 @@
         <QSpace />
 
         <HelpBtn />
-        <!-- language -->
-        <div>
-          <Btn dense flat round icon="logout" color="primary" class="q-ml-lg" @click="logout" />
-          <QTooltip :delay="100"> Déconnexion </QTooltip>
-        </div>
+        <LanguageDropdown @update:locale="refresh++" />
+        <Logout />
       </QToolbar>
     </QHeader>
 
@@ -83,21 +80,25 @@
 
 <script setup lang="ts">
 import { computed, provide, ref } from 'vue'
+import { useI18n } from '@/composables'
 
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '@/stores'
 
 import HelpBtn from './components/HelpBtn.vue'
+import LanguageDropdown from './components/LanguageDropdown.vue'
+import Logout from './components/Logout.vue'
 import DMSTitle from './components/DMSTitle.vue'
 
 import { setBreadcrumbsInjectionKey } from '@/symbols'
 import type { Breadcrumb, MenuItem } from '@/types'
-import Btn from '@/components/ui/Btn.vue'
-import { useRouter } from 'vue-router'
+
+const { t } = useI18n()
 
 const $q = useQuasar()
 const authStore = useAuthStore()
-const router = useRouter()
+
+const refresh = ref(0)
 
 const userRole = computed(() => authStore.userRole)
 
@@ -111,21 +112,25 @@ const menuItems = computed<
   const mainGroup = {
     group: 'main',
     items: [
-      { label: 'Tableau de bord', icon: 'bar_chart', to: '/dashboard' },
-      { label: 'Dons', icon: 'volunteer_activism', to: '/donations' },
-      { label: 'Donateurs', icon: 'group', to: '/donors' },
-      { label: 'Reçus fiscaux', icon: 'receipt_long', to: '/tax-receipts' },
+      { label: t('pages.dashboard'), icon: 'bar_chart', to: '/dashboard' },
+      { label: t('nouns.donation', 2), icon: 'volunteer_activism', to: '/donations' },
+      { label: t('nouns.donor', 2), icon: 'group', to: '/donors' },
+      { label: t('nouns.taxReceipt', 2), icon: 'receipt_long', to: '/tax-receipts' },
     ],
   }
   const adminGroup = {
     group: 'admin',
     label: 'Admin',
     items: [
-      { label: 'Organisations', icon: 'account_balance', to: '/organisations' },
-      { label: 'Types de don', icon: 'favorite', to: '/donation-types' },
-      { label: 'Modes de paiement', icon: 'point_of_sale', to: '/payment-modes' },
-      { label: 'Formes de don', icon: 'article', to: '/donation-methods' },
-      { label: 'Natures de don', icon: 'payments', to: '/donation-asset-types' },
+      { label: t('nouns.organisation', 2), icon: 'account_balance', to: '/organisations' },
+      { label: t('nouns.donationType', 2), icon: 'favorite', to: '/donation-types' },
+      { label: t('nouns.paymentMode', 2), icon: 'point_of_sale', to: '/payment-modes' },
+      { label: t('nouns.donationMethod', 2), icon: 'article', to: '/donation-methods' },
+      {
+        label: t('nouns.donationAssetType', 2),
+        icon: 'payments',
+        to: '/donation-asset-types',
+      },
     ],
   }
   if (userRole.value === 'admin') {
@@ -156,11 +161,6 @@ const leftDrawerComputed = computed(() => ($q.screen.gt.sm ? null : leftDrawer.v
 const menuScrollVisible = ref(false)
 const setMenuScrollVisible = ({ verticalPosition }: { verticalPosition: number }) => {
   menuScrollVisible.value = verticalPosition > 0
-}
-
-const logout = async () => {
-  await authStore.logout()
-  await router.push({ name: 'login' })
 }
 </script>
 

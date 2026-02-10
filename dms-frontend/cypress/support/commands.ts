@@ -100,9 +100,21 @@ declare global {
         formData: PaymentModeFormDataMock,
       ): Chainable<Subject>
       mockUploadImage(): Chainable<Subject>
+      visitPage(url: string, options?: Partial<VisitOptions> | undefined): Chainable<AUTWindow>
     }
   }
 }
+
+Cypress.Commands.add('visitPage', (url, options) => {
+  cy.visit(url, {
+    ...options,
+    onBeforeLoad(win) {
+      Object.defineProperty(win.navigator, 'language', {
+        value: 'fr-FR',
+      })
+    },
+  })
+})
 
 Cypress.Commands.add('mockLogin', (failure = false) => {
   cy.intercept('POST', `${MOCK_API_HOST}/auth/login`, {

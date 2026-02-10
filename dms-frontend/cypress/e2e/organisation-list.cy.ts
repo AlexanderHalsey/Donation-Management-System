@@ -9,7 +9,7 @@ describe('Organisation List', () => {
   const organisationListItem = organisationTable + ' tbody tr'
 
   it('displays the organisation list', () => {
-    cy.visit('/organisations')
+    cy.visitPage('/organisations')
     cy.wait(['@getOrganisationList'])
     cy.get(organisationListItem).should('have.length', 2)
     cy.get(organisationListItem)
@@ -28,7 +28,7 @@ describe('Organisation List', () => {
       })
   })
   it('allows the user to sort by name column', () => {
-    cy.visit('/organisations')
+    cy.visitPage('/organisations')
     cy.wait(['@getOrganisationList'])
     cy.get(organisationHeader).within(() => {
       cy.get('th').eq(0).click() // Sort by name descending
@@ -50,7 +50,7 @@ describe('Organisation List', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/organisations')
+    cy.visitPage('/organisations')
     cy.location('pathname').should('not.include', '/organisations')
     cy.location('pathname').should('include', '/403')
   })

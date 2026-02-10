@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from '@/composables'
 
 import { AxiosError } from 'axios'
 
@@ -46,6 +47,8 @@ type FormFile = {
   id: string
   name: string
 }
+
+const { t } = useI18n()
 
 const props = defineProps<
   Omit<QFileProps, 'error' | 'modelValue' | 'onUpdate:modelValue'> & {
@@ -100,7 +103,7 @@ const uploadFile = async (newFile?: File) => {
     emit('update:model-value', formFile)
   } catch (err: unknown) {
     console.error('File upload failed', err)
-    let error = 'File upload failed. Please try again.'
+    let error = t('errors.fileUpload')
     if (err instanceof AxiosError && err.response?.data.message) {
       error = err.response?.data?.message
     }

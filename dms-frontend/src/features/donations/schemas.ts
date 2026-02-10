@@ -1,17 +1,20 @@
 import type { DonationType } from '@shared/models'
 import { z } from 'zod'
 
-export const getDonationFormSchema = (donationTypeOptions: DonationType[]) => {
+export const getDonationFormSchema = (
+  donationTypeOptions: DonationType[],
+  donationTypeNotInOrganisationLabel: string,
+) => {
   return z
     .object({
-      donorId: z.uuid('Obligatoire'),
-      donatedAt: z.date('Obligatoire'),
-      amount: z.number('Obligatoire').gt(0),
-      organisationId: z.uuid('Obligatoire'),
-      donationTypeId: z.uuid('Obligatoire'),
-      paymentModeId: z.uuid('Obligatoire'),
-      donationMethodId: z.uuid('Obligatoire'),
-      donationAssetTypeId: z.uuid('Obligatoire'),
+      donorId: z.uuid(),
+      donatedAt: z.date(),
+      amount: z.number().gt(0),
+      organisationId: z.uuid(),
+      donationTypeId: z.uuid(),
+      paymentModeId: z.uuid(),
+      donationMethodId: z.uuid(),
+      donationAssetTypeId: z.uuid(),
     })
     .superRefine((data, ctx) => {
       if (
@@ -21,7 +24,7 @@ export const getDonationFormSchema = (donationTypeOptions: DonationType[]) => {
         ;['donationTypeId', 'organisationId'].forEach((field) => {
           ctx.addIssue({
             code: 'custom',
-            message: "Le type de don sélectionné n'appartient pas à l'organisation choisie.",
+            message: donationTypeNotInOrganisationLabel,
             path: [field],
           })
         })

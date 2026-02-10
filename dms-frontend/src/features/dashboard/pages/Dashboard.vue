@@ -1,5 +1,5 @@
 <template>
-  <Page title="Tableau de bord" :breadcrumbs="breadcrumbs">
+  <Page :title="t('pages.dashboard')" :breadcrumbs="breadcrumbs">
     <template #actions>
       <QTabs
         v-model="tab"
@@ -9,15 +9,15 @@
         indicator-color="primary"
         data-cy="dashboard-tabs"
       >
-        <QTab name="donations" label="Dons" no-caps />
+        <QTab name="donations" :label="t('nouns.donation', 2)" no-caps />
         <QTab
           name="donors"
-          :label="`Donateurs${!!disabledDonors?.length ? '&nbsp;&nbsp;&nbsp;⚠️' : ''}`"
+          :label="`${t('nouns.donor', 2)}${!!disabledDonors?.length ? '&nbsp;&nbsp;&nbsp;⚠️' : ''}`"
           no-caps
         />
         <QTab
           name="tax-receipts"
-          :label="`Reçus fiscaux${!!dashboardSummaries?.taxReceiptStatusCounts.FAILED ? '&nbsp;&nbsp;&nbsp;⚠️' : ''}`"
+          :label="`${t('nouns.taxReceipt', 2)}${!!dashboardSummaries?.taxReceiptStatusCounts.FAILED ? '&nbsp;&nbsp;&nbsp;⚠️' : ''}`"
           no-caps
         />
       </QTabs>
@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 
 import Page from '@/layouts/Page.vue'
 
@@ -62,9 +63,13 @@ import DashboardTaxReceiptsTab from '../components/DashboardTaxReceiptsTab.vue'
 
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const tab = ref('donations')
 
-const breadcrumbs: Breadcrumb[] = [{ id: 'dashboard', label: 'Tableau de bord', icon: 'bar_chart' }]
+const breadcrumbs: Breadcrumb[] = [
+  { id: 'dashboard', label: t('pages.dashboard'), icon: 'bar_chart' },
+]
 
 const dashboardStore = useDashboardStore()
 

@@ -8,7 +8,6 @@
       :selected-rows-label="selectedRowsLabel"
       selection="multiple"
       :selected="donorIds"
-      no-data-label="Aucun element à afficher"
       v-model:expanded="expanded"
     >
       <template #header="props">
@@ -27,10 +26,10 @@
               data-cy="select-all-checkbox"
             />
           </QTh>
-          <QTh class="text-left">Donateur</QTh>
-          <QTh class="text-left">Email</QTh>
-          <QTh class="text-center">Nombre de dons</QTh>
-          <QTh class="text-right">Montant total</QTh>
+          <QTh class="text-left">{{ t('nouns.donor') }}</QTh>
+          <QTh class="text-left">{{ t('labels.email') }}</QTh>
+          <QTh class="text-center">{{ t('labels.numberOfDonations') }}</QTh>
+          <QTh class="text-right">{{ t('labels.totalAmount') }}</QTh>
           <QTh class="text-right">
             <Btn
               size="sm"
@@ -45,7 +44,11 @@
               "
               data-cy="expand-collapse-all-button"
             >
-              Tout {{ expanded.length === eligibleDonors.length ? 'replier' : 'déplier' }}
+              {{
+                expanded.length === eligibleDonors.length
+                  ? t('actions.collapseAll')
+                  : t('actions.expandAll')
+              }}
             </Btn>
           </QTh>
         </QTr>
@@ -63,7 +66,7 @@
           /></QTd>
           <QTd>{{ getDonorFullName(props.row) }}</QTd>
           <QTd :class="props.row.email ? '' : 'text-red-6'">{{
-            props.row.email ?? 'Ce donateur n’a pas d’email'
+            props.row.email ?? t('placeholders.thisDonatorHasNoEmail')
           }}</QTd>
           <QTd class="text-center">{{ props.row.donationCount }}</QTd>
           <QTd class="text-right">
@@ -76,7 +79,7 @@
               :icon="props.expand ? 'arrow_drop_up' : 'arrow_drop_down'"
               @click="expanded = xor(expanded, [props.row.id])"
             >
-              {{ props.expand ? 'Replier' : 'Déplier' }}
+              {{ props.expand ? t('actions.collapseAll') : t('actions.expandAll') }}
             </Btn>
           </QTd>
         </QTr>
@@ -87,7 +90,7 @@
               <QCardSection>
                 <div class="text-h6 q-mb-md flex items-center">
                   <QIcon name="volunteer_activism" class="q-mr-sm" />
-                  Dons
+                  {{ t('nouns.donation', 2) }}
                 </div>
                 <Table
                   :rows="props.row.donations"
@@ -96,7 +99,6 @@
                   row-key="id"
                   :rows-per-page-options="[0]"
                   class="q-my-md"
-                  no-data-label="Aucun element à afficher"
                   data-cy="donation-table"
                 >
                   <template #body-cell-donatedAt="{ row }">
@@ -137,7 +139,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, type PropType } from 'vue'
-
+import { useI18n } from '@/composables'
 import { xor } from 'es-toolkit'
 
 import Btn from '@/components/ui/Btn.vue'
@@ -152,7 +154,7 @@ import { DonorAddressCard, getDonorFullName } from '@/features/donors'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { annualTaxReceiptsFormSchema } from '../schemas'
+import { getAnnualTaxReceiptsFormSchema } from '../schemas'
 
 import type { AnnualTaxReceiptsFormData } from '../types'
 import type { EligibleTaxReceiptDonor, OrganisationRef } from '@shared/models'
@@ -173,6 +175,8 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
+
 const emit = defineEmits<{
   (e: 'submit', formData: AnnualTaxReceiptsFormData): void
 }>()
@@ -180,45 +184,41 @@ const emit = defineEmits<{
 const annualTaxReceiptsDialog = ref<InstanceType<typeof AnnualTaxReceiptsDialog> | null>(null)
 
 const selectedRowsLabel = (numSelected: number) => {
-  return numSelected === 0
-    ? 'Aucun donateur sélectionné'
-    : numSelected === 1
-      ? '1 donateur sélectionné'
-      : `${numSelected} donateurs sélectionnés`
+  return t('actions.donatorSelected', numSelected)
 }
 
 const donationTableHeaders: QTableProps['columns'] = [
   {
     name: 'donatedAt',
-    label: 'Date du don',
+    label: t('labels.donatedAt'),
     field: 'donatedAt',
     align: 'left',
     sortable: true,
   },
   {
     name: 'amount',
-    label: 'Montant',
+    label: t('labels.amount'),
     field: 'amount',
     align: 'left',
     sortable: true,
   },
   {
     name: 'paymentMode',
-    label: 'Mode de paiement',
+    label: t('nouns.paymentMode'),
     field: 'paymentMode',
     align: 'left',
     sortable: true,
   },
   {
     name: 'organisation',
-    label: 'Organisation',
+    label: t('nouns.organisation'),
     field: 'organisation',
     align: 'left',
     sortable: true,
   },
   {
     name: 'donationType',
-    label: 'Type de don',
+    label: t('nouns.donationType'),
     field: 'donationType',
     align: 'left',
     sortable: true,
@@ -227,7 +227,9 @@ const donationTableHeaders: QTableProps['columns'] = [
 
 const { defineField, errors, handleSubmit, resetForm, setFieldValue } =
   useForm<AnnualTaxReceiptsFormData>({
-    validationSchema: toTypedSchema(annualTaxReceiptsFormSchema),
+    validationSchema: toTypedSchema(
+      getAnnualTaxReceiptsFormSchema(t('errors.atLeastOneDonorMustBeSelected')),
+    ),
     initialValues: {
       donorIds: [],
     },

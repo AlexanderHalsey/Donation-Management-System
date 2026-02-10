@@ -3,10 +3,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, onMounted, type PropType, ref } from 'vue'
+import { useI18n } from '@/composables'
 
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { format, type Locale } from 'date-fns'
+
+const { locale: i18nLocale } = useI18n()
 
 const props = defineProps({
   value: {
@@ -19,6 +21,8 @@ const props = defineProps({
     validator: (val: string) => ['date', 'date-time', 'time'].includes(val),
   },
 })
+
+const locale = ref<Locale>()
 
 const formattedValue = computed(() => {
   let formatPattern: string
@@ -34,7 +38,14 @@ const formattedValue = computed(() => {
       break
   }
   return format(props.value, formatPattern!, {
-    locale: fr,
+    locale: locale.value,
   })
+})
+
+onMounted(async () => {
+  locale.value =
+    i18nLocale.value === 'fr'
+      ? (await import('date-fns/locale/fr')).fr
+      : (await import('date-fns/locale/en-GB')).enGB
 })
 </script>

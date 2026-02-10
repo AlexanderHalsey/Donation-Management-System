@@ -1,7 +1,7 @@
 import z from 'zod'
 
 export const organisationFormSchema = z.object({
-  name: z.string('Obligatoire').min(1, 'Obligatoire').max(255),
+  name: z.string().min(1).max(255),
   isTaxReceiptEnabled: z.boolean(),
   title: z.string().optional(),
   streetAddress: z.string().optional(),

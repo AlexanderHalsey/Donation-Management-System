@@ -12,7 +12,7 @@ import {
 
 import { PrismaService } from '@/infrastructure'
 
-import { TAX_RECEIPT_STATUS_OPTIONS } from '@shared/constants'
+import { getTaxReceiptStatusOptions } from '@shared/constants'
 
 import {
   Donation,
@@ -25,6 +25,7 @@ import {
 } from '@shared/models'
 
 import { DonationRequest } from '@/api/dtos'
+import { Language } from '../types'
 
 const BASIC_INCLUDE_FIELDS = {
   donationType: true,
@@ -237,6 +238,7 @@ export class DonationService {
 
   async getExportList(
     orderBy: DonationListSortOrder,
+    language: Language,
     filter?: DonationListFilter,
   ): Promise<DonationExport[]> {
     const donations = await this.prisma.donation.findMany({
@@ -258,8 +260,9 @@ export class DonationService {
       taxReceiptNumber: donation.taxReceipt?.receiptNumber || undefined,
       taxReceiptType: donation.taxReceipt?.type || undefined,
       taxReceiptStatus:
-        TAX_RECEIPT_STATUS_OPTIONS.find((option) => option.id === donation.taxReceipt?.status)
-          ?.name || undefined,
+        getTaxReceiptStatusOptions(language).find(
+          (option) => option.id === donation.taxReceipt?.status,
+        )?.name || undefined,
     }))
   }
 

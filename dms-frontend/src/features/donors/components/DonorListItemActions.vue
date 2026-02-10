@@ -12,7 +12,9 @@
         <QItemSection style="flex: unset">
           <QIcon name="contact_page" />
         </QItemSection>
-        <QItemSection> Accéder au profil {{ donorExternalProviderName }} </QItemSection>
+        <QItemSection>
+          {{ t('actions.goToProfile', { profileName: donorExternalProviderName }) }}
+        </QItemSection>
       </QItem>
     </QList>
   </QMenu>
@@ -20,10 +22,13 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Btn from '@/components/ui/Btn.vue'
 
 import type { DonorListItem } from '@shared/models'
+
+const { t } = useI18n()
 
 defineProps({
   donor: {

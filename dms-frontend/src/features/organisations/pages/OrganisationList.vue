@@ -1,7 +1,9 @@
 <template>
-  <Page title="Liste des organisations" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.listOfOrganisations')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
-      <Btn to="/organisations/create" icon="add" color="primary" class="q-mr-sm"> Nouveau </Btn>
+      <Btn to="/organisations/create" icon="add" color="primary" class="q-mr-sm">
+        {{ t('actions.new') }}
+      </Btn>
     </template>
     <OrganisationListTable
       :organisation-list="organisationList"
@@ -12,6 +14,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useQuasar } from 'quasar'
 
 import Page from '@/layouts/Page.vue'
@@ -23,10 +26,12 @@ import { useOrganisationListStore, useOrganisationStore } from '@/stores'
 
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'organisation-list',
-    label: 'Liste des organisations',
+    label: t('labels.listOfOrganisations'),
     icon: 'account_balance',
   },
 ]
@@ -46,7 +51,7 @@ const deleteOrganisation = async (organisationId: string) => {
   await organisationStore.deleteOrganisation(organisationId)
   await organisationListStore.fetchOrganisations()
   working.value = false
-  $q.notify({ type: 'positive', message: "L'organisation a été supprimée avec succès." })
+  $q.notify({ type: 'positive', message: t('notifications.organisationDeleted') })
 }
 
 onMounted(async () => {

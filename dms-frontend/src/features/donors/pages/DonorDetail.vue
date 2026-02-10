@@ -9,7 +9,7 @@
         :href="donorExternalProviderUrl + donor.externalId"
         target="_blank"
       >
-        Accéder au profil {{ donorExternalProviderName }}
+        {{ t('actions.goToProfile', { profileName: donorExternalProviderName }) }}
       </Btn>
     </template>
     <div v-if="donor" style="max-width: 1200px">
@@ -19,26 +19,26 @@
             <QCardSection>
               <div class="text-h6 q-mb-md flex items-center">
                 <QIcon name="person" class="q-mr-sm" />
-                Informations personnelles
+                {{ t('nouns.personalInformation') }}
               </div>
               <div class="row q-col-gutter-xl">
-                <TitledComponent title="Nom complet" class="col-auto">
+                <TitledComponent :title="t('labels.fullName')" class="col-auto">
                   {{ getDonorFullName(donor, false) }}
                 </TitledComponent>
-                <TitledComponent title="Civilité" class="col-auto">
+                <TitledComponent :title="t('labels.civility')" class="col-auto">
                   {{ donor.civility || '-' }}
                 </TitledComponent>
-                <TitledComponent title="ID externe" class="col-auto"
+                <TitledComponent :title="t('labels.externalId')" class="col-auto"
                   >#{{ donor.externalId }}</TitledComponent
                 >
-                <TitledComponent title="Statut" class="col-auto">
+                <TitledComponent :title="t('nouns.status')" class="col-auto">
                   <QChip
                     :color="donor.isDisabled ? 'negative' : 'positive'"
                     text-color="white"
                     size="sm"
                     :icon="donor.isDisabled ? 'block' : 'check_circle'"
                   >
-                    {{ donor.isDisabled ? 'Désactivé' : 'Actif' }}
+                    {{ donor.isDisabled ? t('common.disabled') : t('common.active') }}
                   </QChip>
                   <QChip
                     v-if="donor.isFacilitator"
@@ -48,16 +48,16 @@
                     icon="support_agent"
                     class="q-ml-xs"
                   >
-                    Facilitateur
+                    {{ t('nouns.facilitator') }}
                   </QChip>
                 </TitledComponent>
-                <TitledComponent title="Email" class="col-auto">
+                <TitledComponent :title="t('labels.email')" class="col-auto">
                   <a v-if="donor.email" :href="`mailto:${donor.email}`" class="text-primary">
                     {{ donor.email }}
                   </a>
                   <span v-else>-</span>
                 </TitledComponent>
-                <TitledComponent title="Téléphone" class="col-auto">
+                <TitledComponent :title="t('labels.phoneNumber')" class="col-auto">
                   <a
                     v-if="donor.phoneNumber"
                     :href="`tel:${donor.phoneNumber}`"
@@ -67,7 +67,7 @@
                   </a>
                   <span v-else>-</span>
                 </TitledComponent>
-                <TitledComponent title="Dernière mise à jour" class="col-auto">
+                <TitledComponent :title="t('labels.lastUpdate')" class="col-auto">
                   <FormattedDate :value="donor.updatedAt" pattern="date-time" />
                 </TitledComponent>
               </div>
@@ -80,7 +80,7 @@
             <QCardSection class="full-height column">
               <div class="text-h6 q-mb-md">
                 <QIcon name="bar_chart" class="q-mr-sm" />
-                Statistiques de dons
+                {{ t('nouns.donationStatistics') }}
               </div>
               <div class="row q-col-gutter-md col-grow">
                 <div class="col col-md-12">
@@ -88,11 +88,15 @@
                     icon="volunteer_activism"
                     icon-color="primary"
                     :value="donor.donationCount"
-                    :label="donor.donationCount <= 1 ? 'Don effectué' : 'Dons effectués'"
+                    :label="t('nouns.donationMade', donor.donationCount === 1 ? 1 : 2)"
                   />
                 </div>
                 <div class="col col-md-12">
-                  <StatsCard icon="euro" icon-color="positive" :label="'Montant total des dons'">
+                  <StatsCard
+                    icon="euro"
+                    icon-color="positive"
+                    :label="t('labels.totalDonationAmount')"
+                  >
                     <template #value>
                       <FormattedCurrency :value="donor.donationTotalAmount" />
                     </template>
@@ -103,7 +107,7 @@
                     v-if="donor.donationCount > 0"
                     icon="trending_up"
                     icon-color="info"
-                    label="Montant moyen par don"
+                    :label="t('labels.averageDonationAmount')"
                   >
                     <template #value>
                       <FormattedCurrency :value="averageDonationAmount" />
@@ -122,6 +126,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from '@/composables'
 
 import Page from '@/layouts/Page.vue'
 
@@ -138,6 +143,8 @@ import { useDonorStore } from '@/stores'
 import { getDonorFullName } from '../helpers'
 
 import type { Breadcrumb } from '@/types'
+
+const { t } = useI18n()
 
 const breadcrumbs = ref<Breadcrumb[]>([
   { id: 'donor-list', label: 'Liste des donateurs', to: '/donors', icon: 'group' },

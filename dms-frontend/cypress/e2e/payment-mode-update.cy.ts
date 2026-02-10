@@ -9,12 +9,12 @@ describe('Payment Mode Update', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an existing form', () => {
-    cy.visit('/payment-modes/payment-mode-id-1')
+    cy.visitPage('/payment-modes/payment-mode-id-1')
     cy.wait(['@getPaymentMode'])
     cy.get(formField).eq(0).find('.q-field input').should('have.value', 'Payment Mode 1')
   })
   it('should show validation errors', () => {
-    cy.visit('/payment-modes/payment-mode-id-1')
+    cy.visitPage('/payment-modes/payment-mode-id-1')
     cy.wait(['@getPaymentMode'])
     cy.get(formField).eq(0).find('input').clear()
 
@@ -25,7 +25,7 @@ describe('Payment Mode Update', () => {
       .should('have.text', 'Obligatoire')
   })
   it('should allow changing various fields', () => {
-    cy.visit('/payment-modes/payment-mode-id-1')
+    cy.visitPage('/payment-modes/payment-mode-id-1')
     cy.wait(['@getPaymentMode'])
     // Change name
     cy.get(formField).eq(0).find('input').clear()
@@ -44,7 +44,7 @@ describe('Payment Mode Update', () => {
     )
   })
   it('should allow deleting the payment mode', () => {
-    cy.visit('/payment-modes/payment-mode-id-1')
+    cy.visitPage('/payment-modes/payment-mode-id-1')
     cy.wait(['@getPaymentMode'])
 
     cy.get(deletePaymentModeBtn).click()
@@ -62,7 +62,7 @@ describe('Payment Mode Update', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/payment-modes/payment-mode-id-1')
+    cy.visitPage('/payment-modes/payment-mode-id-1')
     cy.location('pathname').should('not.include', '/payment-modes/payment-mode-id-1')
     cy.location('pathname').should('include', '/403')
   })

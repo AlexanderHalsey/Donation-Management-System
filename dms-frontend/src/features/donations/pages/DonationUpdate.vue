@@ -1,5 +1,5 @@
 <template>
-  <Page title="Modifier le don" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.updateDonation')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
       <Btn
         outline
@@ -8,10 +8,10 @@
         data-cy="delete-donation"
         @click="deleteDonationDialog?.open()"
       >
-        Supprimer
+        {{ t('actions.delete') }}
       </Btn>
       <Btn color="primary" icon="edit" data-cy="update-donation" @click="donationForm?.validate()">
-        Mettre à jour
+        {{ t('actions.update') }}
       </Btn>
     </template>
     <DonationForm
@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -53,10 +54,21 @@ import {
 import type { DonationFormData } from '@/features/donations/types'
 import type { Breadcrumb } from '@/types'
 
-const breadcrumbs: Breadcrumb[] = [
-  { id: 'donation-list', label: 'Liste des dons', to: '/donations', icon: 'volunteer_activism' },
-  { id: 'donation-update', label: 'Modifier le don', icon: 'edit' },
-]
+const { t } = useI18n()
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
+  {
+    id: 'donation-list',
+    label: t('labels.listOfDonations'),
+    to: '/donations',
+    icon: 'volunteer_activism',
+  },
+  {
+    id: 'donation-update',
+    label: t('labels.updateDonation'),
+    icon: 'edit',
+  },
+])
 
 const donationStore = useDonationStore()
 const donorListStore = useDonorListStore()
@@ -86,7 +98,7 @@ const updateDonation = async (formData: DonationFormData) => {
   working.value = true
   await donationStore.updateDonation(donationId.value, formData)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le don a été mis à jour avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationUpdated') })
   await router.push({ name: 'donations' })
 }
 
@@ -94,7 +106,7 @@ const deleteDonation = async () => {
   working.value = true
   await donationStore.deleteDonation(donationId.value)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le don a été supprimé avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationDeleted') })
   await router.push({ name: 'donations' })
 }
 

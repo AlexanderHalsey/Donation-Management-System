@@ -8,12 +8,12 @@ describe('Donation Method Create', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an empty form', () => {
-    cy.visit('/donation-methods/create')
+    cy.visitPage('/donation-methods/create')
     cy.get(formField).eq(0).find('.q-field input').should('have.value', '')
     cy.get(formField).eq(1).find('.q-checkbox__inner--truthy').should('not.exist')
   })
   it('should show validation errors', () => {
-    cy.visit('/donation-methods/create')
+    cy.visitPage('/donation-methods/create')
 
     cy.get(createDonationMethodBtn).click()
 
@@ -22,7 +22,7 @@ describe('Donation Method Create', () => {
       .should('have.text', 'Obligatoire')
   })
   it('should allow filling in various fields', () => {
-    cy.visit('/donation-methods/create')
+    cy.visitPage('/donation-methods/create')
 
     // Enter name
     cy.get(formField).eq(0).find('input').type('New Donation Method')
@@ -42,7 +42,7 @@ describe('Donation Method Create', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-methods/create')
+    cy.visitPage('/donation-methods/create')
     cy.location('pathname').should('not.include', '/donation-methods/create')
     cy.location('pathname').should('include', '/403')
   })

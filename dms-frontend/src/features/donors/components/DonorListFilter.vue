@@ -1,5 +1,5 @@
 <template>
-  <BtnDropdown outline color="primary" icon="filter_alt" label="Filtres">
+  <BtnDropdown outline color="primary" icon="filter_alt" :label="t('common.filters')">
     <template #label>
       <QBadge v-if="filterCount" color="red-8" rounded class="q-ml-sm">
         {{ filterCount }}
@@ -8,14 +8,14 @@
     </template>
     <div class="q-px-md q-py-sm">
       <div class="row justify-between items-center q-mb-lg">
-        <div class="text-bold" style="font-size: 18px">Filtres des donateurs</div>
+        <div class="text-bold" style="font-size: 18px">{{ t('labels.donorFilters') }}</div>
         <Btn flat size="md" color="primary" icon="refresh" @click="updateFilter()">
-          Réinitialiser
+          {{ t('common.reset') }}
         </Btn>
       </div>
       <div class="row">
         <div class="col">
-          <div class="text-bold q-mb-sm">Donateur</div>
+          <div class="text-bold q-mb-sm">{{ t('nouns.donor') }}</div>
           <SelectFilterComponent
             :model-value="filter?.id"
             :options="donorRefs.options"
@@ -24,7 +24,7 @@
           />
         </div>
         <div class="col">
-          <div class="text-bold q-mb-sm">Désactivé</div>
+          <div class="text-bold q-mb-sm">{{ t('common.disabled') }}</div>
           <YesNoCheckbox
             :model-value="filter?.isDisabled?.equals"
             @update:model-value="
@@ -38,7 +38,7 @@
       </div>
       <QSeparator class="q-mt-xs q-mb-sm" />
       <div class="col">
-        <div class="text-bold q-mb-sm">Date du don</div>
+        <div class="text-bold q-mb-sm">{{ t('labels.donatedAt') }}</div>
         <DateTimeFilterComponent
           :model-value="filter?.donatedAt"
           @update:model-value="updateFilter({ ...filter, donatedAt: $event })"
@@ -46,7 +46,7 @@
       </div>
       <QSeparator class="q-mt-xs q-mb-sm" />
       <div class="col">
-        <div class="text-bold q-mb-sm">Montant</div>
+        <div class="text-bold q-mb-sm">{{ t('labels.amount') }}</div>
         <FloatFilterComponent
           :model-value="filter?.totalAmount"
           @update:model-value="updateFilter({ ...filter, totalAmount: $event })"
@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { debounce, isEqual } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -73,6 +74,8 @@ import YesNoCheckbox from '@/components/YesNoCheckbox.vue'
 
 import type { LazySelectOptions } from '@/types'
 import type { DonorListFilter, DonorRefSelect } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   donorRefs: {

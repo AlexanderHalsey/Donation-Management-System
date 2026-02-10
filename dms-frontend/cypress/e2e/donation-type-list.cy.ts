@@ -10,7 +10,7 @@ describe('Donation Type List', () => {
   const donationTypeListItem = donationTypeTable + ' tbody tr'
 
   it('displays the donation type list', () => {
-    cy.visit('/donation-types')
+    cy.visitPage('/donation-types')
     cy.wait(['@getDonationTypeList', '@getOrganisationRefList'])
     cy.get(donationTypeListItem).should('have.length', 10)
     cy.get(donationTypeListItem)
@@ -33,7 +33,7 @@ describe('Donation Type List', () => {
       })
   })
   it('allows the user to sort by name column', () => {
-    cy.visit('/donation-types')
+    cy.visitPage('/donation-types')
     cy.wait(['@getDonationTypeList', '@getOrganisationRefList'])
     cy.get(donationTypeHeader).within(() => {
       cy.get('th').eq(0).click() // Sort by name descending
@@ -55,7 +55,7 @@ describe('Donation Type List', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-types')
+    cy.visitPage('/donation-types')
     cy.location('pathname').should('not.include', '/donation-types')
     cy.location('pathname').should('include', '/403')
   })

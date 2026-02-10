@@ -1,5 +1,5 @@
 <template>
-  <Page title="Nouveau mode de paiement" :breadcrumbs="breadcrumbs" :working="working">
+  <Page :title="t('labels.newPaymentMode')" :breadcrumbs="breadcrumbs" :working="working">
     <template #actions>
       <Btn
         color="primary"
@@ -7,7 +7,7 @@
         @click="paymentModeForm?.validate()"
         data-cy="create-payment-mode"
       >
-        Créer
+        {{ t('actions.create') }}
       </Btn>
     </template>
     <PaymentModeForm
@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -35,14 +36,16 @@ import type { PaymentModeFormData } from '../types'
 
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'payment-mode-list',
-    label: 'Liste des modes de paiement',
+    label: t('labels.listOfPaymentModes'),
     to: '/payment-modes',
     icon: 'point_of_sale',
   },
-  { id: 'payment-mode-create', label: 'Nouveau mode de paiement', icon: 'add' },
+  { id: 'payment-mode-create', label: t('labels.newPaymentMode'), icon: 'add' },
 ]
 
 const $q = useQuasar()
@@ -58,13 +61,13 @@ const createPaymentMode = async (formData: PaymentModeFormData) => {
     await paymentModeStore.createPaymentMode(formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      paymentModeForm.value?.setErrors({ name: 'Un mode de paiement avec ce nom existe déjà.' })
+      paymentModeForm.value?.setErrors({ name: t('errors.paymentModeAlreadyExists') })
     }
     working.value = false
     throw error
   }
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le mode de paiement a été créé avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.paymentModeCreated') })
   await router.push({ name: 'payment-modes' })
 }
 

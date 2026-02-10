@@ -1,8 +1,13 @@
 <template>
-  <Page title="Nouveau don" :breadcrumbs="breadcrumbs" :loading="loading" :working="working">
+  <Page
+    :title="`${t('labels.newDonation')}`"
+    :breadcrumbs="breadcrumbs"
+    :loading="loading"
+    :working="working"
+  >
     <template #actions>
       <Btn color="primary" icon="add" @click="donationForm?.validate()" data-cy="create-donation">
-        Créer
+        {{ t('actions.create') }}
       </Btn>
     </template>
     <DonationForm
@@ -21,6 +26,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -42,10 +48,21 @@ import type { DonationFormData } from '@/features/donations/types'
 
 import type { Breadcrumb } from '@/types'
 
-const breadcrumbs: Breadcrumb[] = [
-  { id: 'donation-list', label: 'Liste des dons', to: '/donations', icon: 'volunteer_activism' },
-  { id: 'donation-create', label: 'Nouveau don', icon: 'add' },
-]
+const { t } = useI18n()
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
+  {
+    id: 'donation-list',
+    label: t('labels.listOfDonations'),
+    to: '/donations',
+    icon: 'volunteer_activism',
+  },
+  {
+    id: 'donation-create',
+    label: t('labels.newDonation'),
+    icon: 'add',
+  },
+])
 
 const $q = useQuasar()
 const router = useRouter()
@@ -71,7 +88,7 @@ const createDonation = async (formData: DonationFormData) => {
   working.value = true
   await donationStore.createDonation(formData)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le don a été créé avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationCreated') })
   await router.push({ name: 'donations' })
 }
 

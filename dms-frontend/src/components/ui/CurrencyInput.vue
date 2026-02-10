@@ -15,8 +15,11 @@
 
 <script setup lang="ts">
 import { watch } from 'vue'
+import { useI18n } from '@/composables'
 import { useCurrencyInput } from 'vue-currency-input'
 import type { QInputProps } from 'quasar'
+
+const { locale } = useI18n()
 
 const props = defineProps<
   Omit<QInputProps, 'error' | 'modelValue' | 'onUpdate:modelValue'> & {
@@ -30,7 +33,7 @@ defineEmits<{
 }>()
 
 const { formattedValue, inputRef, setValue } = useCurrencyInput({
-  locale: 'fr-FR',
+  locale: locale.value === 'fr' ? 'fr-FR' : 'en-GB',
   currency: 'EUR',
 })
 

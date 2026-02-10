@@ -4,7 +4,7 @@ describe('Login', () => {
   })
   const errorMessage = '.q-field--error .q-field__bottom .q-field__messages'
   it('should require authentication', () => {
-    cy.visit('/login')
+    cy.visitPage('/login')
     cy.get('button[type="submit"]').should('be.visible').click()
     cy.get(errorMessage)
       .should('have.length', 2)
@@ -13,7 +13,7 @@ describe('Login', () => {
       })
   })
   it('should give error if username password incorrect', () => {
-    cy.visit('/login')
+    cy.visitPage('/login')
     cy.get('input[name="username"]').type('wronguser')
     cy.get('input[name="password"]').type('wrongpassword')
     cy.mockLogin(true)
@@ -25,7 +25,7 @@ describe('Login', () => {
       })
   })
   it('should login successfully with correct credentials', () => {
-    cy.visit('/login')
+    cy.visitPage('/login')
     cy.get('input[name="username"]').type('correctuser')
     cy.get('input[name="password"]').type('correctpassword')
     cy.mockLogin()
@@ -34,13 +34,13 @@ describe('Login', () => {
   })
   it('should redirect to dashboard if already authenticated', () => {
     cy.mockRefreshToken({})
-    cy.visit('/login')
+    cy.visitPage('/login')
     cy.location('pathname').should('not.include', '/login')
     cy.location('pathname').should('include', '/dashboard')
   })
   it('should redirect to login if not authenticated', () => {
     cy.mockRefreshToken({ failure: true })
-    cy.visit('/dashboard')
+    cy.visitPage('/dashboard')
     cy.location('pathname').should('not.include', '/dashboard')
     cy.location('pathname').should('include', '/login')
   })

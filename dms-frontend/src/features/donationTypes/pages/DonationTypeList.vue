@@ -1,7 +1,9 @@
 <template>
-  <Page title="Liste des types de don" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.listOfDonationTypes')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
-      <Btn to="/donation-types/create" icon="add" color="primary" class="q-mr-sm"> Nouveau </Btn>
+      <Btn to="/donation-types/create" icon="add" color="primary" class="q-mr-sm">
+        {{ t('actions.create') }}
+      </Btn>
     </template>
     <DonationTypeListTable
       :donation-type-list="donationTypeList"
@@ -13,6 +15,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useQuasar } from 'quasar'
 
 import Page from '@/layouts/Page.vue'
@@ -24,13 +27,15 @@ import { useDonationTypeListStore, useDonationTypeStore, useOrganisationListStor
 
 import type { Breadcrumb } from '@/types'
 
-const breadcrumbs: Breadcrumb[] = [
+const { t } = useI18n()
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
   {
     id: 'donation-type-list',
-    label: 'Liste des types de don',
+    label: t('labels.listOfDonationTypes'),
     icon: 'favorite',
   },
-]
+])
 
 const $q = useQuasar()
 
@@ -48,7 +53,7 @@ const deleteDonationType = async (donationTypeId: string) => {
   working.value = true
   await donationTypeStore.deleteDonationType(donationTypeId)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le type de don a été supprimé avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationTypeDeleted') })
 }
 
 onMounted(async () => {

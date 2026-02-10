@@ -9,13 +9,13 @@ describe('Donation Asset Type Update', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an existing form', () => {
-    cy.visit('/donation-asset-types/donation-asset-type-id-1')
+    cy.visitPage('/donation-asset-types/donation-asset-type-id-1')
     cy.wait(['@getDonationAssetType'])
     cy.get(formField).eq(0).find('.q-field input').should('have.value', 'Donation Asset Type 1')
     cy.get(formField).eq(1).find('.q-checkbox__inner--truthy').should('exist')
   })
   it('should show validation errors', () => {
-    cy.visit('/donation-asset-types/donation-asset-type-id-1')
+    cy.visitPage('/donation-asset-types/donation-asset-type-id-1')
     cy.wait(['@getDonationAssetType'])
     cy.get(formField).eq(0).find('input').clear()
 
@@ -26,7 +26,7 @@ describe('Donation Asset Type Update', () => {
       .should('have.text', 'Obligatoire')
   })
   it('should allow changing various fields', () => {
-    cy.visit('/donation-asset-types/donation-asset-type-id-1')
+    cy.visitPage('/donation-asset-types/donation-asset-type-id-1')
     cy.wait(['@getDonationAssetType'])
     // Change name
     cy.get(formField).eq(0).find('input').clear()
@@ -48,7 +48,7 @@ describe('Donation Asset Type Update', () => {
     )
   })
   it('should allow deleting the donation asset type', () => {
-    cy.visit('/donation-asset-types/donation-asset-type-id-1')
+    cy.visitPage('/donation-asset-types/donation-asset-type-id-1')
     cy.wait(['@getDonationAssetType'])
 
     cy.get(deleteDonationAssetTypeBtn).click()
@@ -66,7 +66,7 @@ describe('Donation Asset Type Update', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-asset-types/donation-asset-type-id-1')
+    cy.visitPage('/donation-asset-types/donation-asset-type-id-1')
     cy.location('pathname').should('not.include', '/donation-asset-types/donation-asset-type-id-1')
     cy.location('pathname').should('include', '/403')
   })

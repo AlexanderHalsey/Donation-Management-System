@@ -9,7 +9,7 @@ describe('Donation Method List', () => {
   const donationMethodListItem = donationMethodTable + ' tbody tr'
 
   it('displays the donation method list', () => {
-    cy.visit('/donation-methods')
+    cy.visitPage('/donation-methods')
     cy.wait(['@getDonationMethodList'])
     cy.get(donationMethodListItem).should('have.length', 5)
     cy.get(donationMethodListItem)
@@ -32,7 +32,7 @@ describe('Donation Method List', () => {
       })
   })
   it('allows the user to sort certain columns', () => {
-    cy.visit('/donation-methods')
+    cy.visitPage('/donation-methods')
     cy.wait(['@getDonationMethodList'])
     cy.get(donationMethodHeader).within(() => {
       cy.get('th').eq(1).click() // Sort by isDefault ascending
@@ -70,7 +70,7 @@ describe('Donation Method List', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-methods')
+    cy.visitPage('/donation-methods')
     cy.location('pathname').should('not.include', '/donation-methods')
     cy.location('pathname').should('include', '/403')
   })

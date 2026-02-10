@@ -1,13 +1,15 @@
 import { createApp } from 'vue'
+import { createI18n } from 'vue-i18n'
 
 import { createPinia } from 'pinia'
+import { useLocaleStore } from '@/stores'
 
 import { Quasar, Loading, Notify, QSpinnerPie } from 'quasar'
 
 import App from './App.vue'
 import router from './router'
 
-import './zodi18n.ts'
+import type { Translations } from './locales/i18nTranslation'
 
 import '@quasar/extras/roboto-font/roboto-font.css'
 import '@quasar/extras/material-icons/material-icons.css'
@@ -20,13 +22,25 @@ async function main() {
   const pinia = createPinia()
 
   app.use(pinia)
+
+  const locale = navigator.language.split('-')[0] === 'fr' ? 'fr' : 'en'
+  const i18n = createI18n({
+    legacy: false,
+    locale,
+    fallbackLocale: 'en',
+    messages: {
+      fr: (await import('./locales/fr.json')).default satisfies Translations,
+      en: (await import('./locales/en.json')).default satisfies Translations,
+    },
+  })
+
+  app.use(i18n)
   app.use(router)
   app.use(Quasar, {
     plugins: { Loading, Notify },
     config: {
       loading: {
         delay: 0,
-        message: 'Chargement...',
         spinnerColor: 'primary',
         spinnerSize: 70,
         spinner: QSpinnerPie,
@@ -48,6 +62,9 @@ async function main() {
       },
     },
   })
+
+  const localeStore = useLocaleStore()
+  localeStore.setLocale(locale)
 
   app.mount('#app')
 }

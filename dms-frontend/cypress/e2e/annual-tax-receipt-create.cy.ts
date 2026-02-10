@@ -7,7 +7,7 @@ describe('Annual Tax Receipt Create', () => {
     cy.mockOrganisationRefList()
   })
   it('should display a list of eligible donors for a given year and organisation', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.get('[data-cy=create-annual-tax-receipts-button]').click()
     cy.get('#q-portal--menu--1 .q-menu .q-item').eq(0).click()
     cy.location('pathname').should('include', '/tax-receipts/annual-create/2024/')
@@ -55,7 +55,7 @@ describe('Annual Tax Receipt Create', () => {
     })
   })
   it('should show validation error if no donor is selected', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.get('[data-cy=create-annual-tax-receipts-button]').click()
     cy.get('#q-portal--menu--1 .q-menu .q-item').eq(0).click()
     cy.wait(['@getEligibleDonors', '@getOrganisationRefList'])
@@ -68,7 +68,7 @@ describe('Annual Tax Receipt Create', () => {
   })
 
   it('should create annual tax receipts successfully', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.get('[data-cy=create-annual-tax-receipts-button]').click()
     cy.get('#q-portal--menu--1 .q-menu .q-item').eq(0).click()
     cy.wait(['@getEligibleDonors', '@getOrganisationRefList'])
@@ -93,7 +93,7 @@ describe('Annual Tax Receipt Create', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/tax-receipts/annual-create/2024/1')
+    cy.visitPage('/tax-receipts/annual-create/2024/1')
     cy.location('pathname').should('not.include', '/tax-receipts/annual-create')
     cy.location('pathname').should('include', '/403')
   })

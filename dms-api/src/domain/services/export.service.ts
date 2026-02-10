@@ -124,7 +124,7 @@ export class ExportService {
     orderBy: DonationListSortOrder,
     filter?: DonationListFilter,
   ) {
-    const donations = await this.donationService.getExportList(orderBy, filter)
+    const donations = await this.donationService.getExportList(orderBy, language, filter)
     return this.exportCsv(language, 'donation', donations)
   }
 
@@ -133,7 +133,7 @@ export class ExportService {
     orderBy: DonationListSortOrder,
     filter?: DonationListFilter,
   ) {
-    const donations = await this.donationService.getExportList(orderBy, filter)
+    const donations = await this.donationService.getExportList(orderBy, language, filter)
     return this.exportXlsx(language, 'donation', donations)
   }
 

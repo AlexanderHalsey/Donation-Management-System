@@ -14,9 +14,12 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
-import { TAX_RECEIPT_STATUS_OPTIONS } from '@shared/constants'
+import { getTaxReceiptStatusOptions } from '@shared/constants'
 import type { TaxReceiptStatus } from '@shared/models'
+
+const { locale } = useI18n()
 
 const props = defineProps({
   taxReceiptStatus: {
@@ -26,6 +29,9 @@ const props = defineProps({
 })
 
 const statusOption = computed(
-  () => TAX_RECEIPT_STATUS_OPTIONS.find((option) => option.id === props.taxReceiptStatus)!,
+  () =>
+    getTaxReceiptStatusOptions(locale.value as 'en' | 'fr').find(
+      (option) => option.id === props.taxReceiptStatus,
+    )!,
 )
 </script>

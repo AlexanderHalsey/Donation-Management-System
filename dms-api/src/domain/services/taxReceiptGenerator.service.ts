@@ -168,7 +168,7 @@ export class TaxReceiptGeneratorService {
   }): number {
     return this.pdfRenderer.addSection({
       startY,
-      title: this.template.content.labels.organizationLabel,
+      title: this.template.content.labels.organisationLabel,
       cb: (y) => {
         this.pdfRenderer.addImage({
           buffer: logo,
@@ -206,7 +206,7 @@ export class TaxReceiptGeneratorService {
   }): number {
     return this.pdfRenderer.addSection({
       startY,
-      title: this.template.content.labels.organizationObjectLabel(object),
+      title: this.template.content.labels.organisationObjectLabel(object),
       cb: (y) =>
         this.pdfRenderer.addText({
           text: objectDescription,

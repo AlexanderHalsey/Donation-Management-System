@@ -1,5 +1,5 @@
 <template>
-  <Page title="Nouvelle organisation" :breadcrumbs="breadcrumbs" :working="working">
+  <Page :title="t('labels.newOrganisation')" :breadcrumbs="breadcrumbs" :working="working">
     <template #actions>
       <Btn
         color="primary"
@@ -7,7 +7,7 @@
         @click="organisationForm?.validate()"
         data-cy="create-organisation"
       >
-        Créer
+        {{ t('actions.create') }}
       </Btn>
     </template>
     <OrganisationForm
@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -34,14 +35,20 @@ import { useOrganisationStore } from '@/stores'
 import type { OrganisationFormData } from '../types'
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'organisation-list',
-    label: 'Liste des organisations',
+    label: t('labels.listOfOrganisations'),
     to: '/organisations',
     icon: 'account_balance',
   },
-  { id: 'organisation-create', label: 'Nouvelle organisation', icon: 'add' },
+  {
+    id: 'organisation-create',
+    label: t('labels.newOrganisation'),
+    icon: 'add',
+  },
 ]
 
 const $q = useQuasar()

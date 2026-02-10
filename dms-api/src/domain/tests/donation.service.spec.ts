@@ -344,7 +344,7 @@ describe('DonationService', () => {
   it('should get donation export list', async () => {
     prismaServiceMock.donation.findMany.mockResolvedValueOnce([])
 
-    await donationService.getExportList({ updatedAt: 'desc' }, { amount: { gte: 10 } })
+    await donationService.getExportList({ updatedAt: 'desc' }, 'fr', { amount: { gte: 10 } })
 
     expect(prismaServiceMock.donation.findMany).toHaveBeenCalledTimes(1)
   })

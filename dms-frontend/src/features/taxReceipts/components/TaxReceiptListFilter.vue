@@ -1,5 +1,5 @@
 <template>
-  <BtnDropdown outline color="primary" icon="filter_alt" label="Filtres">
+  <BtnDropdown outline color="primary" icon="filter_alt" :label="t('common.filters')">
     <template #label>
       <QBadge v-if="filterCount" color="red-8" rounded class="q-ml-sm">
         {{ filterCount }}
@@ -8,15 +8,17 @@
     </template>
     <div class="q-px-md q-py-sm">
       <div class="row justify-between items-center q-mb-lg">
-        <div class="text-bold" style="font-size: 18px">Filtres des reçus fiscaux</div>
+        <div class="text-bold" style="font-size: 18px">
+          {{ t('labels.taxReceiptFilters') }}
+        </div>
         <Btn flat size="md" color="primary" icon="refresh" @click="updateFilter()">
-          Réinitialiser
+          {{ t('common.reset') }}
         </Btn>
       </div>
 
       <div class="row">
         <div>
-          <div class="text-bold q-mb-sm">Donateur</div>
+          <div class="text-bold q-mb-sm">{{ t('nouns.donor') }}</div>
           <SelectFilterComponent
             :model-value="filter?.donorId"
             :options="donors.options"
@@ -26,7 +28,7 @@
         </div>
         <QSeparator vertical class="q-mx-md" />
         <div>
-          <div class="text-bold q-mb-sm">Type de reçu</div>
+          <div class="text-bold q-mb-sm">{{ t('labels.receiptType') }}</div>
           <Select
             :model-value="taxReceiptTypeOption"
             :options="taxReceiptTypeOptions"
@@ -60,7 +62,7 @@
       </div>
       <QSeparator class="q-mt-xs q-mb-sm" />
       <div>
-        <div class="text-bold q-mb-sm">Date de création</div>
+        <div class="text-bold q-mb-sm">{{ t('labels.creationDate') }}</div>
         <DateTimeFilterComponent
           :model-value="filter?.createdAt"
           @update:model-value="updateFilter({ ...filter, createdAt: $event })"
@@ -70,17 +72,17 @@
 
       <div class="row">
         <div class="col">
-          <div class="text-bold q-mb-sm">Statut du reçu</div>
+          <div class="text-bold q-mb-sm">{{ t('labels.receiptStatus') }}</div>
           <SelectFilterComponent
             :model-value="filter?.status"
-            :options="TAX_RECEIPT_STATUS_OPTIONS"
+            :options="taxReceiptStatusOptions"
             multiple
             @update:model-value="updateFilter({ ...filter, status: $event })"
           >
             <template #option="scope">
               <QItem v-bind="scope.itemProps">
                 <QItemSection>
-                  <QItemLabel>{{ scope.opt.label }}</QItemLabel>
+                  <QItemLabel>{{ scope.opt.name }}</QItemLabel>
                 </QItemSection>
                 <QItemSection avatar>
                   <TaxReceiptStatusIcon :tax-receipt-status="scope.opt.value" />
@@ -98,6 +100,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { debounce, isEqual } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -111,11 +114,12 @@ import DateTimeFilterComponent from '@/components/DateTimeFilter.vue'
 import SelectFilterComponent from '@/components/SelectFilter.vue'
 
 import TaxReceiptStatusIcon from './TaxReceiptStatusIcon.vue'
+import TaxReceiptTypeTag from './TaxReceiptTypeTag.vue'
+
+import { getTaxReceiptStatusOptions } from '@shared/constants'
 
 import type { LazySelectOptions } from '@/types'
 import type { TaxReceiptListFilter, DonorRefSelect, TaxReceiptType } from '@shared/models'
-import { TAX_RECEIPT_STATUS_OPTIONS } from '@shared/constants'
-import TaxReceiptTypeTag from './TaxReceiptTypeTag.vue'
 
 const props = defineProps({
   donors: {
@@ -128,6 +132,8 @@ const props = defineProps({
   },
 })
 
+const { locale, t } = useI18n()
+
 const emit = defineEmits<{
   (e: 'update:filter', value: TaxReceiptListFilter | undefined): void
 }>()
@@ -136,9 +142,14 @@ type TaxReceiptTypeSelect = {
   id: TaxReceiptType
   name: string
 }
+
+const taxReceiptStatusOptions = computed(() =>
+  getTaxReceiptStatusOptions(locale.value as 'en' | 'fr'),
+)
+
 const taxReceiptTypeOptions = computed<TaxReceiptTypeSelect[]>(() => [
-  { id: 'ANNUAL', name: 'Annuel' },
-  { id: 'INDIVIDUAL', name: 'Individuel' },
+  { id: 'ANNUAL', name: t('nouns.annual') },
+  { id: 'INDIVIDUAL', name: t('nouns.individual') },
 ])
 
 const taxReceiptTypeOption = computed(() =>

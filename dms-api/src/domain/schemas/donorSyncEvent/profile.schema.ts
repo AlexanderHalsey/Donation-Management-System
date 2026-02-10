@@ -48,7 +48,7 @@ const transformAbstractProfile = (
 })
 
 const OrganisationProfileSchema = AbstractProfileSchema.extend({
-  objectType: z.literal('ORGANIZATION'),
+  objectType: z.literal('ORGANISATION'),
 }).transform(transformAbstractProfile)
 
 const PersonProfileSchema = AbstractProfileSchema.extend({

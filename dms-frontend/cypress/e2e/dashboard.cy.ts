@@ -7,7 +7,7 @@ describe('Dashboard', () => {
   const DASHBOARD_TABS = '[data-cy="dashboard-tabs"] .q-tab'
 
   it('should display dashboard donation summaries', () => {
-    cy.visit('/dashboard')
+    cy.visitPage('/dashboard')
     cy.get('[data-cy="total-donations"]').within((card) => {
       cy.wrap(card).get('div').eq(1).should('contain.text', '50000 dons')
       cy.wrap(card).get('div').eq(2).should('contain.text', '1 000 000,00 €')
@@ -26,23 +26,23 @@ describe('Dashboard', () => {
     })
   })
   it('should display dashboard donor summaries', () => {
-    cy.visit('/dashboard')
+    cy.visitPage('/dashboard')
     cy.get(DASHBOARD_TABS).eq(1).should('contain', 'Donateurs').click()
     cy.get('[data-cy="disabled-donors"]').within(() => {
-      cy.get('.q-table__bottom').should('contain.text', 'Aucun element à afficher')
+      cy.get('.q-table__bottom').should('contain.text', 'Aucun élément trouvé')
     })
   })
   it('should display warning sign on donor tab when there are disabled donors with donations', () => {
     cy.mockDashboardSummaries(true)
-    cy.visit('/dashboard')
+    cy.visitPage('/dashboard')
     cy.get(DASHBOARD_TABS).eq(1).should('contain', '⚠️').click()
     cy.get('[data-cy="disabled-donors"]').within(() => {
       cy.get('.text-h6').should('contain.text', '⚠️')
-      cy.get('.q-table__control').children().eq(0).should('contain.text', '1-1 of 1')
+      cy.get('.q-table__control').children().eq(0).should('contain.text', '1-1 sur 1')
     })
   })
   it('should display dashboard tax receipt summaries', () => {
-    cy.visit('/dashboard')
+    cy.visitPage('/dashboard')
     cy.get(DASHBOARD_TABS).eq(2).should('contain', 'Reçus fiscaux').click()
     cy.get('[data-cy="tax-receipts-status-count"]').within(() => {
       cy.get('[data-cy="tax-receipt-status-option"]')
@@ -68,7 +68,7 @@ describe('Dashboard', () => {
     })
   })
   it('should display warning sign on tax receipt tab when there are failed tax receipts', () => {
-    cy.visit('/dashboard')
+    cy.visitPage('/dashboard')
     cy.get(DASHBOARD_TABS).eq(2).should('contain', '⚠️').click()
     cy.get('[data-cy="tax-receipts-status-count"]').children().eq(0).should('contain.text', '⚠️')
   })

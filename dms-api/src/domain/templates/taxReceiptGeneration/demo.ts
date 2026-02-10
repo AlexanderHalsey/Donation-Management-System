@@ -47,9 +47,9 @@ export const demoTaxReceiptTemplate = {
       subtitleText: '(For tax purposes - This is a demo receipt)',
     },
     labels: {
-      organizationLabel: 'Organization:',
+      organisationLabel: 'Organisation:',
       donorLabel: 'Donor:',
-      organizationObjectLabel: (object: string) => `Purpose: ${object}`,
+      organisationObjectLabel: (object: string) => `Purpose: ${object}`,
       totalAmount: 'Total Amount:',
       totalWords: 'Amount in Words:',
       paymentMethod: 'Payment Method:',
@@ -65,11 +65,11 @@ export const demoTaxReceiptTemplate = {
     },
     templates: {
       recognitionTextIndividual: (date: Date) =>
-        `The organization acknowledges receipt of a donation on ${formatDate(date, 'en-US')}`,
+        `The organisation acknowledges receipt of a donation on ${formatDate(date, 'en-US')}`,
       recognitionTextAnnual: (year: number) =>
-        `The organization acknowledges receipt of donations between January 1, ${year} and December 31, ${year}`,
+        `The organisation acknowledges receipt of donations between January 1, ${year} and December 31, ${year}`,
       taxCertification:
-        'The organization certifies that this donation qualifies for tax-deductible status under applicable tax regulations. No goods or services were provided in exchange for this donation.',
+        'The organisation certifies that this donation qualifies for tax-deductible status under applicable tax regulations. No goods or services were provided in exchange for this donation.',
       taxCertificationLocation: (city: string) => `${city}, ${formatDate(new Date(), 'en-US')}`,
     },
   },

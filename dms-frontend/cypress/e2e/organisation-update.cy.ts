@@ -11,7 +11,7 @@ describe('Organisation Update', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an existing form', () => {
-    cy.visit('/organisations/organisation-id-1')
+    cy.visitPage('/organisations/organisation-id-1')
     cy.wait(['@getOrganisation'])
     cy.get(formField).eq(0).find('.q-field input').should('have.value', 'Organisation 1')
     cy.get(formField).eq(1).find('.q-checkbox').find('.q-checkbox__inner--truthy').should('exist')
@@ -27,7 +27,7 @@ describe('Organisation Update', () => {
     cy.get(formField).eq(11).find('.q-field .q-chip').should('contain.text', 'signature.jpg')
   })
   it('should show validation errors', () => {
-    cy.visit('/organisations/organisation-id-1')
+    cy.visitPage('/organisations/organisation-id-1')
     cy.wait(['@getOrganisation'])
     cy.get(formField).eq(0).find('input').clear()
 
@@ -38,7 +38,7 @@ describe('Organisation Update', () => {
       .should('have.text', 'Obligatoire')
   })
   it('should allow changing various fields', () => {
-    cy.visit('/organisations/organisation-id-1')
+    cy.visitPage('/organisations/organisation-id-1')
     cy.wait(['@getOrganisation'])
 
     // Change name
@@ -112,7 +112,7 @@ describe('Organisation Update', () => {
     )
   })
   it('should allow deleting the organisation', () => {
-    cy.visit('/organisations/organisation-id-1')
+    cy.visitPage('/organisations/organisation-id-1')
     cy.wait(['@getOrganisation'])
 
     cy.get(deleteOrganisationBtn).click()
@@ -127,7 +127,7 @@ describe('Organisation Update', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/organisations/organisation-id-1')
+    cy.visitPage('/organisations/organisation-id-1')
     cy.location('pathname').should('not.include', '/organisations/organisation-id-1')
     cy.location('pathname').should('include', '/403')
   })

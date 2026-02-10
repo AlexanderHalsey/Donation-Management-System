@@ -14,7 +14,7 @@ describe('Donor List', () => {
   const filter = '[data-cy="donor-list-filter"]'
 
   it('displays the donor list', () => {
-    cy.visit('/donors')
+    cy.visitPage('/donors')
     cy.wait(['@getDonorList'])
     cy.get(donorListItem).should('have.length', 10)
     cy.get(donorListItem)
@@ -43,54 +43,54 @@ describe('Donor List', () => {
       })
   })
   it('allows the user to navigate pages', () => {
-    cy.visit('/donors')
+    cy.visitPage('/donors')
     cy.wait(['@getDonorList'])
-    cy.get(paginationInfo).should('contain.text', '1-10 of 30')
+    cy.get(paginationInfo).should('contain.text', '1-10 sur 30')
 
     cy.mockDonorList({ page: 2, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait(['@getDonorList'])
     cy.get(donorListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '11-20 of 30')
+    cy.get(paginationInfo).should('contain.text', '11-20 sur 30')
 
     cy.mockDonorList({ page: 3, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(3).click() // Go to end page
     cy.wait(['@getDonorList'])
     cy.get(donorListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '21-30 of 30')
+    cy.get(paginationInfo).should('contain.text', '21-30 sur 30')
 
     cy.mockDonorList({ page: 2, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(1).click() // Go to previous page
     cy.wait(['@getDonorList'])
     cy.get(donorListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '11-20 of 30')
+    cy.get(paginationInfo).should('contain.text', '11-20 sur 30')
 
     cy.mockDonorList({ page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(0).click() // Go to first page
     cy.wait(['@getDonorList'])
     cy.get(donorListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '1-10 of 30')
+    cy.get(paginationInfo).should('contain.text', '1-10 sur 30')
   })
   it('allows the user to change page size', () => {
-    cy.visit('/donors')
+    cy.visitPage('/donors')
     cy.wait(['@getDonorList'])
-    cy.get(paginationInfo).should('contain.text', '1-10 of 30')
+    cy.get(paginationInfo).should('contain.text', '1-10 sur 30')
 
     cy.mockDonorList({ page: 2, pageSize: 10, orderBy: { updatedAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait(['@getDonorList'])
     cy.get(donorListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '11-20 of 30')
+    cy.get(paginationInfo).should('contain.text', '11-20 sur 30')
 
     cy.get(pageSizeSelect).should('contain.text', '10').click()
     cy.mockDonorList({ page: 1, pageSize: 50, orderBy: { updatedAt: 'desc' } })
     cy.get('#q-portal--menu--1 .q-item').eq(3).click() // Select all rows per page
     cy.wait(['@getDonorList'])
     cy.get(donorListItem).should('have.length', 30)
-    cy.get(paginationInfo).should('contain.text', '1-30 of 30')
+    cy.get(paginationInfo).should('contain.text', '1-30 sur 30')
   })
   it('allows the user to sort certain columns', () => {
-    cy.visit('/donors')
+    cy.visitPage('/donors')
     cy.wait(['@getDonorList'])
     cy.get(donorListHeader).within(() => {
       cy.mockDonorList({ page: 1, pageSize: 10, orderBy: { donationTotalAmount: 'asc' } })
@@ -134,7 +134,7 @@ describe('Donor List', () => {
       })
   })
   it('should allow a user to navigate to the user update page', () => {
-    cy.visit('/donors')
+    cy.visitPage('/donors')
     cy.wait(['@getDonorList'])
     cy.mockDonor(3)
     cy.get(donorListItem)
@@ -148,7 +148,7 @@ describe('Donor List', () => {
     const getFilterMenu = () => cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children()
     it('should allow filtering by donor name', () => {
       const getDonorFilter = () => getFilterMenu().eq(1)
-      cy.visit('/donors')
+      cy.visitPage('/donors')
       cy.wait(['@getDonorList'])
       cy.get(filter).click()
       cy.mockDonorList(
@@ -165,7 +165,7 @@ describe('Donor List', () => {
       getDonorFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-1 of 1')
+      cy.get(paginationInfo).should('contain.text', '1-1 sur 1')
       cy.mockDonorList(
         { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
         { id: { in: [0, 1] } },
@@ -178,10 +178,10 @@ describe('Donor List', () => {
       getDonorFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-2 of 2')
+      cy.get(paginationInfo).should('contain.text', '1-2 sur 2')
     })
     it('should allow filtering by a total amount range', () => {
-      cy.visit('/donors')
+      cy.visitPage('/donors')
       cy.wait(['@getDonorList'])
       cy.get(filter).click()
       cy.mockDonorList(
@@ -196,7 +196,7 @@ describe('Donor List', () => {
         .within(() => {
           cy.get('input').eq(0).type('250')
         })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 18')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 18')
 
       cy.mockDonorList(
         { page: 1, pageSize: 10, orderBy: { updatedAt: 'desc' } },
@@ -210,7 +210,7 @@ describe('Donor List', () => {
         .within(() => {
           cy.get('input').eq(1).type('400')
         })
-      cy.get(paginationInfo).should('contain.text', '1-8 of 8')
+      cy.get(paginationInfo).should('contain.text', '1-8 sur 8')
     })
   })
 })

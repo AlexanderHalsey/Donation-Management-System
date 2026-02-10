@@ -9,7 +9,7 @@ describe('Organisation Create', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an empty form', () => {
-    cy.visit('/organisations/create')
+    cy.visitPage('/organisations/create')
     cy.get(formField).eq(0).find('.q-field input').should('have.value', '') // name
     cy.get(formField)
       .eq(1)
@@ -28,7 +28,7 @@ describe('Organisation Create', () => {
     cy.get(formField).eq(11).find('.q-field input').should('have.value', '') // signatureId
   })
   it('should show validation errors', () => {
-    cy.visit('/organisations/create')
+    cy.visitPage('/organisations/create')
 
     cy.get(createOrganisationBtn).click()
 
@@ -38,7 +38,7 @@ describe('Organisation Create', () => {
       .should('have.text', 'Obligatoire')
   })
   it('should allow filling in various fields', () => {
-    cy.visit('/organisations/create')
+    cy.visitPage('/organisations/create')
 
     // Enter name (required)
     cy.get(formField).eq(0).find('input').type('New Organisation')
@@ -107,7 +107,7 @@ describe('Organisation Create', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/organisations/create')
+    cy.visitPage('/organisations/create')
     cy.location('pathname').should('not.include', '/organisations/create')
     cy.location('pathname').should('include', '/403')
   })

@@ -1,7 +1,7 @@
 import z from 'zod'
 
 export const donationTypeFormSchema = z.object({
-  name: z.string('Obligatoire').min(1, 'Obligatoire').max(255),
-  organisationId: z.uuid('Obligatoire'),
+  name: z.string().min(1).max(255),
+  organisationId: z.uuid(),
   isTaxReceiptEnabled: z.boolean(),
 })

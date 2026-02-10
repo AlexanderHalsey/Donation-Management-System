@@ -3,9 +3,11 @@
     <QCardSection>
       <div class="text-h6 q-mb-md flex items-center">
         <QIcon name="location_on" class="q-mr-sm" />
-        Adresse
+        {{ t('labels.address') }}
       </div>
-      <div v-if="!hasAddressData" class="text-grey-6 text-italic">Aucune adresse renseignée</div>
+      <div v-if="!hasAddressData" class="text-grey-6 text-italic">
+        {{ t('placeholders.noAddressProvided') }}
+      </div>
       <div v-else class="row q-gutter-xl">
         <TitledComponent
           v-for="field in addressFields"
@@ -22,10 +24,13 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import TitledComponent from '@/components/TitledComponent.vue'
 
 import type { Donor } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   donor: {
@@ -35,12 +40,12 @@ const props = defineProps({
 })
 
 const addressFields = computed<{ key: keyof Donor; label: string }[]>(() => [
-  { key: 'streetAddress1', label: 'Adresse ligne 1' },
-  { key: 'streetAddress2', label: 'Adresse ligne 2' },
-  { key: 'postalCode', label: 'Code postal' },
-  { key: 'city', label: 'Ville' },
-  { key: 'state', label: 'État/Région' },
-  { key: 'country', label: 'Pays' },
+  { key: 'streetAddress1', label: t('labels.streetAddress1') },
+  { key: 'streetAddress2', label: t('labels.streetAddress2') },
+  { key: 'postalCode', label: t('labels.postalCode') },
+  { key: 'city', label: t('labels.city') },
+  { key: 'state', label: t('labels.state') },
+  { key: 'country', label: t('labels.country') },
 ])
 
 const hasAddressData = computed(() => {

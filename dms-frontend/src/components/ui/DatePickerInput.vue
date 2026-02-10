@@ -3,7 +3,7 @@
     v-model="dateInput"
     dense
     mask="##/##/####"
-    placeholder="JJ/MM/AAAA"
+    :placeholder="t('placeholders.datePlaceholder')"
     :error="internalError"
     :rounded="rounded"
     @blur="internalOnBlur"
@@ -29,9 +29,13 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from '@/composables'
+
 import { format, isValid, parse } from 'date-fns'
 
 import Input from './Input.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<DatePickerInputProps>()
 const emit = defineEmits<{
@@ -61,7 +65,7 @@ const validate = (date?: Date): boolean => {
     internalError.value = undefined
     return true
   } else {
-    internalError.value = "La date n'est pas valide"
+    internalError.value = t('errors.invalidDate')
     return false
   }
 }

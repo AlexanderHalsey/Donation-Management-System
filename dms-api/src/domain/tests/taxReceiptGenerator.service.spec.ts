@@ -270,7 +270,7 @@ describe('TaxReceiptGeneratorService', () => {
 
       expect(mockPDFRenderer.addSection).toHaveBeenCalledWith({
         startY: 100,
-        title: demoTaxReceiptTemplate.content.labels.organizationLabel,
+        title: demoTaxReceiptTemplate.content.labels.organisationLabel,
         cb: expect.any(Function),
       })
       expect(mockPDFRenderer.addImage).toHaveBeenCalledWith({
@@ -300,7 +300,7 @@ describe('TaxReceiptGeneratorService', () => {
       const objectData = {
         startY: 200,
         object: 'Humanitarian Aid',
-        objectDescription: 'International humanitarian aid organization',
+        objectDescription: 'International humanitarian aid organisation',
       }
 
       mockPDFRenderer.addSection.mockImplementation(({ cb }) => cb(50))
@@ -309,7 +309,7 @@ describe('TaxReceiptGeneratorService', () => {
 
       expect(mockPDFRenderer.addSection).toHaveBeenCalled()
       expect(mockPDFRenderer.addText).toHaveBeenCalledWith({
-        text: 'International humanitarian aid organization',
+        text: 'International humanitarian aid organisation',
         y: 50,
       })
     })

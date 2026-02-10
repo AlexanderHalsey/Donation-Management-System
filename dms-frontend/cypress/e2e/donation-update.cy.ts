@@ -15,7 +15,7 @@ describe('Donation Update', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an existing form', () => {
-    cy.visit('/donations/donation-id-1')
+    cy.visitPage('/donations/donation-id-1')
     cy.wait([
       '@getDonation',
       '@getOrganisationRefList',
@@ -34,7 +34,7 @@ describe('Donation Update', () => {
     cy.get(formField).eq(7).find('.q-field').should('contain.text', 'Donation Asset Type 1')
   })
   it('should show validation errors', () => {
-    cy.visit('/donations/donation-id-1')
+    cy.visitPage('/donations/donation-id-1')
     cy.wait([
       '@getDonation',
       '@getOrganisationRefList',
@@ -58,7 +58,7 @@ describe('Donation Update', () => {
       })
   })
   it('should allow changing various fields', () => {
-    cy.visit('/donations/donation-id-1')
+    cy.visitPage('/donations/donation-id-1')
     cy.wait([
       '@getDonation',
       '@getOrganisationRefList',
@@ -112,7 +112,7 @@ describe('Donation Update', () => {
     cy.get('.q-notification').should('contain.text', 'Le don a été mis à jour avec succès.')
   })
   it('should allow deleting the donation', () => {
-    cy.visit('/donations/donation-id-1')
+    cy.visitPage('/donations/donation-id-1')
     cy.wait([
       '@getDonation',
       '@getOrganisationRefList',

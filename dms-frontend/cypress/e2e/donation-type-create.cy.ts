@@ -9,13 +9,13 @@ describe('Donation Type Create', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an empty form', () => {
-    cy.visit('/donation-types/create')
+    cy.visitPage('/donation-types/create')
     cy.get(formField).eq(0).find('.q-field input').should('have.value', '')
     cy.get(formField).eq(1).find('.q-select input').should('have.value', '')
     cy.get(formField).eq(2).find('.q-checkbox').should('not.be.visible')
   })
   it('should show validation errors', () => {
-    cy.visit('/donation-types/create')
+    cy.visitPage('/donation-types/create')
 
     cy.get(createDonationTypeBtn).click()
 
@@ -28,7 +28,7 @@ describe('Donation Type Create', () => {
       .should('contain.text', 'Obligatoire')
   })
   it('should allow filling in various fields', () => {
-    cy.visit('/donation-types/create')
+    cy.visitPage('/donation-types/create')
     cy.wait(['@getOrganisationRefList'])
 
     // Enter name
@@ -49,7 +49,7 @@ describe('Donation Type Create', () => {
     cy.get('.q-notification').should('contain.text', 'Le type de don a été créé avec succès.')
   })
   it('should allow enabling tax receipts', () => {
-    cy.visit('/donation-types/create')
+    cy.visitPage('/donation-types/create')
     cy.wait(['@getOrganisationRefList'])
 
     // Enter name
@@ -83,7 +83,7 @@ describe('Donation Type Create', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-types/create')
+    cy.visitPage('/donation-types/create')
     cy.location('pathname').should('not.include', '/donation-types/create')
     cy.location('pathname').should('include', '/403')
   })

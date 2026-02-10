@@ -117,7 +117,7 @@ describe('ExportService', () => {
 
       const result = await exportService.exportDonationListCsv('en', orderBy, filter)
 
-      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, filter)
+      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, 'en', filter)
       expect(Papa.unparse).toHaveBeenCalledWith(
         mockDonationData.map((donation) => ({
           'Last Name': donation.lastName,
@@ -162,7 +162,7 @@ describe('ExportService', () => {
 
       const result = await exportService.exportDonationListCsv('fr', orderBy)
 
-      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, undefined)
+      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, 'fr', undefined)
       expect(Papa.unparse).toHaveBeenCalledWith(
         mockDonationData.map((donation) => ({
           Nom: donation.lastName,
@@ -208,7 +208,7 @@ describe('ExportService', () => {
 
       const result = await exportService.exportDonationListXlsx('en', orderBy, filter)
 
-      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, filter)
+      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, 'en', filter)
       expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Donation')
       expect(mockWorksheet.columns).toBeDefined()
       expect(mockWorksheet.addRows).toHaveBeenCalledWith(mockDonationData)
@@ -222,7 +222,7 @@ describe('ExportService', () => {
 
       const result = await exportService.exportDonationListXlsx('fr', orderBy)
 
-      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, undefined)
+      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, 'fr', undefined)
       expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Donation')
       expect(mockWorksheet.columns).toBeDefined()
       expect(mockWorksheet.addRows).toHaveBeenCalledWith(mockDonationData)

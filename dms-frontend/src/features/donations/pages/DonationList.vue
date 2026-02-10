@@ -1,7 +1,14 @@
 <template>
-  <Page title="Liste des dons" :breadcrumbs="breadcrumbs" :loading="loading" :working="working">
+  <Page
+    :title="t('labels.listOfDonations')"
+    :breadcrumbs="breadcrumbs"
+    :loading="loading"
+    :working="working"
+  >
     <template #actions>
-      <Btn to="/donations/create" icon="add" color="primary" class="q-mr-sm"> Nouveau </Btn>
+      <Btn to="/donations/create" icon="add" color="primary" class="q-mr-sm">
+        {{ t('actions.new') }}
+      </Btn>
       <BtnGroup outline>
         <DonationListFilter
           :filter="filter"
@@ -30,6 +37,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 
@@ -64,9 +72,15 @@ import type {
   PaymentMode,
 } from '@shared/models'
 
-const breadcrumbs: Breadcrumb[] = [
-  { id: 'donation-list', label: 'Liste des dons', icon: 'volunteer_activism' },
-]
+const { t } = useI18n()
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
+  {
+    id: 'donation-list',
+    label: t('labels.listOfDonations'),
+    icon: 'volunteer_activism',
+  },
+])
 
 const $q = useQuasar()
 const router = useRouter()
@@ -128,7 +142,7 @@ const deleteDonation = async (donationId: string) => {
   working.value = true
   await donationStore.deleteDonation(donationId)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le don a été supprimé avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationDeleted') })
   // Refetch donations to update the list
   await fetchDonations(paginationRequest.value)
 }
@@ -137,7 +151,7 @@ const createTaxReceipt = async (donationId: string) => {
   working.value = true
   await taxReceiptListStore.createIndividualTaxReceipt(donationId)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le reçu fiscal est en cours de génération.' })
+  $q.notify({ type: 'positive', message: t('notifications.taxReceiptIsBeingGenerated') })
   await router.push('/tax-receipts')
 }
 

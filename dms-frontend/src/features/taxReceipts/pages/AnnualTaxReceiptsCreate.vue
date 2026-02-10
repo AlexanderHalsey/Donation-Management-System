@@ -1,6 +1,6 @@
 <template>
   <Page
-    title="Création des reçus fiscaux annuels"
+    :title="t('labels.createAnnualTaxReceipts')"
     :breadcrumbs="breadcrumbs"
     :loading="loading"
     :working="working"
@@ -12,12 +12,12 @@
         @click="annualTaxReceiptsForm?.validate()"
         data-cy="create-annual-tax-receipts-button"
       >
-        Créer
+        {{ t('actions.create') }}
       </Btn>
     </template>
     <div class="flex q-mb-md q-gutter-xl" data-cy="annual-tax-receipts-create-titles">
-      <div class="text-bold">Année : {{ year }}</div>
-      <div class="text-bold">Organisation : {{ organisation?.name }}</div>
+      <div class="text-bold">{{ t('common.year') }} : {{ year }}</div>
+      <div class="text-bold">{{ t('nouns.organisation') }} : {{ organisation?.name }}</div>
       <div v-if="formErrorMessage" class="col-grow text-right" data-cy="form-error-message">
         <div class="text-negative">{{ formErrorMessage }}</div>
       </div>
@@ -35,6 +35,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -47,14 +48,20 @@ import { useAnnualTaxReceiptsStore, useOrganisationListStore } from '@/stores'
 import type { AnnualTaxReceiptsFormData } from '../types'
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'tax-receipt-list',
-    label: 'Liste des reçus fiscaux',
+    label: t('labels.listOfTaxReceipts'),
     icon: 'receipt_long',
     to: '/tax-receipts',
   },
-  { id: 'annual-tax-receipts-create', label: 'Création des reçus fiscaux annuels', icon: 'add' },
+  {
+    id: 'annual-tax-receipts-create',
+    label: t('labels.createAnnualTaxReceipts'),
+    icon: 'add',
+  },
 ]
 
 const $q = useQuasar()
@@ -87,8 +94,7 @@ const createAnnualTaxReceipts = async (formData: AnnualTaxReceiptsFormData) => {
   working.value = false
   $q.notify({
     type: 'positive',
-    message:
-      'Les reçus fiscaux annuels sont en cours de création. Des emails seront envoyés une fois le processus terminé.',
+    message: t('notifications.annualTaxReceiptsInCreationProcess'),
   })
   await router.push({ name: 'tax-receipts' })
 }

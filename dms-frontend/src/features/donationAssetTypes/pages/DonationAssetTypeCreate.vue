@@ -1,5 +1,9 @@
 <template>
-  <Page title="Nouvelle nature du don" :breadcrumbs="breadcrumbs" :working="working">
+  <Page
+    :title="`${t('labels.newDonationAssetType')}`"
+    :breadcrumbs="breadcrumbs"
+    :working="working"
+  >
     <template #actions>
       <Btn
         color="primary"
@@ -7,7 +11,7 @@
         @click="donationAssetTypeForm?.validate()"
         data-cy="create-donation-asset-type"
       >
-        Créer
+        {{ t('actions.create') }}
       </Btn>
     </template>
     <DonationAssetTypeForm
@@ -19,7 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -35,15 +40,21 @@ import type { DonationAssetTypeFormData } from '../types'
 
 import type { Breadcrumb } from '@/types'
 
-const breadcrumbs: Breadcrumb[] = [
+const { t } = useI18n()
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
   {
     id: 'donation-asset-type-list',
-    label: 'Liste des natures de don',
+    label: t('labels.listOfDonationAssetTypes'),
     to: '/donation-asset-types',
     icon: 'payments',
   },
-  { id: 'donation-asset-type-create', label: 'Nouvelle nature de don', icon: 'add' },
-]
+  {
+    id: 'donation-asset-type-create',
+    label: `${t('labels.newDonationAssetType')}`,
+    icon: 'add',
+  },
+])
 
 const $q = useQuasar()
 const router = useRouter()
@@ -59,14 +70,14 @@ const createDonationAssetType = async (formData: DonationAssetTypeFormData) => {
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
       donationAssetTypeForm.value?.setErrors({
-        name: 'Une nature de don avec ce nom existe déjà.',
+        name: t('errors.donationAssetTypeAlreadyExists'),
       })
     }
     working.value = false
     throw error
   }
   working.value = false
-  $q.notify({ type: 'positive', message: 'La nature du don a été créée avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationAssetTypeCreated') })
   await router.push({ name: 'donation-asset-types' })
 }
 

@@ -1,8 +1,8 @@
 <template>
   <div class="column">
-    <FormField name="donorId" label="Donatateur">
+    <FormField name="donorId" :label="t('nouns.donor')" required>
       <Select
-        :id="'donorId'"
+        id="donorId"
         :model-value="donor"
         :options="props.donorOptions"
         :error="errors.donorId"
@@ -13,20 +13,20 @@
         @update:model-value="updateDonor"
       />
     </FormField>
-    <FormField name="donatedAt" label="Date du don">
+    <FormField name="donatedAt" :label="t('labels.donatedAt')" required>
       <DatePickerInput
-        :id="'donatedAt'"
+        id="donatedAt"
         v-model="donatedAt"
         :error="errors.donatedAt"
         v-bind="donatedAtAttrs"
       />
     </FormField>
-    <FormField name="amount" label="Montant">
-      <CurrencyInput :id="'amount'" v-model="amount" :error="errors.amount" v-bind="amountAttrs" />
+    <FormField name="amount" :label="t('labels.amount')" required>
+      <CurrencyInput id="amount" v-model="amount" :error="errors.amount" v-bind="amountAttrs" />
     </FormField>
-    <FormField name="organisationId" label="Organisation">
+    <FormField name="organisationId" :label="t('nouns.organisation')" required>
       <Select
-        :id="'organisationId'"
+        id="organisationId"
         :model-value="organisation"
         :options="props.organisationOptions"
         :error="errors.organisationId"
@@ -48,9 +48,9 @@
         </template>
       </Select>
     </FormField>
-    <FormField name="donationTypeId" label="Type de don">
+    <FormField name="donationTypeId" :label="t('nouns.donationType')" required>
       <Select
-        :id="'donationTypeId'"
+        id="donationTypeId"
         :model-value="donationType"
         :options="props.donationTypeOptions"
         :error="errors.donationTypeId"
@@ -65,7 +65,7 @@
             <QItemSection>
               <QItemLabel>{{ scope.opt.label }}</QItemLabel>
               <QItemLabel caption class="flex items-center">
-                Organisation :
+                {{ t('nouns.organisation') }} :
                 <OrganisationTag
                   :organisation="getOrganisationRefByDonationTypeId(scope.opt.value)"
                   :organisation-options="props.organisationOptions"
@@ -77,9 +77,9 @@
         </template>
       </Select>
     </FormField>
-    <FormField name="paymentModeId" label="Mode de paiement">
+    <FormField name="paymentModeId" :label="t('nouns.paymentMode')" required>
       <Select
-        :id="'paymentModeId'"
+        id="paymentModeId"
         :model-value="paymentMode"
         :options="props.paymentModeOptions"
         :error="errors.paymentModeId"
@@ -90,9 +90,9 @@
         @update:model-value="updatePaymentMode"
       />
     </FormField>
-    <FormField name="donationMethodId" label="Forme de don">
+    <FormField name="donationMethodId" :label="t('nouns.donationMethod')" required>
       <Select
-        :id="'donationMethodId'"
+        id="donationMethodId"
         :model-value="donationMethod"
         :options="props.donationMethodOptions"
         :error="errors.donationMethodId"
@@ -103,9 +103,9 @@
         @update:model-value="updateDonationMethod"
       />
     </FormField>
-    <FormField name="donationAssetTypeId" label="Nature du don">
+    <FormField name="donationAssetTypeId" :label="t('nouns.donationAssetType')" required>
       <Select
-        :id="'donationAssetTypeId'"
+        id="donationAssetTypeId"
         :model-value="donationAssetType"
         :options="props.donationAssetTypeOptions"
         :error="errors.donationAssetTypeId"
@@ -121,6 +121,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, computed } from 'vue'
+import { useI18n } from '@/composables'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -148,6 +149,8 @@ import type {
   PaymentMode,
 } from '@shared/models'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   donorOptions: DonorRefSelect[]
   paymentModeOptions: PaymentMode[]
@@ -163,7 +166,9 @@ const emit = defineEmits<{
 }>()
 
 const { defineField, errors, handleSubmit, resetForm } = useForm({
-  validationSchema: toTypedSchema(getDonationFormSchema(props.donationTypeOptions)),
+  validationSchema: toTypedSchema(
+    getDonationFormSchema(props.donationTypeOptions, t('errors.donationTypeNotInOrganisation')),
+  ),
   initialValues: props.donation
     ? {
         donorId: props.donation.donor.id,

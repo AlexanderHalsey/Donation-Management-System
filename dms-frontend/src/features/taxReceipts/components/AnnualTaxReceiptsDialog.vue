@@ -2,16 +2,16 @@
   <QDialog v-model="annualReceiptsDialog">
     <QCard>
       <QCardSection class="text-bold" style="font-size: 16px">
-        Confirmer la création des reçus fiscaux annuels
+        {{ t('actions.confirmAnnualReceiptCreation') }}
       </QCardSection>
       <QCardSection>
         <div class="column items-center">
           <div>
-            <div class="text-bold">Récapitulatif</div>
+            <div class="text-bold">{{ t('common.summary') }}</div>
             <div class="flex">
               <div class="column">
-                <div>Total des reçus fiscaux à créer :</div>
-                <div>Total des reçus a envoyer par email :</div>
+                <div>{{ t('labels.totalTaxReceiptsToCreate') }}:</div>
+                <div>{{ t('labels.totalReceiptsToSendByEmail') }}:</div>
               </div>
               <div class="column q-ml-md">
                 <div>
@@ -27,13 +27,13 @@
       </QCardSection>
       <QCardSection>
         <div class="column items-center">
-          Êtes-vous sûr de vouloir créer ces reçus fiscaux annuels ? Cette action est irréversible.
+          {{ t('questions.sureToCreateAnnualTaxReceipts') }}
         </div>
       </QCardSection>
       <QCardActions align="right">
-        <Btn flat label="Annuler" v-close-popup />
+        <Btn flat :label="t('common.cancel')" v-close-popup />
         <Btn
-          label="Confirmer"
+          :label="t('common.confirm')"
           color="primary"
           class="text-white"
           v-close-popup
@@ -46,8 +46,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from '@/composables'
 
 import Btn from '@/components/ui/Btn.vue'
+
+const { t } = useI18n()
 
 defineProps({
   totalCreated: {

@@ -1,11 +1,16 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12 col-md-7">
-      <LoadingCard :loading="!chartItems.length" title="Top donateurs" class="full-height q-pa-md">
+      <LoadingCard
+        :loading="!chartItems.length"
+        :title="t('labels.topDonors')"
+        class="full-height q-pa-md"
+      >
         <template #title>
-          Top donateurs par {{ chartValueOption.name.toLowerCase() }}
+          {{ t('labels.topDonors') }} {{ t('prepositions.by').toLowerCase() }}
+          {{ chartValueOption.name.toLowerCase() }}
           <div class="flex text-subtitle2 text-grey q-mt-sm">
-            <span class="q-mr-sm q-mt-sm">Valeur :</span>
+            <span class="q-mr-sm q-mt-sm">{{ t('labels.value') }}:</span>
             <Select v-model="chartValueOption" :options="chartValueOptions" />
           </div>
         </template>
@@ -15,6 +20,7 @@
             :options="
               getChartOptions({
                 value: chartValueOption.id,
+                amountLabel: t('labels.amount'),
                 indexAxis: $q.screen.gt.sm ? 'y' : 'x',
               })
             "
@@ -25,7 +31,7 @@
     <div class="col-12 col-md-5">
       <LoadingCard :loading="!disabledDonors" class="full-height q-pa-md" data-cy="disabled-donors">
         <template #title>
-          Donateurs désactivés avec dons
+          {{ t('labels.disabledDonorsWithDonations') }}
           <span v-if="!!disabledDonors?.length" class="q-ml-xs">⚠️</span>
           <QTooltip
             v-if="!!disabledDonors?.length"
@@ -35,9 +41,7 @@
             class="bg-warning text-subtitle2"
             max-width="400px"
           >
-            Ces donateurs ont été désactivés mais ont encore des dons associés. Pour finaliser leur
-            suppression, veuillez transférer leurs dons à d'autres donateurs. Une fois qu'un
-            donateur désactivé n'a plus aucun don, sa suppression sera finalisée.
+            {{ t('labels.disabledDonorsTooltip') }}
           </QTooltip>
         </template>
         <Table
@@ -47,7 +51,6 @@
           flat
           dense
           class="q-mt-md"
-          no-data-label="Aucun element à afficher"
           v-model:pagination="disabledDonorsPagination"
           :rows-per-page-options="[]"
         >
@@ -69,6 +72,8 @@
 
 <script setup lang="ts">
 import { computed, ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
+
 import { Bar } from 'vue-chartjs'
 import { useQuasar, type QTableColumn } from 'quasar'
 
@@ -82,6 +87,8 @@ import { DonorLink } from '@/features/donors'
 import { getChartData, getChartOptions } from '../helpers/chart'
 
 import type { ChartItem, DonorListItem } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   topDonorsByAmount: {
@@ -100,9 +107,9 @@ const props = defineProps({
 
 const $q = useQuasar()
 
-const chartValueOptions = computed<{ id: 'amount' | 'count'; name: string }[]>(() => [
-  { id: 'amount', name: 'Montant' },
-  { id: 'count', name: 'Nombre de dons' },
+const chartValueOptions = computed<{ id: 'count' | 'amount'; name: string }[]>(() => [
+  { id: 'amount', name: t('labels.amount') },
+  { id: 'count', name: t('labels.numberOfDonations') },
 ])
 const chartValueOption = ref<(typeof chartValueOptions.value)[number]>(chartValueOptions.value[0])
 
@@ -117,23 +124,29 @@ const chartItems = computed<ChartItem[]>(() => {
   }))
 })
 
-const disabledDonorColumns: QTableColumn[] = [
-  { name: 'lastName', required: true, label: 'Nom', align: 'left', field: 'lastName' },
+const disabledDonorColumns = computed<QTableColumn[]>(() => [
+  {
+    name: 'lastName',
+    required: true,
+    label: t('common.name'),
+    align: 'left',
+    field: 'lastName',
+  },
   {
     name: 'donationCount',
     required: true,
-    label: 'Nombre de dons',
+    label: t('labels.numberOfDonations'),
     align: 'left',
     field: 'donationCount',
   },
   {
     name: 'donationTotalAmount',
     required: true,
-    label: 'Montant total',
+    label: t('labels.totalAmount'),
     align: 'left',
     field: 'donationTotalAmount',
   },
-]
+])
 
 const disabledDonorsPagination = ref({
   sortBy: 'desc',

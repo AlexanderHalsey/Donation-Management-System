@@ -16,7 +16,7 @@ describe('Tax Receipt List', () => {
   const filter = '[data-cy="tax-receipt-list-filter"]'
 
   it('displays the tax receipt list and its various states correctly', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.wait(['@getTaxReceiptList'])
     cy.get(taxReceiptListItem).should('have.length', 10)
     // canceled receipt item
@@ -96,54 +96,54 @@ describe('Tax Receipt List', () => {
       })
   })
   it('allows the user to navigate pages', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.wait('@getTaxReceiptList')
-    cy.get(paginationInfo).should('contain.text', '1-10 of 100')
+    cy.get(paginationInfo).should('contain.text', '1-10 sur 100')
 
     cy.mockTaxReceiptList({ page: 2, pageSize: 10, orderBy: { createdAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '11-20 of 100')
+    cy.get(paginationInfo).should('contain.text', '11-20 sur 100')
 
     cy.mockTaxReceiptList({ page: 10, pageSize: 10, orderBy: { createdAt: 'desc' } })
     cy.get(paginationControls).eq(3).click() // Go to end page
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '91-100 of 100')
+    cy.get(paginationInfo).should('contain.text', '91-100 sur 100')
 
     cy.mockTaxReceiptList({ page: 9, pageSize: 10, orderBy: { createdAt: 'desc' } })
     cy.get(paginationControls).eq(1).click() // Go to previous page
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '81-90 of 100')
+    cy.get(paginationInfo).should('contain.text', '81-90 sur 100')
 
     cy.mockTaxReceiptList({ page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } })
     cy.get(paginationControls).eq(0).click() // Go to first page
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '1-10 of 100')
+    cy.get(paginationInfo).should('contain.text', '1-10 sur 100')
   })
   it('allows the user to change page size', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.wait('@getTaxReceiptList')
-    cy.get(paginationInfo).should('contain.text', '1-10 of 100')
+    cy.get(paginationInfo).should('contain.text', '1-10 sur 100')
 
     cy.mockTaxReceiptList({ page: 2, pageSize: 10, orderBy: { createdAt: 'desc' } })
     cy.get(paginationControls).eq(2).click() // Go to next page
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem).should('have.length', 10)
-    cy.get(paginationInfo).should('contain.text', '11-20 of 100')
+    cy.get(paginationInfo).should('contain.text', '11-20 sur 100')
 
     cy.get(pageSizeSelect).should('contain.text', '10').click()
     cy.mockTaxReceiptList({ page: 1, pageSize: 50, orderBy: { createdAt: 'desc' } })
     cy.get('#q-portal--menu--1 .q-item').eq(3).click() // Select 50 rows per page
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem).should('have.length', 50)
-    cy.get(paginationInfo).should('contain.text', '1-50 of 100')
+    cy.get(paginationInfo).should('contain.text', '1-50 sur 100')
   })
   it('allows the user to sort certain columns', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListHeader).within(() => {
       cy.mockTaxReceiptList({ page: 1, pageSize: 10, orderBy: { donor: { lastName: 'asc' } } })
@@ -187,7 +187,7 @@ describe('Tax Receipt List', () => {
       })
   })
   it('should allow retrying a failed tax receipt from the list', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem)
       .eq(2)
@@ -202,7 +202,7 @@ describe('Tax Receipt List', () => {
     cy.get('.q-notification').should('contain.text', 'Le reçu fiscal est en cours de régénération.')
   })
   it('should allow cancelling a tax receipt from the list', () => {
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem)
       .eq(2)
@@ -227,7 +227,7 @@ describe('Tax Receipt List', () => {
   })
   it('should not allow cancelling a tax receipt if the user is not an admin', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/tax-receipts')
+    cy.visitPage('/tax-receipts')
     cy.wait('@getTaxReceiptList')
     cy.get(taxReceiptListItem)
       .eq(1)
@@ -248,7 +248,7 @@ describe('Tax Receipt List', () => {
     const getFilterMenu = () => cy.get('#q-portal--menu--1 .q-menu').children().eq(0).children()
     it('should allow filtering by donor name', () => {
       const getDonorFilter = () => getFilterMenu().eq(1).children().eq(0).children().eq(1)
-      cy.visit('/tax-receipts')
+      cy.visitPage('/tax-receipts')
       cy.wait('@getTaxReceiptList')
       cy.get(filter).click()
       cy.mockTaxReceiptList(
@@ -265,7 +265,7 @@ describe('Tax Receipt List', () => {
       getDonorFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-4 of 4')
+      cy.get(paginationInfo).should('contain.text', '1-4 sur 4')
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
         { donorId: { in: [0, 1] } },
@@ -278,10 +278,10 @@ describe('Tax Receipt List', () => {
       getDonorFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-8 of 8')
+      cy.get(paginationInfo).should('contain.text', '1-8 sur 8')
     })
     it('should allow filtering by a date range', () => {
-      cy.visit('/tax-receipts')
+      cy.visitPage('/tax-receipts')
       cy.wait('@getTaxReceiptList')
       cy.get(filter).click()
       cy.mockTaxReceiptList(
@@ -299,7 +299,7 @@ describe('Tax Receipt List', () => {
           cy.get('input').type('01022024')
         })
 
-      cy.get(paginationInfo).should('contain.text', '1-10 of 69')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 69')
 
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
@@ -315,11 +315,11 @@ describe('Tax Receipt List', () => {
         .within(() => {
           cy.get('input').type('05032024')
         })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 34')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 34')
     })
     it('should allow filtering by tax receipt type', () => {
       const getTaxReceiptTypeFilter = () => getFilterMenu().eq(1).children().eq(2).children().eq(1)
-      cy.visit('/tax-receipts')
+      cy.visitPage('/tax-receipts')
       cy.wait('@getTaxReceiptList')
       cy.get(filter).click()
       cy.mockTaxReceiptList(
@@ -334,7 +334,7 @@ describe('Tax Receipt List', () => {
       getTaxReceiptTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 50')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 50')
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
         { type: { equals: 'INDIVIDUAL' } },
@@ -347,11 +347,11 @@ describe('Tax Receipt List', () => {
       getTaxReceiptTypeFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 50')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 50')
     })
     it('should allow filtering by tax receipt status', () => {
       const getStatusFilter = () => getFilterMenu().eq(5).children().eq(0).children().eq(1)
-      cy.visit('/tax-receipts')
+      cy.visitPage('/tax-receipts')
       cy.wait('@getTaxReceiptList')
       cy.get(filter).click()
       cy.mockTaxReceiptList(
@@ -368,7 +368,7 @@ describe('Tax Receipt List', () => {
       getStatusFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 20')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 20')
       // select status processing as filter too
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
@@ -383,7 +383,7 @@ describe('Tax Receipt List', () => {
       getStatusFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 40')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 40')
       // select status failed as filter too
       cy.mockTaxReceiptList(
         { page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } },
@@ -398,7 +398,7 @@ describe('Tax Receipt List', () => {
       getStatusFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 60')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 60')
       // now remove status from filter
       cy.mockTaxReceiptList({ page: 1, pageSize: 10, orderBy: { createdAt: 'desc' } })
       getStatusFilter().within(() => {
@@ -410,13 +410,13 @@ describe('Tax Receipt List', () => {
       getStatusFilter().within(() => {
         cy.get('.q-select__dropdown-icon').click() // close dropdown
       })
-      cy.get(paginationInfo).should('contain.text', '1-10 of 100')
+      cy.get(paginationInfo).should('contain.text', '1-10 sur 100')
     })
   })
 
   describe('Annual receipt creation', () => {
     it('should display an annual receipt creation button when there are eligible year organisation pairs', () => {
-      cy.visit('/tax-receipts')
+      cy.visitPage('/tax-receipts')
       cy.wait('@getEligibleYearOrganisationPairs')
       cy.get('[data-cy="create-annual-tax-receipts-button"]').should('be.visible').click()
       cy.get('#q-portal--menu--1 .q-menu').within(() => {
@@ -435,7 +435,7 @@ describe('Tax Receipt List', () => {
     })
     it('should not display an annual receipt creation button when there are no eligible year organisation pairs', () => {
       cy.mockEligibleYearOrganisationPairs(true)
-      cy.visit('/tax-receipts')
+      cy.visitPage('/tax-receipts')
       cy.wait('@getEligibleYearOrganisationPairs')
       cy.get('[data-cy="create-annual-tax-receipts-button"]').should('not.exist')
     })

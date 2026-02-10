@@ -15,7 +15,7 @@
     </template>
     <template #no-option>
       <QItem>
-        <QItemSection class="text-grey"> Aucune option trouvée </QItemSection>
+        <QItemSection class="text-grey"> {{ t('placeholders.noOptionsFound') }} </QItemSection>
       </QItem>
     </template>
     <template #selected-item="scope">
@@ -36,10 +36,13 @@
 
 <script setup lang="ts" generic="T extends SelectFilter">
 import { ref, watch } from 'vue'
+import { useI18n } from '@/composables'
 
 import Select, { type SelectOption } from './ui/Select.vue'
 
 import type { SelectFilter } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   modelValue?: T

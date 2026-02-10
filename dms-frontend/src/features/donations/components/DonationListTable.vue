@@ -7,7 +7,6 @@
     row-key="id"
     :table-row-class-fn="rowClassFn"
     class="donation-list-table"
-    no-data-label="Aucun element à afficher"
     @update:pagination="updatePagination"
   >
     <template #body-cell-donor="{ row }">
@@ -46,6 +45,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { isEqual, omit } from 'es-toolkit'
 
@@ -66,6 +66,8 @@ import type {
   OrganisationRef,
   UserRole,
 } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   donationList: {
@@ -96,17 +98,17 @@ const emit = defineEmits<{
   'create:tax-receipt': [donationId: string]
 }>()
 
-const headers: QTableProps['columns'] = [
+const headers = computed<QTableProps['columns']>(() => [
   {
     name: 'donor',
-    label: 'Donateur',
+    label: t('nouns.donor'),
     field: 'donor',
     align: 'left',
     sortable: true,
   },
   {
     name: 'donatedAt',
-    label: 'Date du don',
+    label: t('labels.donatedAt'),
     field: 'donatedAt',
     align: 'left',
     sortable: true,
@@ -115,7 +117,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'amount',
-    label: 'Montant',
+    label: t('labels.amount'),
     field: 'amount',
     align: 'left',
     sortable: true,
@@ -124,7 +126,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'paymentMode',
-    label: 'Mode de paiement',
+    label: t('nouns.paymentMode'),
     field: 'paymentMode',
     align: 'left',
     sortable: true,
@@ -133,7 +135,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'organisation',
-    label: 'Organisation',
+    label: t('nouns.organisation'),
     field: 'organisation',
     align: 'left',
     sortable: true,
@@ -142,7 +144,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'donationType',
-    label: 'Type de don',
+    label: t('nouns.donationType'),
     field: 'donationType',
     align: 'left',
     sortable: true,
@@ -157,7 +159,7 @@ const headers: QTableProps['columns'] = [
     headerStyle: 'width: 50px',
     style: 'width: 50px',
   },
-]
+])
 
 const rowClassFn = (row: DonationListItem) => {
   if (row.taxReceiptId) {

@@ -5,7 +5,6 @@
     :pagination="computedPagination"
     :loading="loading"
     row-key="id"
-    no-data-label="Aucun element à afficher"
     data-cy="tax-receipt-list-table"
     @update:pagination="updatePagination"
   >
@@ -45,6 +44,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { isEqual, omit } from 'es-toolkit'
 
@@ -87,6 +87,8 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
+
 const emit = defineEmits<{
   'update:pagination': [pagination: TaxReceiptListPaginationRequest]
   'cancel:taxReceipt': [formData: CancelTaxReceiptFormData]
@@ -96,7 +98,7 @@ const emit = defineEmits<{
 const headers: QTableProps['columns'] = [
   {
     name: 'receiptNumber',
-    label: 'N°',
+    label: t('labels.receiptNumber'),
     field: 'receiptNumber',
     align: 'left',
     sortable: true,
@@ -105,14 +107,14 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'donor',
-    label: 'Donateur',
+    label: t('nouns.donor'),
     field: 'donor',
     align: 'left',
     sortable: true,
   },
   {
     name: 'createdAt',
-    label: 'Date de création',
+    label: t('labels.creationDate'),
     field: 'createdAt',
     align: 'left',
     sortable: true,
@@ -121,7 +123,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'type',
-    label: 'Type de reçu',
+    label: t('labels.receiptType'),
     field: 'type',
     align: 'left',
     sortable: true,
@@ -130,12 +132,12 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'file',
-    label: 'Nom du fichier',
+    label: t('labels.fileName'),
     field: 'file',
     align: 'left',
     sortable: true,
-    headerStyle: 'width: 320px',
-    style: 'width: 320px',
+    headerStyle: 'width: 320px;',
+    style: 'width: 320px;',
   },
   {
     name: 'status',
@@ -150,8 +152,8 @@ const headers: QTableProps['columns'] = [
     label: '',
     field: 'id',
     align: 'right',
-    headerStyle: 'width: 30px',
-    style: 'width: 30px',
+    headerStyle: 'width: 30px;',
+    style: 'width: 30px;',
   },
 ]
 

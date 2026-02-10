@@ -1,7 +1,9 @@
 <template>
-  <Page title="Liste des modes de paiement" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.listOfPaymentModes')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
-      <Btn to="/payment-modes/create" icon="add" color="primary" class="q-mr-sm"> Nouveau </Btn>
+      <Btn to="/payment-modes/create" icon="add" color="primary" class="q-mr-sm">
+        {{ t('actions.new') }}
+      </Btn>
     </template>
     <PaymentModeListTable
       :payment-mode-list="paymentModeList"
@@ -12,6 +14,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useQuasar } from 'quasar'
 
 import Page from '@/layouts/Page.vue'
@@ -23,10 +26,12 @@ import { usePaymentModeListStore, usePaymentModeStore } from '@/stores'
 
 import type { Breadcrumb } from '@/types'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'payment-mode-list',
-    label: 'Liste des modes de paiement',
+    label: t('labels.listOfPaymentModes'),
     icon: 'point_of_sale',
   },
 ]
@@ -45,7 +50,7 @@ const deletePaymentMode = async (paymentModeId: string) => {
   working.value = true
   await paymentModeStore.deletePaymentMode(paymentModeId)
   working.value = false
-  $q.notify({ type: 'positive', message: 'Le mode de paiement a été supprimé avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.paymentModeDeleted') })
 }
 
 onMounted(async () => {

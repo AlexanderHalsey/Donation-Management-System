@@ -5,7 +5,6 @@
     :pagination="computedPagination"
     :loading="loading"
     row-key="id"
-    no-data-label="Aucun element à afficher"
     @update:pagination="updatePagination"
   >
     <template #body-cell-lastName="{ row }">
@@ -30,6 +29,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { isEqual, omit } from 'es-toolkit'
 
@@ -41,6 +41,8 @@ import DonorLink from './DonorLink.vue'
 
 import type { QTableProps } from 'quasar'
 import type { DonorListItem, DonorListPagination, DonorListPaginationRequest } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   donorList: {
@@ -67,14 +69,14 @@ const isDonorExternalProviderEnabled =
 const headers: QTableProps['columns'] = [
   {
     name: 'lastName',
-    label: 'Donateur',
+    label: t('nouns.donor'),
     field: 'lastName',
     align: 'left',
     sortable: true,
   },
   {
     name: 'email',
-    label: 'Email',
+    label: t('labels.email'),
     field: 'email',
     align: 'left',
     sortable: true,
@@ -82,7 +84,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'donationCount',
-    label: 'Nombre de dons',
+    label: t('labels.numberOfDonations'),
     field: 'donationCount',
     align: 'center',
     sortable: true,
@@ -90,7 +92,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'donationTotalAmount',
-    label: 'Montant total',
+    label: t('labels.totalAmount'),
     field: 'donationTotalAmount',
     align: 'right',
     sortable: true,

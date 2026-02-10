@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import type { TaxReceiptType } from '@shared/models'
 import type { Tag } from '@/types'
@@ -15,12 +16,14 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
+
 const label = computed(() => {
   switch (props.taxReceiptType) {
     case 'ANNUAL':
-      return 'Annuel'
+      return t('nouns.annual')
     case 'INDIVIDUAL':
-      return 'Individuel'
+      return t('nouns.individual')
     default:
       return props.taxReceiptType
   }

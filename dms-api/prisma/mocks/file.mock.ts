@@ -5,6 +5,6 @@ export const buildMockTaxReceiptPdfTemplateFile = (): FileMetadataCreateInput =>
   name: 'tax-receipt-template.pdf',
   size: 2048,
   mimeType: 'application/pdf',
-  hash: '5249b6afe8c88544d338e612527515a9fdabbf677b0ec8b9a4e09e84d453d7fe',
+  hash: '8546a2457cd8f83560c06ec9d5e56ac944bcd8c09395a5a1e49ef6af98b1e253',
   status: 'ACTIVE',
 })

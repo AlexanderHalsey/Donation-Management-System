@@ -2,16 +2,16 @@
   <QDialog v-model="deleteDialog">
     <QCard>
       <QCardSection class="text-bold" style="font-size: 16px">
-        Confirmer la suppression
+        {{ t('actions.confirmDeletion') }}
       </QCardSection>
       <QCardSection>
-        Êtes-vous sûr de vouloir supprimer ce don ? Cette action est irréversible.
+        {{ t('questions.sureToDeleteDonation') }}
       </QCardSection>
       <QCardActions align="right">
-        <Btn flat label="Annuler" v-close-popup />
+        <Btn flat :label="t('common.cancel')" v-close-popup />
         <Btn
           flat
-          label="Confirmer"
+          :label="t('common.confirm')"
           color="red"
           class="text-white"
           v-close-popup
@@ -24,8 +24,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from '@/composables'
 
 import Btn from '@/components/ui/Btn.vue'
+
+const { t } = useI18n()
 
 defineEmits<{
   'delete:donation': []

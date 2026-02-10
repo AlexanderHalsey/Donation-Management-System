@@ -8,17 +8,20 @@
   >
     {{ getDonorFullName(donor) }}
     <QTooltip v-if="donor.isDisabled" :delay="300" :offset="[10, 10]">
-      Donateur désactivé
+      {{ t('labels.disabledDonor') }}
     </QTooltip>
   </RouterLink>
 </template>
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import { getDonorFullName } from '../helpers'
 
 import type { DonorRef } from '@shared/models'
+
+const { t } = useI18n()
 
 defineProps({
   donor: {

@@ -1,5 +1,5 @@
 <template>
-  <Page title="Liste des donateurs" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page :title="t('labels.listOfDonors')" :breadcrumbs="breadcrumbs" :loading="loading">
     <template #actions>
       <BtnGroup outline>
         <DonorListFilter
@@ -26,6 +26,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 
 import { omit } from 'es-toolkit'
 
@@ -46,8 +47,10 @@ import type {
   DonorRefSelect,
 } from '@shared/models'
 
+const { t } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
-  { id: 'donor-list', label: 'Liste des donateurs', icon: 'group' },
+  { id: 'donor-list', label: t('labels.listOfDonors'), icon: 'group' },
 ]
 
 const donorListStore = useDonorListStore()

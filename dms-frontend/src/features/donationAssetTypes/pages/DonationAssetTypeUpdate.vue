@@ -1,5 +1,9 @@
 <template>
-  <Page title="Modifier la nature du don" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page
+    :title="`${t('labels.updateDonationAssetType')}`"
+    :breadcrumbs="breadcrumbs"
+    :loading="loading"
+  >
     <template #actions>
       <Btn
         outline
@@ -8,7 +12,7 @@
         data-cy="delete-donation-asset-type"
         @click="deleteDonationAssetTypeDialog?.open()"
       >
-        Supprimer
+        {{ t('actions.delete') }}
       </Btn>
       <Btn
         color="primary"
@@ -16,7 +20,7 @@
         data-cy="update-donation-asset-type"
         @click="donationAssetTypeForm?.validate()"
       >
-        Mettre à jour
+        {{ t('actions.update') }}
       </Btn>
     </template>
     <DonationAssetTypeForm
@@ -33,6 +37,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -48,6 +53,8 @@ import { useDonationAssetTypeStore } from '@/stores'
 
 import type { DonationAssetTypeFormData } from '../types'
 import type { Breadcrumb } from '@/types'
+
+const { t } = useI18n()
 
 const breadcrumbs: Breadcrumb[] = [
   {
@@ -80,14 +87,14 @@ const updateDonationAssetType = async (formData: DonationAssetTypeFormData) => {
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
       donationAssetTypeForm.value?.setErrors({
-        name: 'Une nature de don avec ce nom existe déjà.',
+        name: t('errors.donationAssetTypeAlreadyExists'),
       })
     }
     working.value = false
     throw error
   }
   working.value = false
-  $q.notify({ type: 'positive', message: 'La nature du don a été mise à jour avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationAssetTypeUpdated') })
   await router.push({ name: 'donation-asset-types' })
 }
 
@@ -95,7 +102,7 @@ const deleteDonationAssetType = async () => {
   working.value = true
   await donationAssetTypeStore.deleteDonationAssetType(donationAssetTypeId.value)
   working.value = false
-  $q.notify({ type: 'positive', message: 'La nature du don a été supprimée avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationAssetTypeDeleted') })
   await router.push({ name: 'donation-asset-types' })
 }
 

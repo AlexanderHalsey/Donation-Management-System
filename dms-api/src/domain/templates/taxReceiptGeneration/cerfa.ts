@@ -55,9 +55,9 @@ export const cerfaTaxReceiptTemplate = {
       subtitleText: '(Articles 200 et 238 bis et 885-0 V bis A du Code Général des Impôts)',
     },
     labels: {
-      organizationLabel: 'Bénéficiaire des versements :',
+      organisationLabel: 'Bénéficiaire des versements :',
       donorLabel: 'Donateur :',
-      organizationObjectLabel: (object: string) => `Objet : ${object}`,
+      organisationObjectLabel: (object: string) => `Objet : ${object}`,
       totalAmount: 'La somme totale de :',
       totalWords: 'Somme en toutes lettres :',
       paymentMethod: 'Mode de versement :',

@@ -4,7 +4,6 @@
     :columns="headers"
     v-model:pagination="pagination"
     row-key="id"
-    no-data-label="Aucun element à afficher"
     data-cy="donation-type-list-table"
   >
     <template #body-cell-organisation="{ row }">
@@ -27,7 +26,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue'
+import { ref, type PropType, computed } from 'vue'
+import { useI18n } from '@/composables'
 
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 import { OrganisationTag, getOrganisationRefById } from '@/features/organisations'
@@ -36,6 +36,8 @@ import DonationTypeListItemActions from './DonationTypeListItemActions.vue'
 
 import type { QTableProps } from 'quasar'
 import type { DonationType, OrganisationRef } from '@shared/models'
+
+const { t } = useI18n()
 
 defineProps({
   donationTypeList: {
@@ -52,17 +54,17 @@ defineEmits<{
   'delete:donationType': [donationTypeId: string]
 }>()
 
-const headers: QTableProps['columns'] = [
+const headers = computed<QTableProps['columns']>(() => [
   {
     name: 'name',
-    label: 'Nom',
+    label: t('common.name'),
     field: 'name',
     align: 'left',
     sortable: true,
   },
   {
     name: 'organisation',
-    label: 'Organisation',
+    label: t('nouns.organisation'),
     field: 'organisationId',
     align: 'center',
     sortable: true,
@@ -82,7 +84,7 @@ const headers: QTableProps['columns'] = [
     headerStyle: 'width: 50px',
     style: 'width: 50px',
   },
-]
+])
 
 const pagination = ref<QTablePagination>({
   page: 1,

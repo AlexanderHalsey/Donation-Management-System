@@ -9,7 +9,7 @@ describe('Donation Asset Type List', () => {
   const donationAssetTypeListItem = donationAssetTypeTable + ' tbody tr'
 
   it('displays the donation asset type list', () => {
-    cy.visit('/donation-asset-types')
+    cy.visitPage('/donation-asset-types')
     cy.wait(['@getDonationAssetTypeList'])
     cy.get(donationAssetTypeListItem).should('have.length', 4)
     cy.get(donationAssetTypeListItem)
@@ -32,7 +32,7 @@ describe('Donation Asset Type List', () => {
       })
   })
   it('allows the user to sort certain columns', () => {
-    cy.visit('/donation-asset-types')
+    cy.visitPage('/donation-asset-types')
     cy.wait(['@getDonationAssetTypeList'])
     cy.get(donationAssetTypeHeader).within(() => {
       cy.get('th').eq(1).click() // Sort by isDefault ascending
@@ -70,7 +70,7 @@ describe('Donation Asset Type List', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-asset-types')
+    cy.visitPage('/donation-asset-types')
     cy.location('pathname').should('not.include', '/donation-asset-types')
     cy.location('pathname').should('include', '/403')
   })

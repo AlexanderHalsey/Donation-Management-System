@@ -11,7 +11,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="edit" />
         </QItemSection>
-        <QItemSection> Editer </QItemSection>
+        <QItemSection> {{ t('actions.edit') }} </QItemSection>
       </QItem>
       <QItem
         clickable
@@ -23,7 +23,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="delete" />
         </QItemSection>
-        <QItemSection> Supprimer </QItemSection>
+        <QItemSection> {{ t('actions.delete') }} </QItemSection>
       </QItem>
     </QList>
   </QMenu>
@@ -35,11 +35,14 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Btn from '@/components/ui/Btn.vue'
 import DeleteDonationAssetTypeDialog from './DeleteDonationAssetTypeDialog.vue'
 
 import type { DonationAssetType } from '@shared/models'
+
+const { t } = useI18n()
 
 defineProps({
   donationAssetType: {

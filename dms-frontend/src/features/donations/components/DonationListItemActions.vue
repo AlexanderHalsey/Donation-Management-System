@@ -11,7 +11,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="edit" />
         </QItemSection>
-        <QItemSection> Editer </QItemSection>
+        <QItemSection> {{ t('actions.edit') }} </QItemSection>
       </QItem>
       <QItem
         v-if="isTaxReceiptEnabled"
@@ -23,7 +23,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="receipt_long" />
         </QItemSection>
-        <QItemSection> Générer un reçu </QItemSection>
+        <QItemSection> {{ t('actions.generateReceipt') }} </QItemSection>
       </QItem>
       <QItem
         v-if="userRole === 'admin'"
@@ -36,7 +36,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="delete" />
         </QItemSection>
-        <QItemSection> Supprimer </QItemSection>
+        <QItemSection> {{ t('actions.delete') }} </QItemSection>
       </QItem>
     </QList>
   </QMenu>
@@ -48,11 +48,14 @@
 
 <script setup lang="ts">
 import { computed, ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Btn from '@/components/ui/Btn.vue'
 import DeleteDonationDialog from './DeleteDonationDialog.vue'
 
 import type { DonationListItem, UserRole } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   donation: {

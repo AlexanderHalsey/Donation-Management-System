@@ -1,7 +1,7 @@
 import { capitalize } from 'es-toolkit'
 import { ToWords } from 'to-words'
 import { format } from 'date-fns'
-import { fr, enUS } from 'date-fns/locale'
+import { fr, enGB } from 'date-fns/locale'
 
 import { Donation, Donor } from '@generated/prisma/client'
 
@@ -34,7 +34,7 @@ export function convertToWords(amount: number, locale: string): string {
 export function formatDate(date: Date, locale: string): string {
   const localeMap = {
     'fr-FR': { locale: fr, format: 'dd/MM/yyyy' },
-    'en-US': { locale: enUS, format: 'MM/dd/yyyy' },
+    'en-GB': { locale: enGB, format: 'dd/MM/yyyy' },
   }
 
   const config = localeMap[locale] || localeMap['fr-FR']

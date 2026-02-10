@@ -1,5 +1,5 @@
 <template>
-  <Page title="Nouvelle forme de don" :breadcrumbs="breadcrumbs" :working="working">
+  <Page :title="t('labels.newDonationMethod')" :breadcrumbs="breadcrumbs" :working="working">
     <template #actions>
       <Btn
         color="primary"
@@ -7,7 +7,7 @@
         @click="donationMethodForm?.validate()"
         data-cy="create-donation-method"
       >
-        Créer
+        {{ t('actions.create') }}
       </Btn>
     </template>
     <DonationMethodForm
@@ -19,7 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from '@/composables'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 
@@ -35,15 +36,17 @@ import type { DonationMethodFormData } from '../types'
 
 import type { Breadcrumb } from '@/types'
 
-const breadcrumbs: Breadcrumb[] = [
+const { t } = useI18n()
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
   {
     id: 'donation-method-list',
-    label: 'Liste des formes de don',
+    label: t('labels.listOfDonationMethods'),
     to: '/donation-methods',
     icon: 'article',
   },
-  { id: 'donation-method-create', label: 'Nouvelle forme de don', icon: 'add' },
-]
+  { id: 'donation-method-create', label: t('labels.newDonationMethod'), icon: 'add' },
+])
 
 const $q = useQuasar()
 const router = useRouter()
@@ -58,13 +61,13 @@ const createDonationMethod = async (formData: DonationMethodFormData) => {
     await donationMethodStore.createDonationMethod(formData)
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 409) {
-      donationMethodForm.value?.setErrors({ name: 'Une forme de don avec ce nom existe déjà.' })
+      donationMethodForm.value?.setErrors({ name: t('errors.donationMethodAlreadyExists') })
     }
     working.value = false
     throw error
   }
   working.value = false
-  $q.notify({ type: 'positive', message: 'La forme de don a été créée avec succès.' })
+  $q.notify({ type: 'positive', message: t('notifications.donationMethodCreated') })
   await router.push({ name: 'donation-methods' })
 }
 

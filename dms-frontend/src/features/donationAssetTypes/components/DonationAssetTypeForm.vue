@@ -1,9 +1,9 @@
 <template>
   <div class="column">
-    <FormField name="name" label="Nom" required>
+    <FormField name="name" :label="t('common.name')" required>
       <Input id="name" v-model="name" :error="errors.name" v-bind="nameAttrs" />
     </FormField>
-    <FormField name="isDefault" label="Valeur par défaut">
+    <FormField name="isDefault" :label="t('labels.defaultValue')">
       <QCheckbox
         id="isDefault"
         v-model="isDefault"
@@ -17,14 +17,14 @@
       class="text-caption text-grey-7"
       style="margin-top: -28px; margin-left: 232px"
     >
-      Si cette option est activée, cette nature du don sera sélectionné par défaut lors de la
-      création d'un nouveau don.
+      {{ t('labels.donationAssetTypeDefaultDescription') }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onBeforeUnmount } from 'vue'
+import { useI18n } from '@/composables'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -36,6 +36,8 @@ import Input from '@/components/ui/Input.vue'
 import type { DonationAssetTypeFormData } from '../types'
 import type { DonationAssetType } from '@shared/models'
 import { QCheckbox } from 'quasar'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   donationAssetType?: DonationAssetType

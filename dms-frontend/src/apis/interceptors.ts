@@ -23,7 +23,7 @@ export const refreshToken = async (): Promise<string | null> => {
     )
     authStore.setToken(accessToken)
     return accessToken
-  } catch (_err) {
+  } catch {
     authStore.clearToken()
     return null
   }

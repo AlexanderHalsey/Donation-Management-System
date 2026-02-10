@@ -9,13 +9,13 @@ describe('Donation Method Update', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an existing form', () => {
-    cy.visit('/donation-methods/donation-method-id-1')
+    cy.visitPage('/donation-methods/donation-method-id-1')
     cy.wait(['@getDonationMethod'])
     cy.get(formField).eq(0).find('.q-field input').should('have.value', 'Donation Method 1')
     cy.get(formField).eq(1).find('.q-checkbox__inner--truthy').should('exist')
   })
   it('should show validation errors', () => {
-    cy.visit('/donation-methods/donation-method-id-1')
+    cy.visitPage('/donation-methods/donation-method-id-1')
     cy.wait(['@getDonationMethod'])
     cy.get(formField).eq(0).find('input').clear()
 
@@ -26,7 +26,7 @@ describe('Donation Method Update', () => {
       .should('have.text', 'Obligatoire')
   })
   it('should allow changing various fields', () => {
-    cy.visit('/donation-methods/donation-method-id-1')
+    cy.visitPage('/donation-methods/donation-method-id-1')
     cy.wait(['@getDonationMethod'])
     // Change name
     cy.get(formField).eq(0).find('input').clear()
@@ -48,7 +48,7 @@ describe('Donation Method Update', () => {
     )
   })
   it('should allow deleting the donation method', () => {
-    cy.visit('/donation-methods/donation-method-id-1')
+    cy.visitPage('/donation-methods/donation-method-id-1')
     cy.wait(['@getDonationMethod'])
 
     cy.get(deleteDonationMethodBtn).click()
@@ -63,7 +63,7 @@ describe('Donation Method Update', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/donation-methods/donation-method-id-1')
+    cy.visitPage('/donation-methods/donation-method-id-1')
     cy.location('pathname').should('not.include', '/donation-methods/donation-method-id-1')
     cy.location('pathname').should('include', '/403')
   })

@@ -4,7 +4,6 @@
     :columns="headers"
     v-model:pagination="pagination"
     row-key="id"
-    no-data-label="Aucun element à afficher"
     data-cy="organisation-list-table"
   >
     <template #body-cell-name="{ row }">
@@ -29,6 +28,7 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 
@@ -37,6 +37,8 @@ import OrganisationListItemActions from './OrganisationListItemActions.vue'
 
 import type { QTableProps } from 'quasar'
 import type { Organisation } from '@shared/models'
+
+const { t } = useI18n()
 
 defineProps({
   organisationList: {
@@ -52,7 +54,7 @@ defineEmits<{
 const headers: QTableProps['columns'] = [
   {
     name: 'name',
-    label: 'Nom interne',
+    label: t('nouns.internalName'),
     field: 'name',
     align: 'left',
     sortable: true,
@@ -60,7 +62,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'title',
-    label: 'Nom sur le reçu',
+    label: t('nouns.taxReceiptName'),
     field: 'title',
     align: 'left',
     sortable: true,
@@ -69,7 +71,7 @@ const headers: QTableProps['columns'] = [
   },
   {
     name: 'city',
-    label: 'Ville',
+    label: t('labels.city'),
     field: 'city',
     align: 'left',
     sortable: true,

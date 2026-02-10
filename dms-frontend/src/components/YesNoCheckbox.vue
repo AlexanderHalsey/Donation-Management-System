@@ -10,8 +10,12 @@
 </template>
 
 <script setup lang="ts">
-import { difference } from 'es-toolkit'
 import { computed } from 'vue'
+import { useI18n } from '@/composables'
+
+import { difference } from 'es-toolkit'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: {
@@ -21,12 +25,12 @@ const props = defineProps({
 })
 
 type Option = {
-  label: 'Oui' | 'Non'
+  label: string
   value: boolean
 }
 const options = computed<Option[]>(() => [
-  { label: 'Non', value: false },
-  { label: 'Oui', value: true },
+  { label: t('common.no'), value: false },
+  { label: t('common.yes'), value: true },
 ])
 
 const emit = defineEmits<{

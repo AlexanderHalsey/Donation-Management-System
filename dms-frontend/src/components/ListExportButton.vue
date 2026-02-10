@@ -6,7 +6,7 @@
           <QIcon name="file_download" />
         </QItemSection>
         <QItemSection>
-          <QItemLabel>Télécharger Csv</QItemLabel>
+          <QItemLabel>{{ t('labels.downloadCsv') }}</QItemLabel>
         </QItemSection>
       </QItem>
       <QItem clickable v-close-popup @click="$emit('export-xlsx')">
@@ -14,13 +14,13 @@
           <QIcon name="file_download" />
         </QItemSection>
         <QItemSection>
-          <QItemLabel>Télécharger Xlsx</QItemLabel>
+          <QItemLabel>{{ t('labels.downloadXlsx') }}</QItemLabel>
         </QItemSection>
       </QItem>
       <QItem>
         <QItemSection>
           <QItemLabel caption>
-            Les exports respectent les filtres appliqués sur la liste.
+            {{ t('labels.exportsRespectFilters') }}
           </QItemLabel>
         </QItemSection>
       </QItem>
@@ -29,7 +29,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from '@/composables'
+
 import BtnDropdown from './ui/BtnDropdown.vue'
+
+const { t } = useI18n()
 
 defineEmits<{
   'export-csv': []

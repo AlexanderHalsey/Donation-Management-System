@@ -1,10 +1,10 @@
 <template>
   <div class="flex q-gutter-md">
     <Input
-      v-for="[key, label] of ([
-        ['gte', 'de'],
-        ['lte', 'à'],
-      ] as const)"
+      v-for="[key, label] of [
+        ['gte', t('prepositions.from')],
+        ['lte', t('prepositions.to')],
+      ] as const"
       :key="key"
       :label="label"
       :model-value="modelValue?.[key]"
@@ -23,9 +23,13 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
+
 import Input from './ui/Input.vue'
 
 import type { FloatFilter } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: {
@@ -49,8 +53,8 @@ const validateRange = (newValue: number | undefined, key: keyof FloatFilter) => 
 
   if (gteValue !== undefined && lteValue !== undefined && gteValue > lteValue) {
     return {
-      gte: 'Supérieur à « à »',
-      lte: 'Inférieur à « de »',
+      gte: t('errors.greaterThanTo'),
+      lte: t('errors.lessThanFrom'),
     }
   }
 

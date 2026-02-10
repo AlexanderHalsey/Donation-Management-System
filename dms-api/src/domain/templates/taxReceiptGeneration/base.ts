@@ -52,9 +52,9 @@ export interface TaxReceiptTemplate {
       subtitleText: string
     }
     labels: {
-      organizationLabel: string
+      organisationLabel: string
       donorLabel: string
-      organizationObjectLabel: (object: string) => string
+      organisationObjectLabel: (object: string) => string
       totalAmount: string
       totalWords: string
       paymentMethod: string

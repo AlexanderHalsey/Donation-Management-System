@@ -51,6 +51,14 @@ export default defineConfigWithVueTs(
       // Frontend-specific overrides
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'vue/multi-word-component-names': 'off',
+      'no-restricted-imports': [
+        'error',
+        {
+          name: 'vue-i18n',
+          importNames: ['useI18n'],
+          message: "Please use 'useI18n' from '@/composables' instead.",
+        },
+      ],
     },
   },
 )

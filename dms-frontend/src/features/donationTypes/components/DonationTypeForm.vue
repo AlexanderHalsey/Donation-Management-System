@@ -1,9 +1,9 @@
 <template>
   <div class="column">
-    <FormField name="name" label="Nom" required>
+    <FormField name="name" :label="t('common.name')" required>
       <Input id="name" v-model="name" :error="errors.name" v-bind="nameAttrs" />
     </FormField>
-    <FormField name="organisationId" label="Organisation" required>
+    <FormField name="organisationId" :label="t('nouns.organisation')" required>
       <Select
         :id="'organisationId'"
         :model-value="organisation"
@@ -30,7 +30,7 @@
     <FormField
       v-show="organisation?.isTaxReceiptEnabled"
       name="isTaxReceiptEnabled"
-      label="Eligible aux reçus fiscaux"
+      :label="t('labels.eligibleForTaxReceipts')"
     >
       <QCheckbox
         id="isTaxReceiptEnabled"
@@ -45,6 +45,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, computed, watch } from 'vue'
+import { useI18n } from '@/composables'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -57,6 +58,8 @@ import { OrganisationTag, getOrganisationRefById } from '@/features/organisation
 
 import type { DonationTypeFormData } from '../types'
 import type { DonationType, OrganisationRef } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   donationType?: DonationType

@@ -1,6 +1,6 @@
 <template>
   <Page
-    title="Liste des reçus fiscaux"
+    :title="t('labels.listOfTaxReceipts')"
     :breadcrumbs="breadcrumbs"
     :loading="loading"
     :working="working"
@@ -8,7 +8,7 @@
     <template #actions>
       <BtnDropdown
         v-if="annualReceiptCreationOptionList.length > 0"
-        label="Créer des reçus annuels"
+        :label="t('labels.createAnnualTaxReceipts')"
         icon="add"
         color="primary"
         class="q-mr-sm"
@@ -37,8 +37,14 @@
                   v-if="!yearOrganisationPair.isReleased && annualReceiptReleaseDate"
                   :offset="[10, 10]"
                 >
-                  La création des reçus fiscaux pour l'année {{ yearOrganisationPair.year }} peut
-                  être effectuée après le <FormattedDate :value="annualReceiptReleaseDate" />.
+                  {{
+                    t('labels.annualReceiptCreationTooltip', {
+                      year: yearOrganisationPair.year,
+                      date: format(annualReceiptReleaseDate, 'date', {
+                        locale: locale === 'fr' ? fr : enGB,
+                      }),
+                    })
+                  }}
                 </QTooltip>
               </QItemLabel>
             </QItemSection>
@@ -67,13 +73,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { useI18n } from '@/composables'
 
 import { omit } from 'es-toolkit'
+import { format } from 'date-fns'
+import { fr, enGB } from 'date-fns/locale'
 
 import Page from '@/layouts/Page.vue'
 
 import BtnDropdown from '@/components/ui/BtnDropdown.vue'
-import FormattedDate from '@/components/FormattedDate.vue'
 
 import TaxReceiptListTable from '../components/TaxReceiptListTable.vue'
 import TaxReceiptListFilter from '../components/TaxReceiptListFilter.vue'
@@ -97,8 +105,14 @@ import type {
 } from '@shared/models'
 import type { CancelTaxReceiptFormData } from '../types'
 
+const { t, locale } = useI18n()
+
 const breadcrumbs: Breadcrumb[] = [
-  { id: 'tax-receipt-list', label: 'Liste des reçus fiscaux', icon: 'receipt_long' },
+  {
+    id: 'tax-receipt-list',
+    label: t('labels.listOfTaxReceipts'),
+    icon: 'receipt_long',
+  },
 ]
 
 const $q = useQuasar()

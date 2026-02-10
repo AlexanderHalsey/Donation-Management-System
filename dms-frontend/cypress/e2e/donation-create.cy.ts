@@ -13,7 +13,7 @@ describe('Donation Create', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an empty form', () => {
-    cy.visit('/donations/create')
+    cy.visitPage('/donations/create')
     cy.wait([
       '@getOrganisationRefList',
       '@getDonationTypeList',
@@ -29,7 +29,7 @@ describe('Donation Create', () => {
   })
 
   it('should show validation errors', () => {
-    cy.visit('/donations/create')
+    cy.visitPage('/donations/create')
     cy.wait([
       '@getOrganisationRefList',
       '@getDonationTypeList',
@@ -47,7 +47,7 @@ describe('Donation Create', () => {
   })
 
   it('should additionally validate compatibility between organisations and donation types', () => {
-    cy.visit('/donations/create')
+    cy.visitPage('/donations/create')
     cy.wait([
       '@getOrganisationRefList',
       '@getDonationTypeList',
@@ -80,7 +80,7 @@ describe('Donation Create', () => {
   })
 
   it('should submit the form successfully', () => {
-    cy.visit('/donations/create')
+    cy.visitPage('/donations/create')
     cy.wait([
       '@getOrganisationRefList',
       '@getDonationTypeList',

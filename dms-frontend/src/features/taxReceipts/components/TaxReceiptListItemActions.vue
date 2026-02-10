@@ -21,7 +21,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="autorenew" />
         </QItemSection>
-        <QItemSection>Réessayer</QItemSection>
+        <QItemSection>{{ t('actions.retry') }}</QItemSection>
       </QItem>
       <QItem
         v-if="userRole === 'admin' && isCanceled"
@@ -34,7 +34,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="visibility" />
         </QItemSection>
-        <QItemSection>Afficher l'annulation</QItemSection>
+        <QItemSection>{{ t('actions.showCancellation') }}</QItemSection>
       </QItem>
       <QItem
         v-else-if="userRole === 'admin' && canCancel"
@@ -47,7 +47,7 @@
         <QItemSection style="flex: unset">
           <QIcon name="cancel" />
         </QItemSection>
-        <QItemSection> Annuler </QItemSection>
+        <QItemSection> {{ t('common.cancel') }} </QItemSection>
       </QItem>
     </QList>
   </QMenu>
@@ -61,12 +61,15 @@
 
 <script setup lang="ts">
 import { computed, ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Btn from '@/components/ui/Btn.vue'
 import CancelTaxReceipt from './CancelTaxReceipt.vue'
 
 import type { TaxReceiptListItem, UserRole } from '@shared/models'
 import type { CancelTaxReceiptFormData } from '../types'
+
+const { t } = useI18n()
 
 const props = defineProps({
   taxReceipt: {

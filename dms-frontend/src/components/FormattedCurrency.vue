@@ -3,27 +3,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from '@/composables'
 
 const props = defineProps({
   value: {
     type: Number,
     required: true,
   },
-  currencyType: {
-    type: String as PropType<'EUR' | 'USD' | 'GBP'>,
-    default: 'EUR',
-  },
-  locale: {
-    type: String as PropType<'fr-FR' | 'en-US' | 'en-GB'>,
-    default: 'fr-FR',
-  },
 })
 
+const { locale } = useI18n()
+
 const formattedCurrency = computed(() =>
-  props.value.toLocaleString(props.locale, {
+  props.value.toLocaleString(locale.value === 'fr' ? 'fr-FR' : 'en-GB', {
     style: 'currency',
-    currency: props.currencyType,
+    currency: 'EUR',
   }),
 )
 </script>

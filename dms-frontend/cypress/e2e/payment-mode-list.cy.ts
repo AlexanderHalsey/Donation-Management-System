@@ -9,7 +9,7 @@ describe('Payment Mode List', () => {
   const paymentModeListItem = paymentModeTable + ' tbody tr'
 
   it('displays the payment mode list', () => {
-    cy.visit('/payment-modes')
+    cy.visitPage('/payment-modes')
     cy.wait(['@getPaymentModeList'])
     cy.get(paymentModeListItem).should('have.length', 4)
     cy.get(paymentModeListItem)
@@ -29,7 +29,7 @@ describe('Payment Mode List', () => {
       })
   })
   it('allows the user to sort by name column', () => {
-    cy.visit('/payment-modes')
+    cy.visitPage('/payment-modes')
     cy.wait(['@getPaymentModeList'])
     cy.get(paymentModeHeader).within(() => {
       cy.get('th').eq(0).click() // Sort by name ascending
@@ -51,7 +51,7 @@ describe('Payment Mode List', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/payment-modes')
+    cy.visitPage('/payment-modes')
     cy.location('pathname').should('not.include', '/payment-modes')
     cy.location('pathname').should('include', '/403')
   })

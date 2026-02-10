@@ -16,9 +16,11 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale,
 
 export const getChartOptions = ({
   value,
+  amountLabel,
   indexAxis,
 }: {
   value: 'amount' | 'count'
+  amountLabel: string
   indexAxis?: 'x' | 'y'
 }): ChartOptions<'bar'> => {
   return {
@@ -43,7 +45,7 @@ export const getChartOptions = ({
           label: (context) => {
             const label = context.dataset.label || ''
             const value = context.parsed[indexAxis === 'y' ? 'x' : 'y'] || 0
-            return `${label} : ${value}${value > 1 && label === 'Montant' ? ' €' : ''}`
+            return `${label} : ${value}${value > 1 && label === amountLabel ? ' €' : ''}`
           },
         },
       },

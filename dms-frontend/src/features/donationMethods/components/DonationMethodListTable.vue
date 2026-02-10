@@ -4,7 +4,6 @@
     :columns="headers"
     v-model:pagination="pagination"
     row-key="id"
-    no-data-label="Aucun element à afficher"
     data-cy="donation-method-list-table"
   >
     <template #body-cell-isDefault="{ row }">
@@ -23,6 +22,7 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import { useI18n } from '@/composables'
 
 import Table, { type QTablePagination } from '@/components/ui/Table.vue'
 
@@ -32,6 +32,8 @@ import DonationMethodListItemActions from './DonationMethodListItemActions.vue'
 
 import type { QTableProps } from 'quasar'
 import type { DonationMethod } from '@shared/models'
+
+const { t } = useI18n()
 
 defineProps({
   donationMethodList: {
@@ -47,14 +49,14 @@ defineEmits<{
 const headers: QTableProps['columns'] = [
   {
     name: 'name',
-    label: 'Nom',
+    label: t('common.name'),
     field: 'name',
     align: 'left',
     sortable: true,
   },
   {
     name: 'isDefault',
-    label: 'Valeur par défaut',
+    label: t('labels.defaultValue'),
     field: 'isDefault',
     align: 'center',
     sortable: true,

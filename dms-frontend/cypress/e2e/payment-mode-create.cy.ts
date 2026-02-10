@@ -8,11 +8,11 @@ describe('Payment Mode Create', () => {
   const formField = '[data-cy="form-field"]'
 
   it('should initialise an empty form', () => {
-    cy.visit('/payment-modes/create')
+    cy.visitPage('/payment-modes/create')
     cy.get(formField).eq(0).find('.q-field input').should('have.value', '')
   })
   it('should show validation errors', () => {
-    cy.visit('/payment-modes/create')
+    cy.visitPage('/payment-modes/create')
 
     cy.get(createPaymentModeBtn).click()
 
@@ -21,7 +21,7 @@ describe('Payment Mode Create', () => {
       .should('have.text', 'Obligatoire')
   })
   it('should allow filling in various fields', () => {
-    cy.visit('/payment-modes/create')
+    cy.visitPage('/payment-modes/create')
 
     // Enter name
     cy.get(formField).eq(0).find('input').type('New Payment Mode')
@@ -37,7 +37,7 @@ describe('Payment Mode Create', () => {
 
   it('should not allow a standard user to access the page', () => {
     cy.mockRefreshToken({ role: 'standard' })
-    cy.visit('/payment-modes/create')
+    cy.visitPage('/payment-modes/create')
     cy.location('pathname').should('not.include', '/payment-modes/create')
     cy.location('pathname').should('include', '/403')
   })

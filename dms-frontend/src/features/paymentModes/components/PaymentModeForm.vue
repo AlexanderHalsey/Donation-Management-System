@@ -1,6 +1,6 @@
 <template>
   <div class="column">
-    <FormField name="name" label="Nom" required>
+    <FormField name="name" :label="t('common.name')" required>
       <Input id="name" v-model="name" :error="errors.name" v-bind="nameAttrs" />
     </FormField>
   </div>
@@ -8,6 +8,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount } from 'vue'
+import { useI18n } from '@/composables'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -18,6 +19,8 @@ import Input from '@/components/ui/Input.vue'
 
 import type { PaymentModeFormData } from '../types'
 import type { PaymentMode } from '@shared/models'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   paymentMode?: PaymentMode
