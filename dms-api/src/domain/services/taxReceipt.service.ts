@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { uniqBy } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -40,6 +41,7 @@ export class TaxReceiptService {
     private readonly fileService: FileService,
     private readonly taxReceiptGeneratorService: TaxReceiptGeneratorService,
     private readonly bullMQService: BullMQService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async getFilteredList(
@@ -357,9 +359,15 @@ export class TaxReceiptService {
       })
     }
 
-    const [{ buffer: logo }, { buffer: signature }] = await Promise.all([
-      this.fileService.downloadFile(organisation.logoId!),
-      this.fileService.downloadFile(organisation.signatureId!),
+    const [logo, signature] = await Promise.all([
+      this.getCachedFileBuffer(
+        organisation.logoId!,
+        `organisation_${organisation.id}_${organisation.updatedAt.toISOString().replace(/:/g, '-')}_logo`,
+      ),
+      this.getCachedFileBuffer(
+        organisation.signatureId!,
+        `organisation_${organisation.id}_${organisation.updatedAt.toISOString().replace(/:/g, '-')}_signature`,
+      ),
     ])
 
     const pdfBuffer = await this.taxReceiptGeneratorService.generateTaxReceipt({
@@ -493,5 +501,21 @@ export class TaxReceiptService {
     this.logger.warn(
       `Marked tax receipt ID ${taxReceiptId}${jobId ? ` with jobId ${jobId}` : ''} as FAILED due to generation error`,
     )
+  }
+
+  private async getCachedFileBuffer(fileId: string, cacheKey: string): Promise<Buffer> {
+    const cachedBuffer = await this.cacheManager.get<Buffer>(cacheKey)
+    if (cachedBuffer) {
+      this.logger.log(`Cache hit for file ID ${fileId} with cache key ${cacheKey}`)
+      return cachedBuffer
+    } else {
+      this.logger.log(
+        `Cache miss for file ID ${fileId} with cache key ${cacheKey}. Downloading from storage.`,
+      )
+      console.log('here')
+      const { buffer } = await this.fileService.downloadFile(fileId)
+      await this.cacheManager.set(cacheKey, buffer, 24 * 60 * 60 * 1000) // 24 hours
+      return buffer
+    }
   }
 }

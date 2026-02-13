@@ -1,4 +1,5 @@
 import { ConfigModule } from '@nestjs/config'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { mockDeep, mockReset } from 'jest-mock-extended'
@@ -10,11 +11,13 @@ import type { DonationMethod } from '@shared/models'
 
 describe('DonationMethodService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
+  const cacheManagerMock = mockDeep<Cache>()
   let donationMethodService: DonationMethodService
 
   beforeEach(async () => {
     jest.resetAllMocks()
     mockReset(prismaServiceMock)
+    mockReset(cacheManagerMock)
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
@@ -23,6 +26,10 @@ describe('DonationMethodService', () => {
         {
           provide: PrismaService,
           useValue: prismaServiceMock,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: cacheManagerMock,
         },
       ],
     }).compile()

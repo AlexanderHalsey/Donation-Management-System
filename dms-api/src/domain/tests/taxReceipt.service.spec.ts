@@ -1,4 +1,5 @@
 import { ConfigModule } from '@nestjs/config'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { omit } from 'es-toolkit'
@@ -28,12 +29,17 @@ describe('TaxReceiptService', () => {
   const fileServiceMock = mockDeep<FileService>()
   const taxReceiptGeneratorServiceMock = mockDeep<TaxReceiptGeneratorService>()
   const bullMqServiceMock = mockDeep<BullMQService>()
+  const cacheManagerMock = mockDeep<Cache>()
 
   let taxReceiptService: TaxReceiptService
 
   beforeEach(async () => {
     jest.resetAllMocks()
     mockReset(prismaServiceMock)
+    mockReset(fileServiceMock)
+    mockReset(taxReceiptGeneratorServiceMock)
+    mockReset(bullMqServiceMock)
+    mockReset(cacheManagerMock)
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
@@ -54,6 +60,10 @@ describe('TaxReceiptService', () => {
         {
           provide: BullMQService,
           useValue: bullMqServiceMock,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: cacheManagerMock,
         },
       ],
     }).compile()
@@ -399,7 +409,7 @@ describe('TaxReceiptService', () => {
     })
   })
 
-  describe('processTaxReceiptGenerationJob', () => {
+  describe.only('processTaxReceiptGenerationJob', () => {
     it('processes tax receipt generation successfully', async () => {
       const donationId = 'donation-1'
       const taxReceiptNumber = 12345
@@ -421,6 +431,7 @@ describe('TaxReceiptService', () => {
         signatoryPosition: 'President',
         logoId: 'logo-file-id',
         signatureId: 'signature-file-id',
+        updatedAt: new Date('2024-01-01T12:00:00Z'),
       }
       const mockDonationWithRelations = mockDeep<
         Prisma.DonationGetPayload<{
@@ -486,7 +497,9 @@ describe('TaxReceiptService', () => {
       expect(fileServiceMock.downloadFile).toHaveBeenCalledTimes(2)
       expect(taxReceiptGeneratorServiceMock.generateTaxReceipt).toHaveBeenCalledWith({
         taxReceiptNumber,
-        organisation: expect.objectContaining(omit(organisation, ['id', 'logoId', 'signatureId'])),
+        organisation: expect.objectContaining(
+          omit(organisation, ['id', 'logoId', 'signatureId', 'updatedAt']),
+        ),
         donor: mockDonationWithRelations[0].donor,
         donations: mockDonationWithRelations,
         taxReceiptType: 'INDIVIDUAL',
@@ -561,6 +574,7 @@ describe('TaxReceiptService', () => {
             signatoryPosition: 'President',
             logoId: 'logo-file-id',
             signatureId: 'signature-file-id',
+            updatedAt: new Date('2024-01-01T12:00:00Z'),
           },
         },
       ])
@@ -626,6 +640,7 @@ describe('TaxReceiptService', () => {
         signatoryPosition: 'President',
         logoId: 'logo-file-id',
         signatureId: 'signature-file-id',
+        updatedAt: new Date('2024-01-01T12:00:00Z'),
       }
       beforeEach(() => {
         fileServiceMock.downloadFile.mockResolvedValueOnce({

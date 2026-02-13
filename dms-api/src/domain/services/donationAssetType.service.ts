@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -9,7 +10,10 @@ import type { DonationAssetTypeRequest } from '@/api/dtos'
 export class DonationAssetTypeService {
   private readonly logger = new Logger(DonationAssetTypeService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {}
 
   async getAll(): Promise<DonationAssetType[]> {
     const donationAssetTypes = await this.prisma.donationAssetType.findMany()
@@ -50,6 +54,7 @@ export class DonationAssetTypeService {
       this.logger.log(
         `Created donation asset type with ID ${donationAssetType.id} and name "${donationAssetType.name}"`,
       )
+      await this.cacheManager.del('donation-asset-types')
 
       return donationAssetType
     })
@@ -75,6 +80,7 @@ export class DonationAssetTypeService {
       this.logger.log(
         `Updated donation asset type with ID ${donationAssetType.id}. New name: "${donationAssetType.name}", isDefault: ${donationAssetType.isDefault}`,
       )
+      await this.cacheManager.del('donation-asset-types')
 
       return donationAssetType
     })
@@ -87,6 +93,7 @@ export class DonationAssetTypeService {
     })
 
     this.logger.log(`Disabled donation asset type with ID ${donationAssetType.id}`)
+    await this.cacheManager.del('donation-asset-types')
 
     return donationAssetType
   }
@@ -100,5 +107,6 @@ export class DonationAssetTypeService {
     })
 
     this.logger.log('Cleaned up non-attached disabled donation asset types')
+    await this.cacheManager.del('donation-asset-types')
   }
 }

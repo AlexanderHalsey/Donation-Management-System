@@ -1,4 +1,5 @@
 import { ConfigModule } from '@nestjs/config'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { mockDeep, mockReset } from 'jest-mock-extended'
@@ -12,12 +13,14 @@ import type { Organisation } from '@generated/prisma/client'
 describe('OrganisationService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
   const fileServiceMock = mockDeep<FileService>()
+  const cacheManagerMock = mockDeep<Cache>()
   let organisationService: OrganisationService
 
   beforeEach(async () => {
     jest.resetAllMocks()
     mockReset(prismaServiceMock)
     mockReset(fileServiceMock)
+    mockReset(cacheManagerMock)
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
@@ -30,6 +33,10 @@ describe('OrganisationService', () => {
         {
           provide: FileService,
           useValue: fileServiceMock,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: cacheManagerMock,
         },
       ],
     }).compile()

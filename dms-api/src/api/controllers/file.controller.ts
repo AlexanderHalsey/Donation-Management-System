@@ -4,14 +4,16 @@ import {
   Param,
   ParseFilePipeBuilder,
   Post,
+  Req,
   Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger'
-import { Response } from 'express'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { Response, Request } from 'express'
+import * as etag from 'etag'
 
 import { FileService } from '@/domain'
 
@@ -55,10 +57,18 @@ export class FileController {
   @ApiResponse({ status: 200, description: 'File served successfully' })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
   @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
-  async downloadFile(@Res() res: Response, @Param('fileId') fileId: string) {
+  async downloadFile(@Req() req: Request, @Res() res: Response, @Param('fileId') fileId: string) {
     const { buffer, metadata } = await this.fileService.downloadFile(fileId)
+
+    const tag = etag(buffer)
+    if (req.headers['if-none-match'] === tag) {
+      res.status(304).send()
+      return
+    }
+
     res.setHeader('Content-Type', metadata.mimeType)
     res.setHeader('Content-Disposition', `inline; filename="${metadata.name}"`)
+    res.setHeader('ETag', tag)
     res.send(buffer)
   }
 }

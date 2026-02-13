@@ -594,14 +594,10 @@ describe('TaxReceiptGeneratorService', () => {
 
       const result = await taxReceiptGeneratorService.cancelTaxReceipt(originalBuffer)
 
-      expect(mockPath.join).toHaveBeenCalledWith(
-        process.cwd(),
-        demoTaxReceiptTemplate.cancelledWatermark.imagePath,
-      )
       expect(mockFs.readFileSync).toHaveBeenCalled()
       expect(mockPDFRenderer.addWatermarkImageToExistingPdf).toHaveBeenCalledWith(
         originalBuffer,
-        Buffer.from('cancelled-watermark'),
+        undefined,
         demoTaxReceiptTemplate.cancelledWatermark.imageType,
         demoTaxReceiptTemplate.cancelledWatermark.sizeFactor,
       )

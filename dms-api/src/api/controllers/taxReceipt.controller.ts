@@ -7,8 +7,10 @@ import {
   Post,
   Put,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager'
 
 import { formatISO } from 'date-fns'
 import { groupBy } from 'es-toolkit'
@@ -74,6 +76,9 @@ export class TaxReceiptController {
   @Roles('admin')
   @UseGuards(RolesGuard)
   @Get('eligible-year-organisations')
+  @CacheKey('eligible_year_organisations')
+  @CacheTTL(5 * 60 * 1000) // 5 minutes
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get eligible years for annual tax receipts' })
   @ApiResponse({
     status: 200,

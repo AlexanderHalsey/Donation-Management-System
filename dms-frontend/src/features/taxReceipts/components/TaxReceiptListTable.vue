@@ -58,6 +58,8 @@ import TaxReceiptStatusIcon from './TaxReceiptStatusIcon.vue'
 import TaxReceiptTypeTag from './TaxReceiptTypeTag.vue'
 import TaxReceiptListItemActions from './TaxReceiptListItemActions.vue'
 
+import { downloadFile } from '@/apis/dms-api'
+
 import type { QTableProps } from 'quasar'
 import type {
   TaxReceiptListItem,
@@ -202,9 +204,10 @@ const updatePagination = ({
   }
 }
 
-const viewFile = (file: { id: string; name: string }) => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  window.open(`${apiBaseUrl}/files/${file.id}`, '_blank')
+const viewFile = async (file: { id: string; name: string }) => {
+  const fileBlob = await downloadFile(file.id)
+  const url = URL.createObjectURL(fileBlob)
+  window.open(url, '_blank')
 }
 </script>
 

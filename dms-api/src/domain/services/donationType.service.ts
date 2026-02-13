@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -9,7 +10,10 @@ import type { DonationTypeRequest } from '@/api/dtos'
 export class DonationTypeService {
   private readonly logger = new Logger(DonationTypeService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {}
 
   async getAll(): Promise<DonationType[]> {
     const donationTypes = await this.prisma.donationType.findMany()
@@ -53,6 +57,7 @@ export class DonationTypeService {
     this.logger.log(
       `Created donation type with ID ${donationType.id} and name "${donationType.name}" for organisation ID ${request.organisationId}`,
     )
+    await this.cacheManager.del('donation-types')
 
     return donationType
   }
@@ -82,6 +87,7 @@ export class DonationTypeService {
     this.logger.log(
       `Updated donation type with ID ${donationType.id}. New name: "${donationType.name}", isTaxReceiptEnabled: ${donationType.isTaxReceiptEnabled}`,
     )
+    await this.cacheManager.del('donation-types')
 
     return donationType
   }
@@ -93,6 +99,7 @@ export class DonationTypeService {
     })
 
     this.logger.log(`Disabled donation type with ID ${donationType.id}`)
+    await this.cacheManager.del('donation-types')
 
     return donationType
   }
@@ -106,5 +113,6 @@ export class DonationTypeService {
     })
 
     this.logger.log('Cleaned up non-attached disabled donation types')
+    await this.cacheManager.del('donation-types')
   }
 }

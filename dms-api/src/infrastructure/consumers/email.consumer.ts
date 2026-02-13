@@ -1,4 +1,4 @@
-import { BadRequestException, Logger } from '@nestjs/common'
+import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq'
 
@@ -12,7 +12,7 @@ import type { EmailQueueJob } from '@/infrastructure/types'
 import type { Job } from 'bullmq'
 
 @Processor(EMAIL_QUEUE)
-export class EmailConsumer extends WorkerHost {
+export class EmailConsumer extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(EmailConsumer.name)
   private htmlTemplate: string | null = null
 
@@ -25,7 +25,7 @@ export class EmailConsumer extends WorkerHost {
     super()
   }
 
-  private async selectHtmlTemplateForEnvironment() {
+  async onModuleInit() {
     if (this.htmlTemplate) return
 
     const templateKey = this.configService.get<string>('EMAIL_TEMPLATE_STORAGE_KEY')
@@ -48,7 +48,6 @@ export class EmailConsumer extends WorkerHost {
   async process({ id, name, data }: EmailQueueJob) {
     switch (name) {
       case 'SEND_RECEIPT': {
-        await this.selectHtmlTemplateForEnvironment()
         const { buffer: taxReceipt, metadata } = await this.fileService.downloadFile(data.fileId)
         await this.smtpService.sendMessage(id!, {
           to: data.to,

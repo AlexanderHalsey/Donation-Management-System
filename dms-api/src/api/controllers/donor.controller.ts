@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager'
 
 import { DonorService } from '@/domain'
 
@@ -45,6 +46,9 @@ export class DonorController {
   }
 
   @Get('refs')
+  @CacheKey('donor-refs')
+  @CacheTTL(24 * 60 * 60 * 1000) // 24 hours
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get donor refs' })
   @ApiResponse({ status: 200, type: [GetDonorRefListResponse] })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })

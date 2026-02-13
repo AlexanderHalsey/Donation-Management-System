@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -9,7 +10,10 @@ import type { PaymentModeRequest } from '@/api/dtos'
 export class PaymentModeService {
   private readonly logger = new Logger(PaymentModeService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {}
 
   async getAll(): Promise<PaymentMode[]> {
     const paymentModes = await this.prisma.paymentMode.findMany()
@@ -35,6 +39,7 @@ export class PaymentModeService {
     })
 
     this.logger.log(`Created payment mode with id ${paymentMode.id}`)
+    await this.cacheManager.del('payment-modes')
 
     return paymentMode
   }
@@ -48,6 +53,7 @@ export class PaymentModeService {
     })
 
     this.logger.log(`Updated payment mode with id ${id}`)
+    await this.cacheManager.del('payment-modes')
 
     return paymentMode
   }
@@ -59,6 +65,7 @@ export class PaymentModeService {
     })
 
     this.logger.log(`Disabled payment mode with id ${id}`)
+    await this.cacheManager.del('payment-modes')
 
     return paymentMode
   }
@@ -72,5 +79,6 @@ export class PaymentModeService {
     })
 
     this.logger.log(`Cleaned up non-attached disabled payment modes`)
+    await this.cacheManager.del('payment-modes')
   }
 }

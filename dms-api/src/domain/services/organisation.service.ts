@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { omit } from 'es-toolkit'
 import { nullsToUndefined } from '@shared/utils'
@@ -21,6 +22,7 @@ export class OrganisationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly fileService: FileService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async getAllActive(): Promise<Organisation[]> {
@@ -97,6 +99,10 @@ export class OrganisationService {
       )
 
       this.logger.log(`Created organisation with id ${organisation.id}`)
+      await Promise.all([
+        this.cacheManager.del('organisations'),
+        this.cacheManager.del('organisation-refs'),
+      ])
 
       return this.transformToOrganisationModel(organisation)
     })
@@ -144,6 +150,10 @@ export class OrganisationService {
       })
 
       this.logger.log(`Updated organisation with id ${id}`)
+      await Promise.all([
+        this.cacheManager.del('organisations'),
+        this.cacheManager.del('organisation-refs'),
+      ])
 
       if (!request.isTaxReceiptEnabled) {
         await tx.donationType.updateMany({
@@ -153,6 +163,7 @@ export class OrganisationService {
         this.logger.log(
           `Disabled tax receipt for all donation types of organisation with id ${id} as tax receipt is disabled for the organisation`,
         )
+        await this.cacheManager.del('donation-types')
       }
 
       return this.transformToOrganisationModel(organisation)
@@ -168,6 +179,10 @@ export class OrganisationService {
     })
 
     this.logger.log(`Disabled organisation with id ${id}`)
+    await Promise.all([
+      this.cacheManager.del('organisations'),
+      this.cacheManager.del('organisation-refs'),
+    ])
 
     return this.transformToOrganisationModel(organisation)
   }
@@ -181,6 +196,10 @@ export class OrganisationService {
     })
 
     this.logger.log(`Cleaned up non-attached disabled organisations`)
+    await Promise.all([
+      this.cacheManager.del('organisations'),
+      this.cacheManager.del('organisation-refs'),
+    ])
   }
 
   transformToOrganisationModel(

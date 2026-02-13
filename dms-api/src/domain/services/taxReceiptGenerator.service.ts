@@ -26,12 +26,16 @@ import { TaxReceiptOrganisationInfo, TaxReceiptDonation } from '@/domain/types'
 @Injectable()
 export class TaxReceiptGeneratorService {
   private template: TaxReceiptTemplate
+  private cancelledWatermarkImageBuffer: Buffer
 
   constructor(
     private readonly pdfRenderer: PDFRendererService,
     private readonly configService: ConfigService,
   ) {
     this.template = this.selectTemplateForEnvironment()
+    this.cancelledWatermarkImageBuffer = fs.readFileSync(
+      path.join(process.cwd(), this.template.cancelledWatermark.imagePath),
+    )
   }
 
   private selectTemplateForEnvironment(): TaxReceiptTemplate {
@@ -446,15 +450,11 @@ export class TaxReceiptGeneratorService {
   }
 
   async cancelTaxReceipt(buffer: Buffer): Promise<Buffer> {
-    const { imagePath, imageType, sizeFactor } = this.template.cancelledWatermark
-    const watermarkPath = path.join(process.cwd(), imagePath)
-    const cancelledWatermarkImageBuffer = fs.readFileSync(watermarkPath)
-
     return await this.pdfRenderer.addWatermarkImageToExistingPdf(
       buffer,
-      cancelledWatermarkImageBuffer,
-      imageType,
-      sizeFactor,
+      this.cancelledWatermarkImageBuffer,
+      this.template.cancelledWatermark.imageType,
+      this.template.cancelledWatermark.sizeFactor,
     )
   }
 }

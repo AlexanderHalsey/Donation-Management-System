@@ -37,7 +37,7 @@ import { AxiosError } from 'axios'
 
 import Btn from '@/components/ui/Btn.vue'
 
-import { uploadImage } from '@/apis/dms-api'
+import { uploadImage, downloadFile } from '@/apis/dms-api'
 
 import type { QFileProps } from 'quasar'
 
@@ -115,8 +115,9 @@ const uploadFile = async (newFile?: File) => {
 
 const viewFile = async () => {
   if (!props.modelValue) return
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  window.open(`${apiBaseUrl}/files/${props.modelValue.id}`, '_blank')
+  const fileBlob = await downloadFile(props.modelValue.id)
+  const url = URL.createObjectURL(fileBlob)
+  window.open(url, '_blank')
 }
 </script>
 

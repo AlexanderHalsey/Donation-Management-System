@@ -44,10 +44,10 @@ describe('EmailConsumer', () => {
 
     emailConsumer = app.get<EmailConsumer>(EmailConsumer)
   })
-
   describe('process', () => {
     it('should send email with attachment when SEND_RECEIPT job is processed', async () => {
       configServiceMock.get.mockReturnValueOnce('demo')
+      emailConsumer.onModuleInit()
       fileServiceMock.downloadFile.mockResolvedValue({
         buffer: Buffer.from('pdf'),
         metadata: mockDeep<FileMetadata>({ name: 'receipt.pdf', mimeType: 'application/pdf' }),
@@ -86,6 +86,7 @@ describe('EmailConsumer', () => {
         metadata: mockDeep<FileMetadata>({ name: 'receipt2.pdf', mimeType: 'application/pdf' }),
       })
       fileStorageServiceMock.downloadFile.mockResolvedValue(Buffer.from('<html>FromStorage</html>'))
+      await emailConsumer.onModuleInit()
 
       await emailConsumer.process(
         mockDeep<EmailQueueJob>({

@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Put, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager'
 
 import { DonationAssetTypeService } from '@/domain'
 
@@ -24,6 +25,9 @@ export class DonationAssetTypeController {
   ) {}
 
   @Get()
+  @CacheKey('donation-asset-types')
+  @CacheTTL(14 * 24 * 60 * 60 * 1000) // 14 days
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get donation asset types' })
   @ApiResponse({ status: 200, type: [GetDonationAssetTypeListResponse] })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })

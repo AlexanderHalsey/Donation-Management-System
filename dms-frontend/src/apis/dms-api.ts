@@ -2,8 +2,10 @@ import axios from 'axios'
 import { parse as parseContentDisposition } from 'content-disposition'
 import { saveAs } from 'file-saver'
 import { parseISO } from 'date-fns'
+import { z } from 'zod'
 
 import { withClient } from './client'
+import { setFileCache, getFileCache } from './idb-helpers'
 
 import {
   convertDonationFormDataToRequest,
@@ -442,6 +444,26 @@ export const uploadImage = async (file: File): Promise<FileUploadResponse> => {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
   )
+}
+
+export const downloadFile = async (fileId: string): Promise<Blob> => {
+  return await withClient(async (client) => {
+    const cached = await getFileCache(fileId)
+    const response = await client.get<Blob>(`/files/${fileId}`, {
+      responseType: 'blob',
+      headers: { 'If-None-Match': cached?.etag || '' },
+      validateStatus: (status) => status === 200 || status === 304,
+    })
+
+    if (response.status === 200) {
+      const newEtag = z.string().parse(response.headers['etag'])
+      await setFileCache(fileId, { etag: newEtag, blob: response.data })
+      return response
+    }
+    // status === 304
+    if (!cached) throw new Error('No cached file found for fileId: ' + fileId)
+    return { ...response, data: cached.blob }
+  })
 }
 
 export const getEligibleTaxReceiptYearOrganisations = async (): Promise<

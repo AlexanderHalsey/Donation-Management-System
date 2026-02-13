@@ -1,5 +1,6 @@
-import { BadRequestException, Controller, Get, UseGuards } from '@nestjs/common'
+import { BadRequestException, Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager'
 
 import { pick } from 'es-toolkit'
 import {
@@ -39,6 +40,9 @@ export class SummaryController {
   ) {}
 
   @Get()
+  @CacheKey('dashboard-summary')
+  @CacheTTL(20 * 60 * 1000) // 20 minutes
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get dashboard summary' })
   @ApiResponse({ status: 200, type: [GetDashboardSummaryResponse] })
   @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })

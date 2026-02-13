@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -9,7 +10,10 @@ import type { DonationMethodRequest } from '@/api/dtos'
 export class DonationMethodService {
   private readonly logger = new Logger(DonationMethodService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {}
 
   async getAll(): Promise<DonationMethod[]> {
     const donationMethods = await this.prisma.donationMethod.findMany()
@@ -48,6 +52,7 @@ export class DonationMethodService {
       this.logger.log(
         `Created donation method with ID ${donationMethod.id} and name "${donationMethod.name}"`,
       )
+      await this.cacheManager.del('donation-methods')
 
       return donationMethod
     })
@@ -73,6 +78,7 @@ export class DonationMethodService {
       this.logger.log(
         `Updated donation method with ID ${donationMethod.id}. New name: "${donationMethod.name}", isDefault: ${donationMethod.isDefault}`,
       )
+      await this.cacheManager.del('donation-methods')
 
       return donationMethod
     })
@@ -85,6 +91,7 @@ export class DonationMethodService {
     })
 
     this.logger.log(`Disabled donation method with ID ${donationMethod.id}`)
+    await this.cacheManager.del('donation-methods')
 
     return donationMethod
   }
@@ -98,5 +105,6 @@ export class DonationMethodService {
     })
 
     this.logger.log('Cleaned up non-attached disabled donation methods')
+    await this.cacheManager.del('donation-methods')
   }
 }

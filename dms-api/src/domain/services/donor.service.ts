@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { omit } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -24,6 +25,7 @@ export class DonorService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly typedSql: TypedSqlService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async getFilteredList(
@@ -145,5 +147,6 @@ export class DonorService {
     this.logger.log(
       `Synchronized ${toUpsert.length} donors with external ids : [${toUpsert.map((d) => d.externalId).join(', ')}]`,
     )
+    await this.cacheManager.del('donor-refs')
   }
 }

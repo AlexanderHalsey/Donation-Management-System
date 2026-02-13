@@ -5,6 +5,8 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { PassportModule } from '@nestjs/passport'
 import { JwtService } from '@nestjs/jwt'
 import { LoggerModule } from 'nestjs-pino'
+import { CacheModule } from '@nestjs/cache-manager'
+import KeyvRedis from '@keyv/redis'
 
 import {
   AuthController,
@@ -124,6 +126,17 @@ import {
             censor: '******',
           },
         },
+      }),
+    }),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        stores: [
+          new KeyvRedis(
+            `redis://${configService.get<string>('REDIS_HOST', 'localhost')}:${configService.get<number>('REDIS_PORT', 6379)}`,
+          ),
+        ],
       }),
     }),
   ],
