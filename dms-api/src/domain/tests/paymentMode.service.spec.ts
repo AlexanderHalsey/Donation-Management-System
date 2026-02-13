@@ -27,6 +27,8 @@ describe('PaymentModeService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     paymentModeService = app.get<PaymentModeService>(PaymentModeService)
   })
 

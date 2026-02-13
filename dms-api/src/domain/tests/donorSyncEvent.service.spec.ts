@@ -32,6 +32,8 @@ describe('DonorSyncEventService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     donorSyncEventService = app.get<DonorSyncEventService>(DonorSyncEventService)
   })
 
@@ -283,7 +285,7 @@ describe('DonorSyncEventService', () => {
 
       prismaServiceMock.donorSyncEvent.updateMany.mockResolvedValueOnce(mockDeep())
 
-      await donorSyncEventService.markAsProcessing(donorSyncEventIds)
+      await donorSyncEventService.markAsProcessingJob({ jobId: 'job-1', donorSyncEventIds })
 
       expect(prismaServiceMock.donorSyncEvent.updateMany).toHaveBeenCalledWith({
         where: { id: { in: donorSyncEventIds } },
@@ -298,7 +300,7 @@ describe('DonorSyncEventService', () => {
 
       prismaServiceMock.donorSyncEvent.updateMany.mockResolvedValueOnce(mockDeep())
 
-      await donorSyncEventService.markAsCompleted(donorSyncEventIds)
+      await donorSyncEventService.markAsCompletedJob({ jobId: 'job-1', donorSyncEventIds })
 
       expect(prismaServiceMock.donorSyncEvent.updateMany).toHaveBeenCalledWith({
         where: { id: { in: donorSyncEventIds } },
@@ -314,7 +316,11 @@ describe('DonorSyncEventService', () => {
 
       prismaServiceMock.donorSyncEvent.updateMany.mockResolvedValueOnce(mockDeep())
 
-      await donorSyncEventService.markAsFailed(donorSyncEventIds, errorMessage)
+      await donorSyncEventService.markAsFailedJob({
+        jobId: 'job-1',
+        donorSyncEventIds,
+        errorMessage,
+      })
 
       expect(prismaServiceMock.donorSyncEvent.updateMany).toHaveBeenCalledWith({
         where: { id: { in: donorSyncEventIds } },

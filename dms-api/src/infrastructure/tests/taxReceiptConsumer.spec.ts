@@ -28,12 +28,15 @@ describe('TaxReceiptConsumer', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     taxReceiptConsumer = app.get<TaxReceiptConsumer>(TaxReceiptConsumer)
   })
 
   describe('process', () => {
     it('should process GENERATE job successfully', async () => {
       const mockJob = mockDeep<TaxReceiptQueueJob>({
+        id: 'job-123',
         name: 'GENERATE',
         data: {
           taxReceiptId: 'tax-receipt-123',
@@ -43,16 +46,20 @@ describe('TaxReceiptConsumer', () => {
         },
       })
 
-      taxReceiptServiceMock.processTaxReceiptGeneration.mockResolvedValueOnce()
+      taxReceiptServiceMock.processTaxReceiptGenerationJob.mockResolvedValueOnce()
 
       await taxReceiptConsumer.process(mockJob)
 
-      expect(taxReceiptServiceMock.processTaxReceiptGeneration).toHaveBeenCalledWith(mockJob.data)
-      expect(taxReceiptServiceMock.processTaxReceiptGeneration).toHaveBeenCalledTimes(1)
+      expect(taxReceiptServiceMock.processTaxReceiptGenerationJob).toHaveBeenCalledWith({
+        ...mockJob.data,
+        jobId: mockJob.id,
+      })
+      expect(taxReceiptServiceMock.processTaxReceiptGenerationJob).toHaveBeenCalledTimes(1)
     })
 
     it('should process RETRY job successfully', async () => {
       const mockJob = mockDeep<TaxReceiptQueueJob>({
+        id: 'job-123',
         name: 'RETRY',
         data: {
           taxReceiptId: 'tax-receipt-456',
@@ -62,16 +69,20 @@ describe('TaxReceiptConsumer', () => {
         },
       })
 
-      taxReceiptServiceMock.processTaxReceiptGeneration.mockResolvedValueOnce()
+      taxReceiptServiceMock.processTaxReceiptGenerationJob.mockResolvedValueOnce()
 
       await taxReceiptConsumer.process(mockJob)
 
-      expect(taxReceiptServiceMock.processTaxReceiptGeneration).toHaveBeenCalledWith(mockJob.data)
-      expect(taxReceiptServiceMock.processTaxReceiptGeneration).toHaveBeenCalledTimes(1)
+      expect(taxReceiptServiceMock.processTaxReceiptGenerationJob).toHaveBeenCalledWith({
+        ...mockJob.data,
+        jobId: mockJob.id,
+      })
+      expect(taxReceiptServiceMock.processTaxReceiptGenerationJob).toHaveBeenCalledTimes(1)
     })
 
     it('should process CANCEL job successfully', async () => {
       const mockJob = mockDeep<TaxReceiptQueueJob>({
+        id: 'job-123',
         name: 'CANCEL',
         data: {
           fileId: 'file-123',
@@ -79,12 +90,15 @@ describe('TaxReceiptConsumer', () => {
         },
       })
 
-      taxReceiptServiceMock.processTaxReceiptCancellation.mockResolvedValueOnce()
+      taxReceiptServiceMock.processTaxReceiptCancellationJob.mockResolvedValueOnce()
 
       await taxReceiptConsumer.process(mockJob)
 
-      expect(taxReceiptServiceMock.processTaxReceiptCancellation).toHaveBeenCalledWith(mockJob.data)
-      expect(taxReceiptServiceMock.processTaxReceiptCancellation).toHaveBeenCalledTimes(1)
+      expect(taxReceiptServiceMock.processTaxReceiptCancellationJob).toHaveBeenCalledWith({
+        ...mockJob.data,
+        jobId: mockJob.id,
+      })
+      expect(taxReceiptServiceMock.processTaxReceiptCancellationJob).toHaveBeenCalledTimes(1)
     })
 
     it('should handle GENERATE_BATCH job without error', async () => {
@@ -118,26 +132,13 @@ describe('TaxReceiptConsumer', () => {
 
       const mockError = new Error('Tax receipt generation failed')
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
       taxReceiptServiceMock.handleTaxReceiptGenerationFailure.mockResolvedValueOnce()
 
       await taxReceiptConsumer.onFailed(mockJob, mockError)
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Job job-456 failed with error:',
-        'Tax receipt generation failed',
-      )
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Job data:',
-        JSON.stringify(mockJob.data, null, 2),
-      )
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error stack:', mockError.stack)
-      expect(taxReceiptServiceMock.handleTaxReceiptGenerationFailure).toHaveBeenCalledWith(
-        'tax-receipt-failed',
-        mockError,
-      )
-
-      consoleErrorSpy.mockRestore()
+      expect(taxReceiptServiceMock.handleTaxReceiptGenerationFailure).toHaveBeenCalledWith({
+        jobId: 'job-456',
+        taxReceiptId: 'tax-receipt-failed',
+      })
     })
   })
 })

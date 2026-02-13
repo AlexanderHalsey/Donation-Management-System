@@ -33,6 +33,8 @@ describe('FileService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     fileService = app.get<FileService>(FileService)
   })
 

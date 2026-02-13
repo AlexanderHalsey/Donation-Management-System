@@ -27,6 +27,8 @@ describe('DonationAssetTypeService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     donationAssetTypeService = app.get<DonationAssetTypeService>(DonationAssetTypeService)
   })
 

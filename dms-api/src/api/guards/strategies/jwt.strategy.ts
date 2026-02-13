@@ -11,7 +11,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
     const jwtSecret = configService.get<string>('JWT_SECRET')
     if (!jwtSecret) {
-      throw new BadRequestException('JWT_SECRET environment variable is not set')
+      throw new BadRequestException({
+        code: 'JWT_SECRET_MISSING',
+        message: 'JWT_SECRET environment variable is not set',
+      })
     }
 
     super({

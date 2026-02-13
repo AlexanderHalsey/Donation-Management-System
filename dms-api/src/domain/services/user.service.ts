@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import * as bcrypt from 'bcrypt'
 import { omit } from 'es-toolkit'
@@ -12,12 +12,18 @@ const BCRYPT_SALT_ROUNDS = 10
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name)
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserName(username: string): Promise<PrismaUser> {
-    return this.prisma.user.findUniqueOrThrow({
+    const user = this.prisma.user.findUniqueOrThrow({
       where: { username },
     })
+
+    this.logger.log(`Retrieved user with username ${username}`)
+
+    return user
   }
 
   async createUser({
@@ -37,6 +43,9 @@ export class UserService {
         role: role.toUpperCase() as keyof typeof PrismaUserRole,
       },
     })
+
+    this.logger.log(`Created user with username ${username} and role ${role}`)
+
     return this.transformToModel(prismaUser)
   }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common'
+import { Body, Controller, Logger, Post, Req, Res, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 import { ConfigService } from '@nestjs/config'
 
@@ -13,6 +13,8 @@ import { User } from '@shared/models'
 @ApiBearerAuth()
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name)
+
   constructor(
     private authService: AuthService,
     private configService: ConfigService,
@@ -75,5 +77,6 @@ export class AuthController {
       path: '/auth',
       maxAge: !expired ? this.configService.get<number>('JWT_REFRESH_TOKEN_LIFETIME_MS') : 0,
     })
+    this.logger.log(`Setting refresh token cookie${expired ? ' (expired)' : ''}`)
   }
 }

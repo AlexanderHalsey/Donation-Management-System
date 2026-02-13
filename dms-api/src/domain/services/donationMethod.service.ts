@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -7,14 +7,26 @@ import type { DonationMethodRequest } from '@/api/dtos'
 
 @Injectable()
 export class DonationMethodService {
+  private readonly logger = new Logger(DonationMethodService.name)
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getAll(): Promise<DonationMethod[]> {
-    return this.prisma.donationMethod.findMany()
+    const donationMethods = await this.prisma.donationMethod.findMany()
+
+    this.logger.log(`Retrieved ${donationMethods.length} donation methods`)
+
+    return donationMethods
   }
 
   async getById(id: string): Promise<DonationMethod> {
-    return this.prisma.donationMethod.findUniqueOrThrow({ where: { id } })
+    const donationMethod = await this.prisma.donationMethod.findUniqueOrThrow({
+      where: { id },
+    })
+
+    this.logger.log(`Retrieved donation method with ID ${id} and name "${donationMethod.name}"`)
+
+    return donationMethod
   }
 
   async create(request: DonationMethodRequest): Promise<DonationMethod> {
@@ -25,12 +37,18 @@ export class DonationMethodService {
           isDefault: request.isDefault,
         },
       })
+
       if (request.isDefault) {
         await tx.donationMethod.updateMany({
           where: { id: { not: donationMethod.id } },
           data: { isDefault: false },
         })
       }
+
+      this.logger.log(
+        `Created donation method with ID ${donationMethod.id} and name "${donationMethod.name}"`,
+      )
+
       return donationMethod
     })
   }
@@ -44,21 +62,31 @@ export class DonationMethodService {
           isDefault: request.isDefault,
         },
       })
+
       if (request.isDefault) {
         await tx.donationMethod.updateMany({
           where: { id: { not: id } },
           data: { isDefault: false },
         })
       }
+
+      this.logger.log(
+        `Updated donation method with ID ${donationMethod.id}. New name: "${donationMethod.name}", isDefault: ${donationMethod.isDefault}`,
+      )
+
       return donationMethod
     })
   }
 
   async disable(id: string): Promise<DonationMethod> {
-    return this.prisma.donationMethod.update({
+    const donationMethod = await this.prisma.donationMethod.update({
       where: { id },
       data: { isDisabled: true },
     })
+
+    this.logger.log(`Disabled donation method with ID ${donationMethod.id}`)
+
+    return donationMethod
   }
 
   async cleanupNonAttachedDisabled(): Promise<void> {
@@ -68,5 +96,7 @@ export class DonationMethodService {
         donations: { none: {} },
       },
     })
+
+    this.logger.log('Cleaned up non-attached disabled donation methods')
   }
 }

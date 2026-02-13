@@ -61,13 +61,15 @@ export class TypedSqlService {
       try {
         require.resolve('../../../prisma/generated/prisma/sql')
       } catch (error) {
-        throw new BadRequestException(
-          `❌ TypedSQL files not found!\n\n` +
+        throw new BadRequestException({
+          code: 'TYPED_SQL_MODULE_MISSING',
+          message:
+            `❌ TypedSQL files not found!\n\n` +
             `You must generate SQL types before running the dev server:\n` +
             `  npx prisma generate --sql\n\n` +
             `Then restart your dev server.\n\n` +
             `Error details: ${error}`,
-        )
+        })
       }
     }
   }
@@ -79,9 +81,10 @@ export class TypedSqlService {
         // @ts-ignore - Module may not exist during build, handled by try/catch
         this.typedSqlModule = await import('../../../prisma/generated/prisma/sql')
       } catch (error) {
-        throw new BadRequestException(
-          `SQL functions not available. Make sure to run "npx prisma generate --sql" first. Error: ${error}`,
-        )
+        throw new BadRequestException({
+          code: 'TYPED_SQL_MODULE_MISSING',
+          message: `SQL functions not available. Make sure to run "npx prisma generate --sql" first. Error: ${error}`,
+        })
       }
     }
     // Non-null assertion required for Docker builds: TypeScript can statically analyze that

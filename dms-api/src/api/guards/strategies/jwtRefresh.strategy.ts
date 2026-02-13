@@ -12,7 +12,10 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
   constructor(configService: ConfigService) {
     const jwtRefreshSecret = configService.get<string>('JWT_REFRESH_SECRET')
     if (!jwtRefreshSecret) {
-      throw new BadRequestException('JWT_REFRESH_SECRET environment variable is not set')
+      throw new BadRequestException({
+        code: 'JWT_REFRESH_SECRET_MISSING',
+        message: 'JWT_REFRESH_SECRET environment variable is not set',
+      })
     }
 
     super({

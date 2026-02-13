@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 import { PassportModule } from '@nestjs/passport'
 import { JwtService } from '@nestjs/jwt'
+import { LoggerModule } from 'nestjs-pino'
 
 import {
   AuthController,
@@ -96,6 +97,35 @@ import {
     BullModule.registerQueue({ name: TAX_RECEIPT_QUEUE }),
     BullModule.registerQueue({ name: EMAIL_QUEUE }),
     PassportModule,
+    LoggerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        pinoHttp: {
+          transport:
+            configService.get<string>('NODE_ENV') === 'production'
+              ? {
+                  target: '@logtail/pino',
+                  options: {
+                    sourceToken: configService.get<string>('LOGTAIL_SOURCE_TOKEN'),
+                    options: {
+                      endpoint: `https://${configService.get<string>('LOGTAIL_INGESTING_HOST')}`,
+                    },
+                  },
+                }
+              : { target: 'pino-pretty' },
+          redact: {
+            paths: [
+              'req.headers.authorization',
+              'req.headers.cookie',
+              'req.body.password',
+              'res.headers["set-cookie"]',
+            ],
+            censor: '******',
+          },
+        },
+      }),
+    }),
   ],
   controllers: [
     AuthController,

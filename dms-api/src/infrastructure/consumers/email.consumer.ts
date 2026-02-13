@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common'
+import { BadRequestException, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq'
 
@@ -13,6 +13,7 @@ import type { Job } from 'bullmq'
 
 @Processor(EMAIL_QUEUE)
 export class EmailConsumer extends WorkerHost {
+  private readonly logger = new Logger(EmailConsumer.name)
   private htmlTemplate: string | null = null
 
   constructor(
@@ -29,7 +30,10 @@ export class EmailConsumer extends WorkerHost {
 
     const templateKey = this.configService.get<string>('EMAIL_TEMPLATE_STORAGE_KEY')
     if (!templateKey) {
-      throw new BadRequestException('EMAIL_TEMPLATE_STORAGE_KEY environment variable is not set.')
+      throw new BadRequestException({
+        code: 'EMAIL_TEMPLATE_STORAGE_KEY_MISSING',
+        message: 'EMAIL_TEMPLATE_STORAGE_KEY environment variable is not set.',
+      })
     }
     if (templateKey === 'demo') {
       const emailTemplatePath = path.join(process.cwd(), 'src/assets/demoEmailTemplate.html')
@@ -41,12 +45,12 @@ export class EmailConsumer extends WorkerHost {
     }
   }
 
-  async process({ name, data }: EmailQueueJob) {
+  async process({ id, name, data }: EmailQueueJob) {
     switch (name) {
       case 'SEND_RECEIPT': {
         await this.selectHtmlTemplateForEnvironment()
         const { buffer: taxReceipt, metadata } = await this.fileService.downloadFile(data.fileId)
-        await this.smtpService.sendMessage({
+        await this.smtpService.sendMessage(id!, {
           to: data.to,
           subject:
             this.configService.get<string>('EMAIL_TEMPLATE_STORAGE_KEY') === 'demo'
@@ -68,8 +72,14 @@ export class EmailConsumer extends WorkerHost {
 
   @OnWorkerEvent('failed')
   async onFailed(job: Job, error: Error) {
-    console.error(`Job ${job.id} failed with error:`, error.message)
-    console.error('Job data:', JSON.stringify(job.data, null, 2))
-    console.error('Error stack:', error.stack)
+    this.logger.error(
+      {
+        code: 'EMAIL_JOB_FAILED',
+        jobId: job.id,
+        jobData: job.data,
+        errorStack: error.stack,
+      },
+      `Email job ${job.id} failed with error: ${error.message}`,
+    )
   }
 }

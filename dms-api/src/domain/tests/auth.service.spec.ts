@@ -24,7 +24,7 @@ describe('AuthService', () => {
     mockReset(jwtServiceMock)
     mockReset(jwtRefreshServiceMock)
 
-    const module: TestingModule = await Test.createTestingModule({
+    const app: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UserService, useValue: userServiceMock },
@@ -33,7 +33,9 @@ describe('AuthService', () => {
       ],
     }).compile()
 
-    authService = module.get<AuthService>(AuthService)
+    app.useLogger(false)
+
+    authService = app.get<AuthService>(AuthService)
   })
 
   it('should validate user with correct password', async () => {

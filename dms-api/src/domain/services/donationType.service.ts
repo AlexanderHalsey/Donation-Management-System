@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -7,14 +7,26 @@ import type { DonationTypeRequest } from '@/api/dtos'
 
 @Injectable()
 export class DonationTypeService {
+  private readonly logger = new Logger(DonationTypeService.name)
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getAll(): Promise<DonationType[]> {
-    return this.prisma.donationType.findMany()
+    const donationTypes = await this.prisma.donationType.findMany()
+
+    this.logger.log(`Retrieved ${donationTypes.length} donation types`)
+
+    return donationTypes
   }
 
   async getById(id: string): Promise<DonationType> {
-    return this.prisma.donationType.findUniqueOrThrow({ where: { id } })
+    const donationType = await this.prisma.donationType.findUniqueOrThrow({
+      where: { id },
+    })
+
+    this.logger.log(`Retrieved donation type with ID ${id} and name "${donationType.name}"`)
+
+    return donationType
   }
 
   async create(request: DonationTypeRequest): Promise<DonationType> {
@@ -23,18 +35,26 @@ export class DonationTypeService {
     })
 
     if (!organisation.isTaxReceiptEnabled && request.isTaxReceiptEnabled) {
-      throw new BadRequestException(
-        'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
-      )
+      throw new BadRequestException({
+        code: 'TAX_RECEIPT_NOT_ENABLED_FOR_ORGANISATION',
+        message:
+          'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
+      })
     }
 
-    return this.prisma.donationType.create({
+    const donationType = await this.prisma.donationType.create({
       data: {
         name: request.name,
         organisationId: request.organisationId,
         isTaxReceiptEnabled: request.isTaxReceiptEnabled,
       },
     })
+
+    this.logger.log(
+      `Created donation type with ID ${donationType.id} and name "${donationType.name}" for organisation ID ${request.organisationId}`,
+    )
+
+    return donationType
   }
 
   async update(id: string, request: DonationTypeRequest): Promise<DonationType> {
@@ -43,12 +63,14 @@ export class DonationTypeService {
     })
 
     if (!organisation.isTaxReceiptEnabled && request.isTaxReceiptEnabled) {
-      throw new BadRequestException(
-        'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
-      )
+      throw new BadRequestException({
+        code: 'TAX_RECEIPT_NOT_ENABLED_FOR_ORGANISATION',
+        message:
+          'Cannot enable tax receipts for a donation type when the parent organisation has tax receipts disabled',
+      })
     }
 
-    return this.prisma.donationType.update({
+    const donationType = await this.prisma.donationType.update({
       where: { id },
       data: {
         name: request.name,
@@ -56,13 +78,23 @@ export class DonationTypeService {
         isTaxReceiptEnabled: request.isTaxReceiptEnabled,
       },
     })
+
+    this.logger.log(
+      `Updated donation type with ID ${donationType.id}. New name: "${donationType.name}", isTaxReceiptEnabled: ${donationType.isTaxReceiptEnabled}`,
+    )
+
+    return donationType
   }
 
   async disable(id: string): Promise<DonationType> {
-    return this.prisma.donationType.update({
+    const donationType = await this.prisma.donationType.update({
       where: { id },
       data: { isDisabled: true },
     })
+
+    this.logger.log(`Disabled donation type with ID ${donationType.id}`)
+
+    return donationType
   }
 
   async cleanupNonAttachedDisabled(): Promise<void> {
@@ -72,5 +104,7 @@ export class DonationTypeService {
         donations: { none: {} },
       },
     })
+
+    this.logger.log('Cleaned up non-attached disabled donation types')
   }
 }

@@ -27,6 +27,8 @@ describe('DonationMethodService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     donationMethodService = app.get<DonationMethodService>(DonationMethodService)
   })
 

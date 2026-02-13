@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { InjectQueue } from '@nestjs/bullmq'
 
 import { chunk } from 'es-toolkit'
@@ -148,6 +148,8 @@ export const QUEUE_CONFIGS = {
 
 @Injectable()
 export class BullMQService {
+  private readonly logger = new Logger(BullMQService.name)
+
   constructor(
     @InjectQueue(DONOR_SYNC_QUEUE) private readonly donorSyncQueue: DonorSyncQueue,
     @InjectQueue(TAX_RECEIPT_QUEUE) private readonly taxReceiptQueue: TaxReceiptQueue,
@@ -157,6 +159,9 @@ export class BullMQService {
   async addDonorSyncJob(data: { donorSyncEventIds: string[] }): Promise<void> {
     const batchSize = 50
     for (const chunkedDonorSyncEventIds of chunk(data.donorSyncEventIds, batchSize)) {
+      this.logger.log(
+        `Adding PROCESS job to DONOR_SYNC queue with ${chunkedDonorSyncEventIds.length} events`,
+      )
       await this.donorSyncQueue.add(
         'PROCESS',
         { donorSyncEventIds: chunkedDonorSyncEventIds },
@@ -175,14 +180,19 @@ export class BullMQService {
         data as TaxReceiptQueueJobData<'GENERATE_BATCH'>,
         batchSize,
       )) {
+        this.logger.log(`Adding ${jobName} job to TAX_RECEIPT queue`)
         await this.taxReceiptQueue.add(jobName, chunkedData, QUEUE_CONFIGS.TAX_RECEIPT[jobName])
       }
     } else {
+      this.logger.log(`Adding ${jobName} job to TAX_RECEIPT queue`)
       await this.taxReceiptQueue.add(jobName, data, QUEUE_CONFIGS.TAX_RECEIPT[jobName])
     }
   }
 
   async addEmailJob(data: EmailQueueData): Promise<void> {
+    this.logger.log(
+      `Adding SEND_RECEIPT job to EMAIL queue for tax receipt ${data.taxReceiptNumber}`,
+    )
     await this.emailQueue.add('SEND_RECEIPT', data, QUEUE_CONFIGS.EMAIL.SEND_RECEIPT)
   }
 
@@ -215,9 +225,16 @@ export class BullMQService {
         EMAIL: emailCounts,
       }
     } catch (error: unknown) {
-      issues.push(
-        `Queue connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorStack = error instanceof Error ? error.stack : 'No stack trace'
+      this.logger.error(
+        {
+          code: 'BULLMQ_STATUS_CHECK_FAILED',
+          errorStack: errorStack,
+        },
+        `BullMQ status check failed with error: ${errorMessage}`,
       )
+      issues.push(`Queue connection failed: ${errorMessage}`)
     }
 
     return {

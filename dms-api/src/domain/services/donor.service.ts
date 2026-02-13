@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 
 import { omit } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -19,6 +19,8 @@ import {
 
 @Injectable()
 export class DonorService {
+  private readonly logger = new Logger(DonorService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly typedSql: TypedSqlService,
@@ -65,11 +67,13 @@ export class DonorService {
       donationTotalAmount: donor.donationTotalAmount ?? 0,
     }))
 
+    this.logger.log(`Fetched ${totalCount} filtered donors`)
+
     return { donors: nullsToUndefined(items), totalCount }
   }
 
   async getAllRefs(): Promise<DonorRef[]> {
-    return nullsToUndefined(
+    const refs = nullsToUndefined(
       await this.prisma.donor.findMany({
         select: {
           id: true,
@@ -79,24 +83,35 @@ export class DonorService {
         },
       }),
     )
+
+    this.logger.log(`Fetched ${refs.length} donor references`)
+
+    return refs
   }
 
   async getById(donorId: string): Promise<Donor> {
-    const donor = await this.prisma.donor.findUniqueOrThrow({
-      where: { id: donorId },
-      include: {
-        donations: {
-          select: {
-            amount: true,
+    try {
+      const donor = await this.prisma.donor.findUniqueOrThrow({
+        where: { id: donorId },
+        include: {
+          donations: {
+            select: {
+              amount: true,
+            },
           },
         },
-      },
-    })
-    return nullsToUndefined({
-      ...omit(donor, ['donations']),
-      donationCount: donor.donations.length,
-      donationTotalAmount: donor.donations.reduce((sum, donation) => sum + donation.amount, 0),
-    })
+      })
+      return nullsToUndefined({
+        ...omit(donor, ['donations']),
+        donationCount: donor.donations.length,
+        donationTotalAmount: donor.donations.reduce((sum, donation) => sum + donation.amount, 0),
+      })
+    } catch {
+      throw new BadRequestException({
+        code: 'DONOR_NOT_FOUND',
+        message: `Donor with ID ${donorId} not found`,
+      })
+    }
   }
 
   async getExportList(
@@ -111,6 +126,9 @@ export class DonorService {
       },
       filter,
     )
+
+    this.logger.log(`Fetched ${donors.length} donors for export`)
+
     return donors
   }
 
@@ -123,5 +141,9 @@ export class DonorService {
         select: { id: true, externalId: true },
       })
     }
+
+    this.logger.log(
+      `Synchronized ${toUpsert.length} donors with external ids : [${toUpsert.map((d) => d.externalId).join(', ')}]`,
+    )
   }
 }

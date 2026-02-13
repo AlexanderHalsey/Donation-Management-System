@@ -42,6 +42,8 @@ describe('DonorSyncConsumer', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     donorSyncConsumer = app.get<DonorSyncConsumer>(DonorSyncConsumer)
   })
 
@@ -83,14 +85,16 @@ describe('DonorSyncConsumer', () => {
         },
       ]
 
-      donorSyncEventServiceMock.markAsProcessing.mockResolvedValueOnce()
+      donorSyncEventServiceMock.markAsProcessingJob.mockResolvedValueOnce()
       prismaServiceMock.donorSyncEvent.findMany.mockResolvedValueOnce(mockEvents)
       donorServiceMock.synchronizeDonors.mockResolvedValueOnce()
-      donorSyncEventServiceMock.markAsCompleted.mockResolvedValueOnce()
+      donorSyncEventServiceMock.markAsCompletedJob.mockResolvedValueOnce()
 
       await donorSyncConsumer.process(mockJob)
 
-      expect(donorSyncEventServiceMock.markAsProcessing).toHaveBeenCalledWith(donorSyncEventIds)
+      expect(donorSyncEventServiceMock.markAsProcessingJob).toHaveBeenCalledWith({
+        donorSyncEventIds,
+      })
       expect(prismaServiceMock.donorSyncEvent.findMany).toHaveBeenCalledWith({
         where: { id: { in: donorSyncEventIds } },
       })
@@ -116,7 +120,9 @@ describe('DonorSyncConsumer', () => {
           },
         ],
       })
-      expect(donorSyncEventServiceMock.markAsCompleted).toHaveBeenCalledWith(donorSyncEventIds)
+      expect(donorSyncEventServiceMock.markAsCompletedJob).toHaveBeenCalledWith({
+        donorSyncEventIds,
+      })
     })
 
     it('should process DELETE event with isDisabled set to true', async () => {
@@ -143,10 +149,10 @@ describe('DonorSyncConsumer', () => {
         },
       ]
 
-      donorSyncEventServiceMock.markAsProcessing.mockResolvedValueOnce()
+      donorSyncEventServiceMock.markAsProcessingJob.mockResolvedValueOnce()
       prismaServiceMock.donorSyncEvent.findMany.mockResolvedValueOnce(mockEvents)
       donorServiceMock.synchronizeDonors.mockResolvedValueOnce()
-      donorSyncEventServiceMock.markAsCompleted.mockResolvedValueOnce()
+      donorSyncEventServiceMock.markAsCompletedJob.mockResolvedValueOnce()
 
       await donorSyncConsumer.process(mockJob)
 
@@ -202,10 +208,10 @@ describe('DonorSyncConsumer', () => {
         },
       ]
 
-      donorSyncEventServiceMock.markAsProcessing.mockResolvedValueOnce()
+      donorSyncEventServiceMock.markAsProcessingJob.mockResolvedValueOnce()
       prismaServiceMock.donorSyncEvent.findMany.mockResolvedValueOnce(mockEvents)
       donorServiceMock.synchronizeDonors.mockResolvedValueOnce()
-      donorSyncEventServiceMock.markAsCompleted.mockResolvedValueOnce()
+      donorSyncEventServiceMock.markAsCompletedJob.mockResolvedValueOnce()
 
       await donorSyncConsumer.process(mockJob)
 
@@ -252,12 +258,14 @@ describe('DonorSyncConsumer', () => {
         'Some donor sync events not found, cannot process job. Ids to process: event-1, event-2. Ids found: event-1',
       )
 
-      expect(donorSyncEventServiceMock.markAsProcessing).toHaveBeenCalledWith(donorSyncEventIds)
+      expect(donorSyncEventServiceMock.markAsProcessingJob).toHaveBeenCalledWith({
+        donorSyncEventIds,
+      })
       expect(prismaServiceMock.donorSyncEvent.findMany).toHaveBeenCalledWith({
         where: { id: { in: donorSyncEventIds } },
       })
       expect(donorServiceMock.synchronizeDonors).not.toHaveBeenCalled()
-      expect(donorSyncEventServiceMock.markAsCompleted).not.toHaveBeenCalled()
+      expect(donorSyncEventServiceMock.markAsCompletedJob).not.toHaveBeenCalled()
     })
   })
 
@@ -270,26 +278,15 @@ describe('DonorSyncConsumer', () => {
 
       const mockError = new Error('Test error message')
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
-      donorSyncEventServiceMock.markAsFailed.mockResolvedValueOnce()
+      donorSyncEventServiceMock.markAsFailedJob.mockResolvedValueOnce()
 
       await donorSyncConsumer.onFailed(mockJob, mockError)
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Job job-123 failed with error:',
-        'Test error message',
-      )
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Job data:',
-        JSON.stringify(mockJob.data, null, 2),
-      )
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error stack:', mockError.stack)
-      expect(donorSyncEventServiceMock.markAsFailed).toHaveBeenCalledWith(
-        ['event-1', 'event-2'],
-        'Test error message',
-      )
-
-      consoleErrorSpy.mockRestore()
+      expect(donorSyncEventServiceMock.markAsFailedJob).toHaveBeenCalledWith({
+        jobId: 'job-123',
+        donorSyncEventIds: ['event-1', 'event-2'],
+        errorMessage: 'Test error message',
+      })
     })
   })
 })

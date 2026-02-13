@@ -10,7 +10,6 @@ import { SmtpService } from '../services/smtp.service'
 
 import type { EmailQueueJob } from '../types/queues.type'
 import type { FileMetadata } from '@shared/models'
-import type { Job } from 'bullmq'
 
 describe('EmailConsumer', () => {
   const fileServiceMock = mockDeep<FileService>()
@@ -41,6 +40,8 @@ describe('EmailConsumer', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     emailConsumer = app.get<EmailConsumer>(EmailConsumer)
   })
 
@@ -54,6 +55,7 @@ describe('EmailConsumer', () => {
 
       await emailConsumer.process(
         mockDeep<EmailQueueJob>({
+          id: 'job-1',
           name: 'SEND_RECEIPT',
           data: {
             to: 'test@example.com',
@@ -63,7 +65,7 @@ describe('EmailConsumer', () => {
         }),
       )
 
-      expect(smtpServiceMock.sendMessage).toHaveBeenCalledWith({
+      expect(smtpServiceMock.sendMessage).toHaveBeenCalledWith('job-1', {
         to: 'test@example.com',
         subject: expect.any(String),
         html: expect.any(String),
@@ -87,6 +89,7 @@ describe('EmailConsumer', () => {
 
       await emailConsumer.process(
         mockDeep<EmailQueueJob>({
+          id: 'job-1',
           name: 'SEND_RECEIPT',
           data: {
             to: 'test2@example.com',
@@ -96,21 +99,12 @@ describe('EmailConsumer', () => {
         }),
       )
       expect(smtpServiceMock.sendMessage).toHaveBeenCalledWith(
+        'job-1',
         expect.objectContaining({
           to: 'test2@example.com',
           html: '<html>FromStorage</html>',
         }),
       )
-    })
-  })
-
-  describe('onFailed', () => {
-    it('should log error details', async () => {
-      const error = new Error('fail')
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      await emailConsumer.onFailed(mockDeep<Job>({ id: '1', data: { foo: 'bar' } }), error)
-      expect(spy).toHaveBeenCalled()
-      spy.mockRestore()
     })
   })
 })

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 
 import { uniqBy } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -8,6 +8,8 @@ import { BullMQService, PrismaService } from '@/infrastructure'
 
 import { FileService } from './file.service'
 import { TaxReceiptGeneratorService } from './taxReceiptGenerator.service'
+
+import { ApiJobScheduleException, WorkerJobScheduleException } from '../exceptions'
 
 import type {
   TaxReceiptListItem,
@@ -31,6 +33,8 @@ export const ELIGIBLE_TAX_RECEIPT_DONATION_FILTER = {
 
 @Injectable()
 export class TaxReceiptService {
+  private readonly logger = new Logger(TaxReceiptService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly fileService: FileService,
@@ -56,6 +60,9 @@ export class TaxReceiptService {
       }),
       this.prisma.taxReceipt.count({ where: filter }),
     ])
+
+    this.logger.log(`Retrieved ${taxReceipts.length} filtered tax receipts`)
+
     return {
       taxReceipts: taxReceipts.map(nullsToUndefined),
       totalCount,
@@ -67,6 +74,9 @@ export class TaxReceiptService {
       where: { id },
       include: { donor: true, file: true, donations: { select: { id: true } } },
     })
+
+    this.logger.log(`Retrieved tax receipt with id ${id}`)
+
     return nullsToUndefined({
       ...taxReceipt,
       donationIds: taxReceipt.donations.map((donation) => donation.id),
@@ -79,13 +89,17 @@ export class TaxReceiptService {
       _count: { id: true },
     })
 
-    return result.reduce(
+    const statusCounts = result.reduce(
       (acc, item) => {
         acc[item.status] = item._count.id
         return acc
       },
       {} as Record<TaxReceiptStatus, number>,
     )
+
+    this.logger.log(`Retrieved tax receipt status counts: ${JSON.stringify(statusCounts)}`)
+
+    return statusCounts
   }
 
   taxReceiptReleaseDate(): Date {
@@ -131,8 +145,16 @@ export class TaxReceiptService {
           data: { taxReceiptId: taxReceipt.id },
         })
 
+        this.logger.log(
+          `Created individual tax receipt with id ${taxReceipt.id} for donation ${donationId}`,
+        )
+
         return taxReceipt
       },
+    )
+
+    this.logger.log(
+      `Scheduling generation job for tax receipt ${taxReceiptId} of donation ${donationId}`,
     )
 
     try {
@@ -143,8 +165,12 @@ export class TaxReceiptService {
         taxReceiptType: 'INDIVIDUAL',
       })
     } catch (error) {
-      await this.handleTaxReceiptGenerationFailure(taxReceiptId, error)
-      throw error
+      await this.handleTaxReceiptGenerationFailure({ taxReceiptId })
+      throw new ApiJobScheduleException({
+        code: 'TAX_RECEIPT_JOB_SCHEDULING_FAILED',
+        message: `Failed to schedule tax receipt generation job for tax receipt ID ${taxReceiptId}`,
+        stack: error.stack,
+      })
     }
 
     return { taxReceiptId }
@@ -162,9 +188,10 @@ export class TaxReceiptService {
     taxReceiptIds: string[]
   }> {
     if (!this.isTaxReceiptYearReleased(year)) {
-      throw new BadRequestException(
-        `Annual tax receipts for year ${year} cannot be generated before ${TAX_RECEIPT_RELEASE_MONTH_INDEX + 1}/${TAX_RECEIPT_RELEASE_DAY}/${new Date().getFullYear()}`,
-      )
+      throw new BadRequestException({
+        code: 'TAX_RECEIPT_YEAR_NOT_RELEASED',
+        message: `Annual tax receipts for year ${year} cannot be generated before ${TAX_RECEIPT_RELEASE_MONTH_INDEX + 1}/${TAX_RECEIPT_RELEASE_DAY}/${new Date().getFullYear()}`,
+      })
     }
     const donors = await this.prisma.donor.findMany({
       where: { id: { in: donorIds } },
@@ -188,9 +215,10 @@ export class TaxReceiptService {
     const taxReceipts = await this.prisma.$transaction(async (tx) => {
       donors.forEach((donor) => {
         if (donor.donations.length === 0) {
-          throw new BadRequestException(
-            `No donations found for donor ID ${donor.id} in organisation ID ${organisationId} for year ${year}`,
-          )
+          throw new BadRequestException({
+            code: 'NO_DONATIONS_FOUND_FOR_DONOR',
+            message: `No donations found for donor ID ${donor.id} in organisation ID ${organisationId} for year ${year}`,
+          })
         }
       })
 
@@ -217,8 +245,16 @@ export class TaxReceiptService {
         })
       }
 
+      this.logger.log(
+        `Created ${taxReceipts.length} annual tax receipts for organisation ID ${organisationId} and year ${year}`,
+      )
+
       return taxReceipts
     })
+
+    this.logger.log(
+      `Scheduling generation jobs for ${taxReceipts.length} annual tax receipts for organisation ID ${organisationId} and year ${year}`,
+    )
 
     try {
       await this.bullMQService.addTaxReceiptJob(
@@ -232,20 +268,26 @@ export class TaxReceiptService {
       )
     } catch (error) {
       for (const taxReceipt of taxReceipts) {
-        await this.handleTaxReceiptGenerationFailure(taxReceipt.id, error)
+        await this.handleTaxReceiptGenerationFailure({ taxReceiptId: taxReceipt.id })
       }
-      throw error
+      throw new ApiJobScheduleException({
+        code: 'TAX_RECEIPT_JOB_SCHEDULING_FAILED',
+        message: `Failed to schedule tax receipt generation jobs for annual tax receipts for organisation ID ${organisationId} and year ${year}`,
+        stack: error.stack,
+      })
     }
 
     return { taxReceiptIds: taxReceipts.map((tr) => tr.id) }
   }
 
-  async processTaxReceiptGeneration({
+  async processTaxReceiptGenerationJob({
+    jobId,
     taxReceiptId,
     taxReceiptNumber,
     donationIds,
     taxReceiptType,
   }: {
+    jobId: string
     taxReceiptId: string
     taxReceiptNumber: number
     donationIds: string[]
@@ -268,16 +310,22 @@ export class TaxReceiptService {
       }),
     ])
 
+    this.logger.log(
+      `Processing tax receipt generation for tax receipt ID ${taxReceiptId} and job ID ${jobId}`,
+    )
+
     const organisations = uniqBy(
       donations.map((donation) => donation.organisation),
       (org) => org.id,
     )
 
     if (organisations.length > 1) {
-      throw new BadRequestException(
-        'Donations must belong to the same organisation. Current organisation IDs: ' +
+      throw new BadRequestException({
+        code: 'MULTIPLE_ORGANISATIONS_FOUND',
+        message:
+          'Donations must belong to the same organisation. Current organisation IDs: ' +
           organisations.map((org) => org.id).join(', '),
-      )
+      })
     }
 
     const organisation = organisations[0]
@@ -296,13 +344,17 @@ export class TaxReceiptService {
         'signatureId',
       ].some((field) => !organisation?.[field as keyof typeof organisation])
     ) {
-      throw new BadRequestException(
-        'Organisation details are incomplete for tax receipt generation',
-      )
+      throw new BadRequestException({
+        code: 'INCOMPLETE_ORGANISATION_DETAILS',
+        message: 'Organisation details are incomplete for tax receipt generation',
+      })
     }
 
     if (donations.length < donationIds.length) {
-      throw new BadRequestException('One or more donations not found during tax receipt processing')
+      throw new BadRequestException({
+        code: 'DONATIONS_NOT_FOUND',
+        message: 'One or more donations not found during tax receipt processing',
+      })
     }
 
     const [{ buffer: logo }, { buffer: signature }] = await Promise.all([
@@ -329,6 +381,10 @@ export class TaxReceiptService {
       taxReceiptType,
     })
 
+    this.logger.log(
+      `Generated PDF buffer for tax receipt ID ${taxReceiptId}, size: ${pdfBuffer.length} bytes`,
+    )
+
     const fileId = await this.fileService.createFile({
       name: `tax-receipt-${taxReceiptId}.pdf`,
       mimeType: 'application/pdf',
@@ -343,7 +399,12 @@ export class TaxReceiptService {
       },
     })
 
+    this.logger.log(`Updated tax receipt ID ${taxReceiptId} with file ID ${fileId}`)
+
     if (donations[0].donor.email && taxReceiptType === 'ANNUAL') {
+      this.logger.log(
+        `Scheduling email job for tax receipt ID ${taxReceiptId} to be sent to ${donations[0].donor.email}`,
+      )
       try {
         await this.bullMQService.addEmailJob({
           to: donations[0].donor.email,
@@ -351,7 +412,11 @@ export class TaxReceiptService {
           fileId,
         })
       } catch (err) {
-        console.error('Failed to add email job', { err })
+        throw new WorkerJobScheduleException({
+          code: 'EMAIL_JOB_SCHEDULING_FAILED',
+          message: `Failed to schedule email job for tax receipt ID ${taxReceiptId} and donor email ${donations[0].donor.email}`,
+          stack: err instanceof Error ? err.stack : undefined,
+        })
       }
     }
   }
@@ -369,9 +434,10 @@ export class TaxReceiptService {
           taxReceipt.fileId === null ||
           taxReceipt.file === null
         ) {
-          throw new BadRequestException(
-            'Tax receipt status does not allow cancellation. Status: ' + taxReceipt.status,
-          )
+          throw new BadRequestException({
+            code: 'TAX_RECEIPT_CANCELLATION_NOT_ALLOWED',
+            message: 'Tax receipt status does not allow cancellation. Status: ' + taxReceipt.status,
+          })
         }
 
         await tx.taxReceipt.update({
@@ -396,12 +462,16 @@ export class TaxReceiptService {
       },
       { timeout: 2 * 60 * 1000 },
     )
+
+    this.logger.log(`Canceled tax receipt with id ${id} and scheduled cancellation processing`)
   }
 
-  async processTaxReceiptCancellation({
+  async processTaxReceiptCancellationJob({
+    jobId,
     fileId,
     storageKey,
   }: {
+    jobId: string
     fileId: string
     storageKey: string
   }): Promise<void> {
@@ -409,12 +479,19 @@ export class TaxReceiptService {
     const canceledPdfBuffer =
       await this.taxReceiptGeneratorService.cancelTaxReceipt(existingPdfBuffer)
     await this.fileService.updateFileContent(fileId, storageKey, canceledPdfBuffer)
+    this.logger.log(`Processed tax receipt cancellation for file ID ${fileId} in job ID ${jobId}`)
   }
 
-  async handleTaxReceiptGenerationFailure(taxReceiptId: string, _error: Error): Promise<void> {
-    await this.prisma.taxReceipt.update({
-      where: { id: taxReceiptId },
-      data: { status: 'FAILED' },
-    })
+  async handleTaxReceiptGenerationFailure({
+    jobId,
+    taxReceiptId,
+  }: {
+    jobId?: string
+    taxReceiptId: string
+  }): Promise<void> {
+    await this.prisma.taxReceipt.update({ where: { id: taxReceiptId }, data: { status: 'FAILED' } })
+    this.logger.warn(
+      `Marked tax receipt ID ${taxReceiptId}${jobId ? ` with jobId ${jobId}` : ''} as FAILED due to generation error`,
+    )
   }
 }

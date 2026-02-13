@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 
 import * as bcrypt from 'bcrypt'
@@ -10,6 +10,8 @@ import { JwtPayload } from '../types'
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name)
+
   constructor(
     private readonly userService: UserService,
     @Inject('JWT_SERVICE') private readonly jwtService: JwtService,
@@ -20,8 +22,13 @@ export class AuthService {
     const user = await this.userService.findByUserName(username)
     const match = await bcrypt.compare(pass, user.passwordHash)
     if (match) {
+      this.logger.log(`User ${username} authenticated successfully`)
       return this.userService.transformToModel(user)
     }
+    this.logger.warn({
+      code: 'AUTHENTICATION_FAILED',
+      message: `Authentication failed for user ${username}`,
+    })
     return null
   }
 
@@ -29,17 +36,20 @@ export class AuthService {
     accessToken: string
     refreshToken: string
   }> {
-    return {
-      accessToken: this.jwtService.sign({
-        username: user.username,
-        sub: user.id,
-        role: user.role,
-      } satisfies JwtPayload),
-      refreshToken: this.jwtRefreshService.sign({
-        username: user.username,
-        sub: user.id,
-        role: user.role,
-      } satisfies JwtPayload),
-    }
+    const accessToken = this.jwtService.sign({
+      username: user.username,
+      sub: user.id,
+      role: user.role,
+    } satisfies JwtPayload)
+
+    const refreshToken = this.jwtRefreshService.sign({
+      username: user.username,
+      sub: user.id,
+      role: user.role,
+    } satisfies JwtPayload)
+
+    this.logger.log(`Tokens issued for user ${user.username} (ID: ${user.id})`)
+
+    return { accessToken, refreshToken }
   }
 }

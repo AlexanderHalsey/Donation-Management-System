@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import * as Papa from 'papaparse'
 import { Workbook } from 'exceljs'
@@ -26,6 +26,7 @@ type ExportType = keyof ExportHeaderTranslation
 
 @Injectable()
 export class ExportService {
+  private readonly logger = new Logger(ExportService.name)
   private readonly headerTranslations: Record<Language, ExportHeaderTranslation> = {
     fr: {
       donation: {
@@ -125,7 +126,9 @@ export class ExportService {
     filter?: DonationListFilter,
   ) {
     const donations = await this.donationService.getExportList(orderBy, language, filter)
-    return this.exportCsv(language, 'donation', donations)
+    const csv = this.exportCsv(language, 'donation', donations)
+    this.logger.log(`Generated CSV for donation list with ${donations.length} rows`)
+    return csv
   }
 
   async exportDonationListXlsx(
@@ -134,7 +137,9 @@ export class ExportService {
     filter?: DonationListFilter,
   ) {
     const donations = await this.donationService.getExportList(orderBy, language, filter)
-    return this.exportXlsx(language, 'donation', donations)
+    const xlsx = this.exportXlsx(language, 'donation', donations)
+    this.logger.log(`Generated XLSX for donation list with ${donations.length} rows`)
+    return xlsx
   }
 
   async exportDonorListCsv(
@@ -143,7 +148,9 @@ export class ExportService {
     filter?: DonorListFilter,
   ) {
     const donors = await this.donorService.getExportList(orderBy, filter)
-    return this.exportCsv(language, 'donor', donors)
+    const csv = this.exportCsv(language, 'donor', donors)
+    this.logger.log(`Generated CSV for donor list with ${donors.length} rows`)
+    return csv
   }
 
   async exportDonorListXlsx(
@@ -152,6 +159,8 @@ export class ExportService {
     filter?: DonorListFilter,
   ) {
     const donors = await this.donorService.getExportList(orderBy, filter)
-    return this.exportXlsx(language, 'donor', donors)
+    const xlsx = this.exportXlsx(language, 'donor', donors)
+    this.logger.log(`Generated XLSX for donor list with ${donors.length} rows`)
+    return xlsx
   }
 }

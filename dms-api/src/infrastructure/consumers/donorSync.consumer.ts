@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common'
+import { BadRequestException, Logger } from '@nestjs/common'
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq'
 
 import { omit } from 'es-toolkit'
@@ -14,6 +14,8 @@ import type { DonorCreateManyInput } from '@generated/prisma/models'
 
 @Processor(DONOR_SYNC_QUEUE)
 export class DonorSyncConsumer extends WorkerHost {
+  private readonly logger = new Logger(DonorSyncConsumer.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly donorService: DonorService,
@@ -22,8 +24,8 @@ export class DonorSyncConsumer extends WorkerHost {
     super()
   }
 
-  async process({ data: { donorSyncEventIds } }: DonorSyncQueueJob) {
-    await this.donorSyncEventService.markAsProcessing(donorSyncEventIds)
+  async process({ id, data: { donorSyncEventIds } }: DonorSyncQueueJob) {
+    await this.donorSyncEventService.markAsProcessingJob({ jobId: id!, donorSyncEventIds })
 
     const donorSyncEvents = await this.prisma.donorSyncEvent.findMany({
       where: { id: { in: donorSyncEventIds } },
@@ -54,15 +56,25 @@ export class DonorSyncConsumer extends WorkerHost {
     }
 
     await this.donorService.synchronizeDonors({ toUpsert })
-    await this.donorSyncEventService.markAsCompleted(donorSyncEventIds)
+    await this.donorSyncEventService.markAsCompletedJob({ jobId: id!, donorSyncEventIds })
   }
 
   @OnWorkerEvent('failed')
   async onFailed(job: DonorSyncQueueJob, error: Error) {
-    console.error(`Job ${job.id} failed with error:`, error.message)
-    console.error('Job data:', JSON.stringify(job.data, null, 2))
-    console.error('Error stack:', error.stack)
+    this.logger.error(
+      {
+        code: 'DONOR_SYNC_JOB_FAILED',
+        jobId: job.id,
+        jobData: job.data,
+        errorStack: error.stack,
+      },
+      `Donor Sync job ${job.id} failed with error: ${error.message}`,
+    )
 
-    await this.donorSyncEventService.markAsFailed(job.data.donorSyncEventIds, error.message)
+    await this.donorSyncEventService.markAsFailedJob({
+      jobId: job.id!,
+      donorSyncEventIds: job.data.donorSyncEventIds,
+      errorMessage: error.message,
+    })
   }
 }

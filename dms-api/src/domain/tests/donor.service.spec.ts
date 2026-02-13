@@ -33,6 +33,8 @@ describe('DonorService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     donorService = app.get<DonorService>(DonorService)
   })
 

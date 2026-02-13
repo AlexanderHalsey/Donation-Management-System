@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import { chunk } from 'es-toolkit'
 import { subDays } from 'date-fns'
@@ -6,11 +6,14 @@ import { subDays } from 'date-fns'
 import { BullMQService, PrismaService } from '@/infrastructure'
 
 import { DonorSyncEventRequestSchema } from '../schemas'
+import { ApiDonorSyncEventRequestException, ApiJobScheduleException } from '../exceptions'
 
 import { DonorSyncEventCreateManyInput } from '@generated/prisma/models'
 
 @Injectable()
 export class DonorSyncEventService {
+  private readonly logger = new Logger(DonorSyncEventService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly bullMQService: BullMQService,
@@ -20,7 +23,10 @@ export class DonorSyncEventService {
     const request = DonorSyncEventRequestSchema.safeParse(body)
 
     if (!request.success) {
-      throw new BadRequestException(`Invalid Donor Sync Event request: ${request.error.message}`)
+      throw new ApiDonorSyncEventRequestException({
+        code: 'INVALID_DONOR_SYNC_EVENT_REQUEST',
+        message: `Invalid Donor Sync Event request: ${request.error.message}`,
+      })
     }
 
     const notifications: DonorSyncEventCreateManyInput[] = request.data.notifications.map(
@@ -58,31 +64,72 @@ export class DonorSyncEventService {
       donorSyncEventIds.push(...createdChunk.map((event) => event.id))
     }
 
+    this.logger.log(
+      `Created ${donorSyncEventIds.length} donor sync events for request ${request.data.id}`,
+    )
+
+    this.logger.log(`Scheduling sync job for ${donorSyncEventIds.length} donor sync events`)
+
     if (donorSyncEventIds.length > 0) {
       try {
         await this.bullMQService.addDonorSyncJob({ donorSyncEventIds })
       } catch (error) {
-        await this.markAsFailed(donorSyncEventIds, `Failed to schedule sync job: ${error.message}`)
-        throw error
+        await this.markAsFailedJob({
+          donorSyncEventIds,
+          errorMessage: `Failed to schedule sync job: ${error.message}`,
+        })
+        throw new ApiJobScheduleException({
+          code: 'DONOR_SYNC_JOB_SCHEDULING_FAILED',
+          message: `Failed to schedule donor sync job for ${donorSyncEventIds.length}`,
+          stack: error.stack,
+        })
       }
     }
   }
 
-  async markAsProcessing(donorSyncEventIds: string[]): Promise<void> {
+  async markAsProcessingJob({
+    jobId,
+    donorSyncEventIds,
+  }: {
+    jobId: string
+    donorSyncEventIds: string[]
+  }): Promise<void> {
     await this.prisma.donorSyncEvent.updateMany({
       where: { id: { in: donorSyncEventIds } },
       data: { status: 'PROCESSING' },
     })
+
+    this.logger.log(
+      `Marked ${donorSyncEventIds.length} donor sync events as PROCESSING for job ${jobId}`,
+    )
   }
 
-  async markAsCompleted(donorSyncEventIds: string[]): Promise<void> {
+  async markAsCompletedJob({
+    jobId,
+    donorSyncEventIds,
+  }: {
+    jobId: string
+    donorSyncEventIds: string[]
+  }): Promise<void> {
     await this.prisma.donorSyncEvent.updateMany({
       where: { id: { in: donorSyncEventIds } },
       data: { status: 'COMPLETED', processedAt: new Date(), errorMessage: null },
     })
+
+    this.logger.log(
+      `Marked ${donorSyncEventIds.length} donor sync events as COMPLETED for job ${jobId}`,
+    )
   }
 
-  async markAsFailed(donorSyncEventIds: string[], errorMessage: string): Promise<void> {
+  async markAsFailedJob({
+    jobId,
+    donorSyncEventIds,
+    errorMessage,
+  }: {
+    jobId?: string
+    donorSyncEventIds: string[]
+    errorMessage: string
+  }): Promise<void> {
     await this.prisma.donorSyncEvent.updateMany({
       where: { id: { in: donorSyncEventIds } },
       data: {
@@ -92,6 +139,10 @@ export class DonorSyncEventService {
         retryCount: { increment: 1 },
       },
     })
+
+    this.logger.warn(
+      `Marked ${donorSyncEventIds.length} donor sync events as FAILED${jobId ? ` for job ${jobId}` : ''} with error: ${errorMessage}`,
+    )
   }
 
   async cleanupOldEvents(): Promise<void> {
@@ -113,5 +164,7 @@ export class DonorSyncEventService {
         ],
       },
     })
+
+    this.logger.log('Cleaned up old donor sync events')
   }
 }

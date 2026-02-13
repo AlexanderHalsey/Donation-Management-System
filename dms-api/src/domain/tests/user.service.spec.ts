@@ -14,11 +14,13 @@ describe('UserService', () => {
   beforeEach(async () => {
     mockReset(prismaMock)
 
-    const module: TestingModule = await Test.createTestingModule({
+    const app: TestingModule = await Test.createTestingModule({
       providers: [UserService, { provide: PrismaService, useValue: prismaMock }],
     }).compile()
 
-    userService = module.get<UserService>(UserService)
+    app.useLogger(false)
+
+    userService = app.get<UserService>(UserService)
   })
 
   it('should find user by username', async () => {

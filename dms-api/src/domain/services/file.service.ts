@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 
 import { createHash } from 'crypto'
 import { nullsToUndefined } from '@shared/utils'
@@ -11,18 +11,24 @@ import type { FileMetadata } from '@shared/models'
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly fileStorageService: FileStorageService,
   ) {}
 
   async uploadDraftFile(file: Express.Multer.File): Promise<string> {
-    return await this._createFile({
+    const fileId = await this._createFile({
       name: file.originalname,
       mimeType: file.mimetype,
       buffer: file.buffer,
       status: 'DRAFT',
     })
+
+    this.logger.log(`Uploaded draft file with id ${fileId} and name ${file.originalname}`)
+
+    return fileId
   }
 
   async activateFile(fileId: string): Promise<void> {
@@ -33,6 +39,8 @@ export class FileService {
         expiresAt: null,
       },
     })
+
+    this.logger.log(`Activated file with id ${fileId}`)
   }
 
   async createFile({
@@ -44,7 +52,11 @@ export class FileService {
     mimeType: string
     buffer: Buffer
   }): Promise<string> {
-    return await this._createFile({ name, mimeType, buffer, status: 'ACTIVE' })
+    const fileId = await this._createFile({ name, mimeType, buffer, status: 'ACTIVE' })
+
+    this.logger.log(`Created file with id ${fileId} and name ${name}`)
+
+    return fileId
   }
 
   private async _createFile({
@@ -68,10 +80,22 @@ export class FileService {
             select: { storageKey: true },
           })
 
-          const storageKey =
-            duplicateFile?.storageKey ||
-            (await this.fileStorageService.uploadFile({ name, buffer }))
-          if (!duplicateFile) uploadedStorageKey = storageKey
+          let storageKey: string
+          if (duplicateFile?.storageKey) {
+            storageKey = duplicateFile.storageKey
+          } else {
+            try {
+              storageKey = await this.fileStorageService.uploadFile({ name, buffer })
+            } catch {
+              throw new BadRequestException({
+                code: 'FILE_UPLOAD_FAILED',
+                message: 'Failed to upload file to storage service',
+              })
+            }
+            this.logger.log(`Uploaded file to storage with key ${storageKey} for file ${name}`)
+            // keep reference for rollback cleanup in case transaction fails after this point
+            uploadedStorageKey = storageKey
+          }
 
           const fileId = await tx.fileMetadata.create({
             data: {
@@ -86,6 +110,8 @@ export class FileService {
             select: { id: true },
           })
 
+          this.logger.log(`Created file metadata with id ${fileId.id} for file ${name}`)
+
           uploadedStorageKey = undefined
           return fileId.id
         },
@@ -95,17 +121,25 @@ export class FileService {
       if (uploadedStorageKey) {
         try {
           await this.fileStorageService.deleteFile(uploadedStorageKey)
+          this.logger.warn({
+            code: 'FILE_UPLOAD_ROLLBACK',
+            message: `Cleaned up uploaded file with key ${uploadedStorageKey} after transaction failure`,
+          })
         } catch (cleanupError) {
-          console.error(
-            'Failed to cleanup uploaded file after transaction failure: ',
-            uploadedStorageKey,
-            cleanupError,
+          this.logger.error(
+            {
+              code: 'FILE_UPLOAD_ROLLBACK_FAILED',
+              message: `Failed to cleanup uploaded file with key ${uploadedStorageKey} after transaction failure`,
+              errorStack: cleanupError instanceof Error ? cleanupError.stack : null,
+            },
+            `Failed to cleanup uploaded file with key ${uploadedStorageKey} after transaction failure`,
           )
         }
       }
-      throw new BadRequestException(
-        `Failed to create file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
+      throw new BadRequestException({
+        code: 'FILE_CREATION_FAILED',
+        message: `Failed to create file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      })
     }
   }
 
@@ -114,16 +148,31 @@ export class FileService {
       where: { id: fileId },
     })
 
-    if (fileMetadata.status !== 'ACTIVE') throw new BadRequestException('File is not active')
+    if (fileMetadata.status !== 'ACTIVE')
+      throw new BadRequestException({
+        code: 'FILE_NOT_ACTIVE',
+        message: 'File is not active',
+      })
 
-    const buffer = await this.fileStorageService.downloadFile(fileMetadata.storageKey)
+    let buffer: Buffer
+    try {
+      buffer = await this.fileStorageService.downloadFile(fileMetadata.storageKey)
+    } catch {
+      throw new BadRequestException({
+        code: 'FILE_DOWNLOAD_FAILED',
+        message: 'Failed to download file from storage service',
+      })
+    }
 
     const downloadedHash = this.computeHash(buffer)
     if (downloadedHash !== fileMetadata.hash) {
-      throw new BadRequestException(
-        'File integrity check failed - file may be corrupted or tampered with',
-      )
+      throw new BadRequestException({
+        code: 'FILE_INTEGRITY_CHECK_FAILED',
+        message: 'File integrity check failed - file may be corrupted or tampered with',
+      })
     }
+
+    this.logger.log(`Downloaded file with id ${fileId} and name ${fileMetadata.name}`)
 
     return {
       buffer,
@@ -142,14 +191,22 @@ export class FileService {
             size: newBuffer.length,
           },
         })
-        await this.fileStorageService.updateFile({ filePath: storageKey, buffer: newBuffer })
+        try {
+          await this.fileStorageService.updateFile({ filePath: storageKey, buffer: newBuffer })
+        } catch {
+          throw new BadRequestException({
+            code: 'FILE_UPDATE_FAILED',
+            message: 'Failed to update file in storage service',
+          })
+        }
       },
       { timeout: 60 * 1000 },
     )
+    this.logger.log(`Updated content for file with id ${id} and storage key ${storageKey}`)
   }
 
   async deleteFile(fileId: string): Promise<void> {
-    return await this.prisma.$transaction(
+    await this.prisma.$transaction(
       async (tx) => {
         const fileMetadata = await tx.fileMetadata.findUniqueOrThrow({
           where: { id: fileId },
@@ -157,22 +214,18 @@ export class FileService {
         })
 
         await tx.fileMetadata.delete({ where: { id: fileId } })
-
-        await this.fileStorageService.deleteFile(fileMetadata.storageKey)
+        try {
+          await this.fileStorageService.deleteFile(fileMetadata.storageKey)
+        } catch {
+          throw new BadRequestException({
+            code: 'FILE_DELETE_FAILED',
+            message: 'Failed to delete file from storage service',
+          })
+        }
       },
       { timeout: 60 * 1000 },
     )
-  }
-
-  computeHash(buffer: Buffer): string {
-    return createHash('sha256').update(buffer).digest('hex')
-  }
-
-  transformToFileMetadataModel(fileMetadata: PrismaFileMetadata): FileMetadata {
-    return nullsToUndefined({
-      ...omit(fileMetadata, ['status']),
-      status: fileMetadata.status.toLowerCase() as FileMetadata['status'],
-    })
+    this.logger.log(`Deleted file with id ${fileId}`)
   }
 
   async cleanupExpiredDrafts(): Promise<number> {
@@ -188,6 +241,19 @@ export class FileService {
       await this.deleteFile(draft.id)
     }
 
+    this.logger.log(`Cleaned up ${expiredDrafts.length} expired draft files`)
+
     return expiredDrafts.length
+  }
+
+  computeHash(buffer: Buffer): string {
+    return createHash('sha256').update(buffer).digest('hex')
+  }
+
+  transformToFileMetadataModel(fileMetadata: PrismaFileMetadata): FileMetadata {
+    return nullsToUndefined({
+      ...omit(fileMetadata, ['status']),
+      status: fileMetadata.status.toLowerCase() as FileMetadata['status'],
+    })
   }
 }

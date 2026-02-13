@@ -103,6 +103,8 @@ describe('ExportService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     exportService = app.get<ExportService>(ExportService)
   })
 

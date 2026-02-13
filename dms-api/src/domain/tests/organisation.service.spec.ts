@@ -34,6 +34,8 @@ describe('OrganisationService', () => {
       ],
     }).compile()
 
+    app.useLogger(false)
+
     organisationService = app.get<OrganisationService>(OrganisationService)
   })
 

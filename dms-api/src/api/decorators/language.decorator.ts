@@ -1,6 +1,8 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common'
+import { createParamDecorator, ExecutionContext, Logger } from '@nestjs/common'
 import * as acceptLanguage from 'accept-language-parser'
 import { Language } from '@/domain/types'
+
+const logger = new Logger('ParsedLanguageDecorator')
 
 /**
  * Parameter decorator that automatically parses the Accept-Language header
@@ -32,7 +34,14 @@ export const ParsedLanguage = createParamDecorator(
       }
     } catch (error) {
       // Fallback to English if parsing fails
-      console.warn('Failed to parse Accept-Language header:', error)
+      logger.warn(
+        {
+          code: 'LANGUAGE_PARSE_FAILED',
+          header: acceptLanguageHeader,
+          error,
+        },
+        'Failed to parse Accept-Language header',
+      )
     }
 
     return 'en'

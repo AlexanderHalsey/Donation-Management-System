@@ -1,52 +1,38 @@
-import { ArgumentsHost, Catch, HttpStatus } from '@nestjs/common'
-import { BaseExceptionFilter } from '@nestjs/core'
+import {
+  BadRequestException,
+  Catch,
+  ConflictException,
+  ExceptionFilter,
+  NotFoundException,
+} from '@nestjs/common'
 import { Prisma } from '@generated/prisma/client'
-import { Response } from 'express'
 
 @Catch(Prisma.PrismaClientKnownRequestError)
-export class PrismaClientExceptionFilter extends BaseExceptionFilter {
-  catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
-    const ctx = host.switchToHttp()
-    const response = ctx.getResponse<Response>()
-
+export class PrismaClientExceptionFilter implements ExceptionFilter {
+  catch(exception: Prisma.PrismaClientKnownRequestError) {
     switch (exception.code) {
-      case 'P2025': {
-        const status = HttpStatus.NOT_FOUND
-        response.status(status).json({
-          statusCode: status,
-          message: 'Resource not found',
+      case 'P2025':
+        throw new NotFoundException({
+          code: 'RESOURCE_NOT_FOUND',
+          message: 'The requested resource was not found or does not exist',
         })
-        break
-      }
-      case 'P2002': {
-        const status = HttpStatus.CONFLICT
-        response.status(status).json({
-          statusCode: status,
-          message: `Unique constraint failed`,
-          fields:
-            exception.meta?.['driverAdapterError']?.['cause']?.['constraint']?.['fields'] ?? [],
+      case 'P2002':
+        throw new ConflictException({
+          code: 'UNIQUE_CONSTRAINT_VIOLATION',
+          message: 'A record with the same unique field already exists',
         })
-        break
-      }
-      case 'P2003': {
-        const status = HttpStatus.BAD_REQUEST
-        response.status(status).json({
-          statusCode: status,
+      case 'P2003':
+        throw new BadRequestException({
+          code: 'INVALID_REFERENCE',
           message: 'Invalid reference to related resource',
         })
-        break
-      }
-      case 'P2014': {
-        const status = HttpStatus.BAD_REQUEST
-        response.status(status).json({
-          statusCode: status,
+      case 'P2014':
+        throw new BadRequestException({
+          code: 'INVALID_ID',
           message: 'Invalid ID provided',
         })
-        break
-      }
       default:
-        super.catch(exception, host)
-        break
+        throw exception
     }
   }
 }

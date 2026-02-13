@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import { PrismaService } from '@/infrastructure'
 
@@ -7,38 +7,60 @@ import type { PaymentModeRequest } from '@/api/dtos'
 
 @Injectable()
 export class PaymentModeService {
+  private readonly logger = new Logger(PaymentModeService.name)
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getAll(): Promise<PaymentMode[]> {
-    return this.prisma.paymentMode.findMany()
+    const paymentModes = await this.prisma.paymentMode.findMany()
+
+    this.logger.log(`Retrieved ${paymentModes.length} payment modes`)
+
+    return paymentModes
   }
 
   async getById(id: string): Promise<PaymentMode> {
-    return this.prisma.paymentMode.findUniqueOrThrow({ where: { id } })
+    const paymentMode = await this.prisma.paymentMode.findUniqueOrThrow({ where: { id } })
+
+    this.logger.log(`Retrieved payment mode with id ${id}`)
+
+    return paymentMode
   }
 
   async create(request: PaymentModeRequest): Promise<PaymentMode> {
-    return this.prisma.paymentMode.create({
+    const paymentMode = await this.prisma.paymentMode.create({
       data: {
         name: request.name,
       },
     })
+
+    this.logger.log(`Created payment mode with id ${paymentMode.id}`)
+
+    return paymentMode
   }
 
   async update(id: string, request: PaymentModeRequest): Promise<PaymentMode> {
-    return this.prisma.paymentMode.update({
+    const paymentMode = await this.prisma.paymentMode.update({
       where: { id },
       data: {
         name: request.name,
       },
     })
+
+    this.logger.log(`Updated payment mode with id ${id}`)
+
+    return paymentMode
   }
 
   async disable(id: string): Promise<PaymentMode> {
-    return this.prisma.paymentMode.update({
+    const paymentMode = await this.prisma.paymentMode.update({
       where: { id },
       data: { isDisabled: true },
     })
+
+    this.logger.log(`Disabled payment mode with id ${id}`)
+
+    return paymentMode
   }
 
   async cleanupNonAttachedDisabled(): Promise<void> {
@@ -48,5 +70,7 @@ export class PaymentModeService {
         donations: { none: {} },
       },
     })
+
+    this.logger.log(`Cleaned up non-attached disabled payment modes`)
   }
 }

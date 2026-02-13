@@ -1,16 +1,26 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+import { Logger } from 'nestjs-pino'
 
 import * as cookieParser from 'cookie-parser'
 import { json } from 'express'
 
-import { PrismaClientExceptionFilter } from './api/filters'
+import {
+  AllExceptionsFilter,
+  HttpExceptionFilter,
+  PrismaClientExceptionFilter,
+} from './api/filters'
 
 import { AppModule } from './app.module'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  })
+
+  app.useLogger(app.get(Logger))
+  app.flushLogs()
 
   app.use('/donor-sync-events', json({ limit: '500mb' /* For send all function */ }))
   app.use(json({ limit: '100kb' }))
@@ -38,7 +48,12 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory)
 
   const { httpAdapter } = app.get<HttpAdapterHost>(HttpAdapterHost)
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter))
+  // Order matters here - https://docs.nestjs.com/exception-filters#catch-everything
+  app.useGlobalFilters(
+    new AllExceptionsFilter(httpAdapter),
+    new PrismaClientExceptionFilter(),
+    new HttpExceptionFilter(),
+  )
 
   await app.listen(process.env.PORT ?? 3000)
 }

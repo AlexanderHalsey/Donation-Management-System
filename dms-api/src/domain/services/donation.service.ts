@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 
 import { uniqBy } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
@@ -65,6 +65,8 @@ const BASIC_OMIT_FIELDS = {
 
 @Injectable()
 export class DonationService {
+  private readonly logger = new Logger(DonationService.name)
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getFilteredList(
@@ -82,6 +84,9 @@ export class DonationService {
       }),
       this.prisma.donation.count({ where: filter }),
     ])
+
+    this.logger.log(`Fetched ${totalCount} filtered donations`)
+
     return {
       donations: donations.map((donation) => this.transformToDonationModel(donation)),
       totalCount,
@@ -94,6 +99,9 @@ export class DonationService {
       include: FULL_INCLUDE_FIELDS,
       omit: BASIC_OMIT_FIELDS,
     })
+
+    this.logger.log(`Fetched donation with ID: ${donationId}`)
+
     return this.transformToDonationModel(donation)
   }
 
@@ -111,13 +119,20 @@ export class DonationService {
         donatedAt: { lte: getTaxReceiptYearEnd(new Date().getFullYear() - 1) },
       },
     })
-    return uniqBy(
+
+    const eligibleYearOrganisations = uniqBy(
       donations.map((donation) => ({
         year: donation.donatedAt.getFullYear(),
         organisationId: donation.organisation.id,
       })),
       (entry) => `${entry.year}-${entry.organisationId}`,
     )
+
+    this.logger.log(
+      `Fetched ${eligibleYearOrganisations.length} eligible year-organisation combinations for tax receipts`,
+    )
+
+    return eligibleYearOrganisations
   }
 
   async getEligibleTaxReceiptDonations({
@@ -144,11 +159,12 @@ export class DonationService {
       orderBy: { updatedAt: 'desc' },
     })
     if (!donations.length) {
-      throw new BadRequestException(
-        `No eligible donations found for organisation ID: ${organisationId} in year: ${year}`,
-      )
+      throw new BadRequestException({
+        code: 'NO_ELIGIBLE_DONATIONS',
+        message: `No eligible donations found for organisation ID: ${organisationId} in year: ${year}`,
+      })
     }
-    return donations.map((donation) => {
+    const eligibleTaxReceiptDonations = donations.map((donation) => {
       const transformedDonation = this.transformToDonationModel(donation)
       return {
         ...transformedDonation,
@@ -161,6 +177,12 @@ export class DonationService {
         },
       }
     })
+
+    this.logger.log(
+      `Fetched ${eligibleTaxReceiptDonations.length} eligible donations for tax receipts for organisation ID: ${organisationId} in year: ${year}`,
+    )
+
+    return eligibleTaxReceiptDonations
   }
 
   async createDonation(formData: DonationRequest): Promise<Donation> {
@@ -181,6 +203,8 @@ export class DonationService {
       omit: BASIC_OMIT_FIELDS,
     })
 
+    this.logger.log(`Created donation with ID: ${donation.id}`)
+
     return this.transformToDonationModel(donation)
   }
 
@@ -191,10 +215,12 @@ export class DonationService {
     })
 
     if (existingDonation.taxReceiptId) {
-      throw new BadRequestException(
-        "Can't update donation. Donation already has a tax receipt associated with it :" +
+      throw new BadRequestException({
+        code: 'DONATION_HAS_TAX_RECEIPT',
+        message:
+          "Can't update donation. Donation already has a tax receipt associated with it :" +
           existingDonation.taxReceiptId,
-      )
+      })
     }
 
     await this._validateDonationType(formData)
@@ -215,6 +241,8 @@ export class DonationService {
       omit: BASIC_OMIT_FIELDS,
     })
 
+    this.logger.log(`Updated donation with ID: ${donationId}`)
+
     return this.transformToDonationModel(donation)
   }
 
@@ -225,15 +253,19 @@ export class DonationService {
     })
 
     if (donation.taxReceiptId) {
-      throw new BadRequestException(
-        "Can't delete donation. Donation already has a tax receipt associated with it :" +
+      throw new BadRequestException({
+        code: 'DONATION_HAS_TAX_RECEIPT',
+        message:
+          "Can't delete donation. Donation already has a tax receipt associated with it :" +
           donation.taxReceiptId,
-      )
+      })
     }
 
     await this.prisma.donation.delete({
       where: { id: donationId },
     })
+
+    this.logger.log(`Deleted donation with ID: ${donationId}`)
   }
 
   async getExportList(
@@ -247,7 +279,7 @@ export class DonationService {
       where: filter,
       orderBy: isEmpty(orderBy) ? { updatedAt: 'desc' } : orderBy,
     })
-    return donations.map((donation) => ({
+    const donationExportList = donations.map((donation) => ({
       donatedAt: donation.donatedAt,
       amount: donation.amount,
       lastName: donation.donor.lastName,
@@ -264,6 +296,10 @@ export class DonationService {
           (option) => option.id === donation.taxReceipt?.status,
         )?.name || undefined,
     }))
+
+    this.logger.log(`Fetched ${donationExportList.length} donations for export`)
+
+    return donationExportList
   }
 
   async getDonationStats(minDate?: Date): Promise<{ count: number; amount: number }> {
@@ -272,10 +308,17 @@ export class DonationService {
       _sum: { amount: true },
       _count: { id: true },
     })
-    return {
+
+    const donationStats = {
       count: result._count.id,
       amount: result._sum.amount || 0,
     }
+
+    this.logger.log(
+      `Fetched${minDate ? ' ' : ' all'} donation stats${minDate ? ` since ${minDate.toISOString()}` : ''}: ${JSON.stringify(donationStats)}`,
+    )
+
+    return donationStats
   }
 
   async getDonationDistribution(
@@ -287,17 +330,30 @@ export class DonationService {
       _count: { id: true },
     })
 
-    return result.map((item) => ({
+    const donationDistribution = result.map((item) => ({
       id: item[groupBy],
       count: item._count.id,
       amount: item._sum.amount || 0,
     }))
+
+    this.logger.log(
+      `Fetched donation distribution grouped by ${groupBy}: ${JSON.stringify(donationDistribution)}`,
+    )
+
+    return donationDistribution
   }
 
   private async _validateDonationType(formData: DonationRequest) {
-    await this.prisma.donationType.findUniqueOrThrow({
-      where: { id: formData.donationTypeId, organisationId: formData.organisationId },
-    })
+    try {
+      await this.prisma.donationType.findUniqueOrThrow({
+        where: { id: formData.donationTypeId, organisationId: formData.organisationId },
+      })
+    } catch {
+      throw new BadRequestException({
+        code: 'INVALID_DONATION_TYPE',
+        message: `Invalid donation type ID: ${formData.donationTypeId} for organisation ID: ${formData.organisationId}`,
+      })
+    }
   }
 
   transformToDonationModel<

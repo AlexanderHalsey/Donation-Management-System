@@ -11,6 +11,8 @@ import { FileService } from '../services/file.service'
 import { TaxReceiptService } from '../services/taxReceipt.service'
 import { TaxReceiptGeneratorService } from '../services/taxReceiptGenerator.service'
 
+import { ApiJobScheduleException } from '../exceptions'
+
 import type {
   FileMetadata as FileMetadataPrisma,
   Prisma,
@@ -55,6 +57,8 @@ describe('TaxReceiptService', () => {
         },
       ],
     }).compile()
+
+    app.useLogger(false)
 
     taxReceiptService = app.get<TaxReceiptService>(TaxReceiptService)
   })
@@ -167,7 +171,11 @@ describe('TaxReceiptService', () => {
       const donorId = 'donor-1'
       const taxReceiptId = 'new-tax-receipt-id'
       const receiptNumber = 12345
-      const jobError = new Error('BullMQ error')
+      const jobError = new ApiJobScheduleException({
+        code: 'JOB_SCHEDULING_FAILED',
+        message:
+          'Failed to schedule tax receipt generation job for tax receipt ID new-tax-receipt-id',
+      })
 
       const mockDonation = mockDeep<
         Donation & {
@@ -323,7 +331,11 @@ describe('TaxReceiptService', () => {
       const organisationId = 'org-1'
       const donorIds = ['donor-1']
       const year = 2024
-      const jobError = new Error('BullMQ batch error')
+      const jobError = new ApiJobScheduleException({
+        code: 'JOB_SCHEDULING_FAILED',
+        message:
+          'Failed to schedule tax receipt generation jobs for annual tax receipts for organisation ID org-1 and year 2024',
+      })
 
       const mockDonors = mockDeep<
         (Donor & {
@@ -377,9 +389,8 @@ describe('TaxReceiptService', () => {
   describe('handleTaxReceiptGenerationFailure', () => {
     it('updates tax receipt status to FAILED', async () => {
       const taxReceiptId = 'tax-receipt-id-123'
-      const error = new Error('Generation failed')
 
-      await taxReceiptService.handleTaxReceiptGenerationFailure(taxReceiptId, error)
+      await taxReceiptService.handleTaxReceiptGenerationFailure({ taxReceiptId })
 
       expect(prismaServiceMock.taxReceipt.update).toHaveBeenCalledWith({
         where: { id: taxReceiptId },
@@ -388,7 +399,7 @@ describe('TaxReceiptService', () => {
     })
   })
 
-  describe('processTaxReceiptGeneration', () => {
+  describe('processTaxReceiptGenerationJob', () => {
     it('processes tax receipt generation successfully', async () => {
       const donationId = 'donation-1'
       const taxReceiptNumber = 12345
@@ -450,7 +461,8 @@ describe('TaxReceiptService', () => {
 
       fileServiceMock.createFile.mockResolvedValueOnce('generated-file-id-123')
 
-      await taxReceiptService.processTaxReceiptGeneration({
+      await taxReceiptService.processTaxReceiptGenerationJob({
+        jobId: 'job-123',
         taxReceiptId: 'tax-receipt-id-123',
         taxReceiptNumber: taxReceiptNumber,
         donationIds: [donationId],
@@ -515,7 +527,8 @@ describe('TaxReceiptService', () => {
       prismaServiceMock.$transaction.mockResolvedValueOnce([mockDonationsWithDifferentOrgs])
 
       await expect(
-        taxReceiptService.processTaxReceiptGeneration({
+        taxReceiptService.processTaxReceiptGenerationJob({
+          jobId: 'job-123',
           taxReceiptId: 'tax-receipt-id-123',
           taxReceiptNumber: 12345,
           donationIds: ['donation-1', 'donation-2'],
@@ -555,7 +568,8 @@ describe('TaxReceiptService', () => {
       prismaServiceMock.$transaction.mockResolvedValueOnce([mockDonationWithIncompleteOrg])
 
       await expect(
-        taxReceiptService.processTaxReceiptGeneration({
+        taxReceiptService.processTaxReceiptGenerationJob({
+          jobId: 'job-123',
           taxReceiptId: 'tax-receipt-id-123',
           taxReceiptNumber: 12345,
           donationIds: ['donation-1'],
@@ -587,7 +601,8 @@ describe('TaxReceiptService', () => {
       ])
 
       await expect(
-        taxReceiptService.processTaxReceiptGeneration({
+        taxReceiptService.processTaxReceiptGenerationJob({
+          jobId: 'job-123',
           taxReceiptId: 'tax-receipt-id-123',
           taxReceiptNumber: 12345,
           donationIds: ['donation-1', 'donation-2'],
@@ -638,7 +653,8 @@ describe('TaxReceiptService', () => {
             ],
           ]),
         )
-        await taxReceiptService.processTaxReceiptGeneration({
+        await taxReceiptService.processTaxReceiptGenerationJob({
+          jobId: 'job-123',
           taxReceiptId: 'tax-receipt-id-123',
           taxReceiptNumber: 12345,
           donationIds: [donationId],
@@ -663,7 +679,8 @@ describe('TaxReceiptService', () => {
             ],
           ]),
         )
-        await taxReceiptService.processTaxReceiptGeneration({
+        await taxReceiptService.processTaxReceiptGenerationJob({
+          jobId: 'job-123',
           taxReceiptId: 'tax-receipt-id-123',
           taxReceiptNumber: 12345,
           donationIds: [donationId],
@@ -731,7 +748,7 @@ describe('TaxReceiptService', () => {
     })
   })
 
-  describe('processTaxReceiptCancellation', () => {
+  describe('processTaxReceiptCancellationJob', () => {
     it('processes tax receipt cancellation successfully', async () => {
       const fileId = 'file-id-123'
       const storageKey = 'storage-key-123'
@@ -745,7 +762,8 @@ describe('TaxReceiptService', () => {
 
       taxReceiptGeneratorServiceMock.cancelTaxReceipt.mockResolvedValueOnce(cancelledPdfBuffer)
 
-      await taxReceiptService.processTaxReceiptCancellation({
+      await taxReceiptService.processTaxReceiptCancellationJob({
+        jobId: 'job-123',
         fileId,
         storageKey,
       })

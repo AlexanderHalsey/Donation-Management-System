@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import { omit } from 'es-toolkit'
 import { nullsToUndefined } from '@shared/utils'
@@ -16,13 +16,15 @@ import type { OrganisationRequest } from '@/api/dtos'
 
 @Injectable()
 export class OrganisationService {
+  private readonly logger = new Logger(OrganisationService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly fileService: FileService,
   ) {}
 
   async getAllActive(): Promise<Organisation[]> {
-    return (
+    const organisations = (
       await this.prisma.organisation.findMany({
         where: {
           isDisabled: false,
@@ -34,10 +36,14 @@ export class OrganisationService {
         omit: { logoId: true, signatureId: true },
       })
     ).map((organisation) => this.transformToOrganisationModel(organisation))
+
+    this.logger.log(`Retrieved ${organisations.length} active organisations`)
+
+    return organisations
   }
 
   async getAllRefs(): Promise<OrganisationRef[]> {
-    return this.prisma.organisation.findMany({
+    const organisationRefs = await this.prisma.organisation.findMany({
       select: {
         id: true,
         name: true,
@@ -45,6 +51,10 @@ export class OrganisationService {
         isTaxReceiptEnabled: true,
       },
     })
+
+    this.logger.log(`Retrieved ${organisationRefs.length} organisation references`)
+
+    return organisationRefs
   }
 
   async getById(id: string): Promise<Organisation> {
@@ -53,6 +63,9 @@ export class OrganisationService {
       include: { logo: true, signature: true },
       omit: { logoId: true, signatureId: true },
     })
+
+    this.logger.log(`Retrieved organisation with id ${id}`)
+
     return this.transformToOrganisationModel(organisation)
   }
 
@@ -82,6 +95,8 @@ export class OrganisationService {
           .filter((fileId): fileId is string => !!fileId)
           .map((fileId) => this.fileService.activateFile(fileId)),
       )
+
+      this.logger.log(`Created organisation with id ${organisation.id}`)
 
       return this.transformToOrganisationModel(organisation)
     })
@@ -128,11 +143,16 @@ export class OrganisationService {
         omit: { logoId: true, signatureId: true },
       })
 
+      this.logger.log(`Updated organisation with id ${id}`)
+
       if (!request.isTaxReceiptEnabled) {
         await tx.donationType.updateMany({
           where: { organisationId: id, isTaxReceiptEnabled: true },
           data: { isTaxReceiptEnabled: false },
         })
+        this.logger.log(
+          `Disabled tax receipt for all donation types of organisation with id ${id} as tax receipt is disabled for the organisation`,
+        )
       }
 
       return this.transformToOrganisationModel(organisation)
@@ -146,6 +166,9 @@ export class OrganisationService {
       include: { logo: true, signature: true },
       omit: { logoId: true, signatureId: true },
     })
+
+    this.logger.log(`Disabled organisation with id ${id}`)
+
     return this.transformToOrganisationModel(organisation)
   }
 
@@ -156,6 +179,8 @@ export class OrganisationService {
         donations: { none: {} },
       },
     })
+
+    this.logger.log(`Cleaned up non-attached disabled organisations`)
   }
 
   transformToOrganisationModel(
