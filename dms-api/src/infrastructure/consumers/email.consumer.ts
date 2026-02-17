@@ -1,11 +1,8 @@
-import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common'
+import { Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq'
 
-import * as fs from 'fs'
-import * as path from 'path'
-
-import { EMAIL_QUEUE, FileStorageService, SmtpService } from '@/infrastructure'
+import { EMAIL_QUEUE, GCSService, SmtpService } from '@/infrastructure'
 import { FileService } from '@/domain'
 
 import type { EmailQueueJob } from '@/infrastructure/types'
@@ -18,7 +15,7 @@ export class EmailConsumer extends WorkerHost implements OnModuleInit {
 
   constructor(
     private readonly fileService: FileService,
-    private readonly fileStorageService: FileStorageService,
+    private readonly gcsService: GCSService,
     private readonly smtpService: SmtpService,
     private readonly configService: ConfigService,
   ) {
@@ -28,21 +25,10 @@ export class EmailConsumer extends WorkerHost implements OnModuleInit {
   async onModuleInit() {
     if (this.htmlTemplate) return
 
-    const templateKey = this.configService.get<string>('EMAIL_TEMPLATE_STORAGE_KEY')
-    if (!templateKey) {
-      throw new BadRequestException({
-        code: 'EMAIL_TEMPLATE_STORAGE_KEY_MISSING',
-        message: 'EMAIL_TEMPLATE_STORAGE_KEY environment variable is not set.',
-      })
-    }
-    if (templateKey === 'demo') {
-      const emailTemplatePath = path.join(process.cwd(), 'src/assets/demoEmailTemplate.html')
-      this.htmlTemplate = fs.readFileSync(emailTemplatePath).toString('utf-8')
-    } else {
-      this.htmlTemplate = await this.fileStorageService
-        .downloadFile(templateKey)
-        .then((buffer) => buffer.toString('utf-8'))
-    }
+    const templateStorageKey = this.configService.getOrThrow<string>('EMAIL_TEMPLATE_STORAGE_KEY')
+    this.htmlTemplate = await this.gcsService
+      .downloadFile(templateStorageKey)
+      .then((buffer) => buffer.toString('utf-8'))
   }
 
   async process({ id, name, data }: EmailQueueJob) {

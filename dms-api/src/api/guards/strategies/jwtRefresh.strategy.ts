@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
 import { PassportStrategy } from '@nestjs/passport'
@@ -12,10 +12,9 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
   constructor(configService: ConfigService) {
     const jwtRefreshSecret = configService.get<string>('JWT_REFRESH_SECRET')
     if (!jwtRefreshSecret) {
-      throw new BadRequestException({
-        code: 'JWT_REFRESH_SECRET_MISSING',
-        message: 'JWT_REFRESH_SECRET environment variable is not set',
-      })
+      throw new Error(
+        'JWT_REFRESH_SECRET_MISSING: JWT_REFRESH_SECRET environment variable is not set',
+      )
     }
 
     super({

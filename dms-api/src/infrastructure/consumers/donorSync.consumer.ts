@@ -1,4 +1,4 @@
-import { BadRequestException, Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq'
 
 import { omit } from 'es-toolkit'
@@ -32,8 +32,8 @@ export class DonorSyncConsumer extends WorkerHost {
     })
 
     if (donorSyncEvents.length !== donorSyncEventIds.length) {
-      throw new BadRequestException(
-        `Some donor sync events not found, cannot process job. Ids to process: ${donorSyncEventIds.join(', ')}. Ids found: ${donorSyncEvents.map((e) => e.id).join(', ')}`,
+      throw new Error(
+        `DONOR_SYNC_EVENTS_NOT_FOUND: Some donor sync events not found, cannot process job. Ids to process: ${donorSyncEventIds.join(', ')}. Ids found: ${donorSyncEvents.map((e) => e.id).join(', ')}`,
       )
     }
 

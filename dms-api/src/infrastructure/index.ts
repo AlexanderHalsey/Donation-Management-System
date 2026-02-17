@@ -1,5 +1,5 @@
 export * from './services/bullmq.service'
-export * from './services/fileStorage.service'
+export * from './services/gcs.service'
 export * from './services/prisma.service'
 export * from './services/smtp.service'
 export * from './services/typedSql.service'

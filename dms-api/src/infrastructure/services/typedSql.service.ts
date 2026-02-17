@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import type * as runtime from '@prisma/client/runtime/client'
 
@@ -53,6 +53,7 @@ type TypedSqlModule = {
  */
 @Injectable()
 export class TypedSqlService {
+  private readonly logger = new Logger(TypedSqlService.name)
   private typedSqlModule: TypedSqlModule | null = null
 
   constructor(private readonly configService: ConfigService) {
@@ -61,15 +62,10 @@ export class TypedSqlService {
       try {
         require.resolve('../../../prisma/generated/prisma/sql')
       } catch (error) {
-        throw new BadRequestException({
-          code: 'TYPED_SQL_MODULE_MISSING',
-          message:
-            `❌ TypedSQL files not found!\n\n` +
-            `You must generate SQL types before running the dev server:\n` +
-            `  npx prisma generate --sql\n\n` +
-            `Then restart your dev server.\n\n` +
-            `Error details: ${error}`,
-        })
+        throw new Error(
+          'Prisma SQL files not found. Please run `npx prisma generate --sql` before starting the application.',
+          { cause: error },
+        )
       }
     }
   }
@@ -82,8 +78,10 @@ export class TypedSqlService {
         this.typedSqlModule = await import('../../../prisma/generated/prisma/sql')
       } catch (error) {
         throw new BadRequestException({
-          code: 'TYPED_SQL_MODULE_MISSING',
-          message: `SQL functions not available. Make sure to run "npx prisma generate --sql" first. Error: ${error}`,
+          code: 'PRISMA_SQL_MODULE_LOAD_FAILED',
+          message:
+            'Failed to load Prisma SQL module. Please ensure `npx prisma generate --sql` has been run.',
+          cause: error,
         })
       }
     }

@@ -15,7 +15,7 @@ export const buildMockOrganisationCreateInput = (index: number): OrganisationCre
   isTaxReceiptEnabled: index === 0,
   logo: {
     create: {
-      storageKey: 'src/infrastructure/storage/logo.png',
+      storageKey: 'organisation-logo.png',
       name: 'logo.png',
       size: 1024,
       mimeType: 'image/png',
@@ -25,7 +25,7 @@ export const buildMockOrganisationCreateInput = (index: number): OrganisationCre
   },
   signature: {
     create: {
-      storageKey: 'src/infrastructure/storage/signature.jpg',
+      storageKey: 'organisation-signature.jpg',
       name: 'signature.jpg',
       size: 1024,
       mimeType: 'image/jpeg',

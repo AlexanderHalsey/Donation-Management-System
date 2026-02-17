@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
 import { PassportStrategy } from '@nestjs/passport'
@@ -11,10 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
     const jwtSecret = configService.get<string>('JWT_SECRET')
     if (!jwtSecret) {
-      throw new BadRequestException({
-        code: 'JWT_SECRET_MISSING',
-        message: 'JWT_SECRET environment variable is not set',
-      })
+      throw new Error('JWT_SECRET_MISSING: JWT_SECRET environment variable is not set')
     }
 
     super({

@@ -8,7 +8,7 @@ import { PrismaService } from '@/infrastructure'
 import { User as PrismaUser, UserRole as PrismaUserRole } from '@generated/prisma/client'
 import { User, UserRole } from '@shared/models'
 
-const BCRYPT_SALT_ROUNDS = 10
+const BCRYPT_SALT_ROUNDS = 12
 
 @Injectable()
 export class UserService {

@@ -12,8 +12,6 @@ import { FileService } from '../services/file.service'
 import { TaxReceiptService } from '../services/taxReceipt.service'
 import { TaxReceiptGeneratorService } from '../services/taxReceiptGenerator.service'
 
-import { ApiJobScheduleException } from '../exceptions'
-
 import type {
   FileMetadata as FileMetadataPrisma,
   Prisma,
@@ -23,6 +21,7 @@ import type {
   Organisation,
 } from '@generated/prisma/client'
 import type { FileMetadata } from '@shared/models'
+import { InternalServerErrorException } from '@nestjs/common'
 
 describe('TaxReceiptService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -181,7 +180,7 @@ describe('TaxReceiptService', () => {
       const donorId = 'donor-1'
       const taxReceiptId = 'new-tax-receipt-id'
       const receiptNumber = 12345
-      const jobError = new ApiJobScheduleException({
+      const jobError = new InternalServerErrorException({
         code: 'JOB_SCHEDULING_FAILED',
         message:
           'Failed to schedule tax receipt generation job for tax receipt ID new-tax-receipt-id',
@@ -341,7 +340,7 @@ describe('TaxReceiptService', () => {
       const organisationId = 'org-1'
       const donorIds = ['donor-1']
       const year = 2024
-      const jobError = new ApiJobScheduleException({
+      const jobError = new InternalServerErrorException({
         code: 'JOB_SCHEDULING_FAILED',
         message:
           'Failed to schedule tax receipt generation jobs for annual tax receipts for organisation ID org-1 and year 2024',
@@ -409,7 +408,7 @@ describe('TaxReceiptService', () => {
     })
   })
 
-  describe.only('processTaxReceiptGenerationJob', () => {
+  describe('processTaxReceiptGenerationJob', () => {
     it('processes tax receipt generation successfully', async () => {
       const donationId = 'donation-1'
       const taxReceiptNumber = 12345
@@ -787,11 +786,12 @@ describe('TaxReceiptService', () => {
       expect(taxReceiptGeneratorServiceMock.cancelTaxReceipt).toHaveBeenCalledWith(
         originalPdfBuffer,
       )
-      expect(fileServiceMock.updateFileContent).toHaveBeenCalledWith(
-        fileId,
+      expect(fileServiceMock.updateFileContent).toHaveBeenCalledWith({
+        id: fileId,
         storageKey,
-        cancelledPdfBuffer,
-      )
+        buffer: cancelledPdfBuffer,
+        mimeType: 'application/pdf',
+      })
     })
   })
 })

@@ -180,9 +180,10 @@ export class TaxReceiptController {
   async retryFailedTaxReceipt(@Param('id') id: string): Promise<void> {
     const taxReceipt = await this.taxReceiptService.getTaxReceiptById(id)
     if (taxReceipt.status !== 'FAILED') {
-      throw new BadRequestException(
-        'Only failed tax receipts can be retried. Tax receipt id : ' + id,
-      )
+      throw new BadRequestException({
+        code: 'TAX_RECEIPT_NOT_FAILED',
+        message: 'Only failed tax receipts can be retried. Tax receipt id : ' + id,
+      })
     }
     await this.bullMQService.addTaxReceiptJob('GENERATE', {
       taxReceiptId: id,

@@ -15,7 +15,7 @@
       <slot :name="slot" v-bind="scope || {}"></slot>
     </template>
     <template v-if="modelValue" #after>
-      <Btn flat icon="open_in_browser" @click="viewFile" style="padding: 8px" />
+      <Btn flat icon="download" @click="viewFile" style="padding: 8px" />
     </template>
     <QChip v-if="modelValue" :removable="!isUploading" @remove="uploadFile(undefined)">
       <QAvatar>
@@ -117,7 +117,13 @@ const viewFile = async () => {
   if (!props.modelValue) return
   const fileBlob = await downloadFile(props.modelValue.id)
   const url = URL.createObjectURL(fileBlob)
-  window.open(url, '_blank')
+  const a = document.createElement('a')
+  a.href = url
+  a.download = props.modelValue.name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 </script>
 

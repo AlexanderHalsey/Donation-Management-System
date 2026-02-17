@@ -83,7 +83,7 @@ export const cerfaTaxReceiptTemplate = {
     },
   },
   cancelledWatermark: {
-    imagePath: 'src/assets/watermarks/cancelled_fr.png',
+    storageKey: 'cancelled_watermark_fr.png',
     imageType: 'png',
     sizeFactor: 0.4,
   },

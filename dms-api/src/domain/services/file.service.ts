@@ -1,10 +1,15 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common'
 
 import { createHash } from 'crypto'
 import { nullsToUndefined } from '@shared/utils'
 import { omit } from 'es-toolkit'
 
-import { FileStorageService, PrismaService } from '@/infrastructure'
+import { GCSService, PrismaService } from '@/infrastructure'
 
 import type { FileMetadata as PrismaFileMetadata } from '@generated/prisma/client'
 import type { FileMetadata } from '@shared/models'
@@ -15,7 +20,7 @@ export class FileService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly fileStorageService: FileStorageService,
+    private readonly gcsService: GCSService,
   ) {}
 
   async uploadDraftFile(file: Express.Multer.File): Promise<string> {
@@ -85,14 +90,16 @@ export class FileService {
             storageKey = duplicateFile.storageKey
           } else {
             try {
-              storageKey = await this.fileStorageService.uploadFile({ name, buffer })
+              storageKey = await this.gcsService.uploadFile({
+                buffer,
+                contentType: mimeType,
+              })
             } catch {
-              throw new BadRequestException({
+              throw new InternalServerErrorException({
                 code: 'FILE_UPLOAD_FAILED',
                 message: 'Failed to upload file to storage service',
               })
             }
-            this.logger.log(`Uploaded file to storage with key ${storageKey} for file ${name}`)
             // keep reference for rollback cleanup in case transaction fails after this point
             uploadedStorageKey = storageKey
           }
@@ -120,7 +127,7 @@ export class FileService {
     } catch (error) {
       if (uploadedStorageKey) {
         try {
-          await this.fileStorageService.deleteFile(uploadedStorageKey)
+          await this.gcsService.deleteFile(uploadedStorageKey)
           this.logger.warn({
             code: 'FILE_UPLOAD_ROLLBACK',
             message: `Cleaned up uploaded file with key ${uploadedStorageKey} after transaction failure`,
@@ -136,7 +143,7 @@ export class FileService {
           )
         }
       }
-      throw new BadRequestException({
+      throw new InternalServerErrorException({
         code: 'FILE_CREATION_FAILED',
         message: `Failed to create file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       })
@@ -156,9 +163,9 @@ export class FileService {
 
     let buffer: Buffer
     try {
-      buffer = await this.fileStorageService.downloadFile(fileMetadata.storageKey)
+      buffer = await this.gcsService.downloadFile(fileMetadata.storageKey)
     } catch {
-      throw new BadRequestException({
+      throw new InternalServerErrorException({
         code: 'FILE_DOWNLOAD_FAILED',
         message: 'Failed to download file from storage service',
       })
@@ -166,7 +173,7 @@ export class FileService {
 
     const downloadedHash = this.computeHash(buffer)
     if (downloadedHash !== fileMetadata.hash) {
-      throw new BadRequestException({
+      throw new InternalServerErrorException({
         code: 'FILE_INTEGRITY_CHECK_FAILED',
         message: 'File integrity check failed - file may be corrupted or tampered with',
       })
@@ -180,23 +187,39 @@ export class FileService {
     }
   }
 
-  async updateFileContent(id: string, storageKey: string, newBuffer: Buffer): Promise<void> {
-    const hash = this.computeHash(newBuffer)
+  async updateFileContent({
+    id,
+    storageKey,
+    mimeType,
+    buffer,
+  }: {
+    id: string
+    storageKey: string
+    mimeType: string
+    buffer: Buffer
+  }): Promise<void> {
+    const hash = this.computeHash(buffer)
     await this.prisma.$transaction(
       async (tx) => {
         await tx.fileMetadata.update({
           where: { id },
           data: {
             hash,
-            size: newBuffer.length,
+            size: buffer.length,
+            mimeType,
           },
         })
         try {
-          await this.fileStorageService.updateFile({ filePath: storageKey, buffer: newBuffer })
-        } catch {
-          throw new BadRequestException({
+          await this.gcsService.updateFile({
+            storageKey,
+            buffer,
+            contentType: mimeType,
+          })
+        } catch (err) {
+          throw new InternalServerErrorException({
             code: 'FILE_UPDATE_FAILED',
             message: 'Failed to update file in storage service',
+            stack: err instanceof Error ? err.stack : null,
           })
         }
       },
@@ -208,18 +231,19 @@ export class FileService {
   async deleteFile(fileId: string): Promise<void> {
     await this.prisma.$transaction(
       async (tx) => {
-        const fileMetadata = await tx.fileMetadata.findUniqueOrThrow({
+        const { storageKey } = await tx.fileMetadata.findUniqueOrThrow({
           where: { id: fileId },
           select: { storageKey: true },
         })
 
         await tx.fileMetadata.delete({ where: { id: fileId } })
         try {
-          await this.fileStorageService.deleteFile(fileMetadata.storageKey)
-        } catch {
-          throw new BadRequestException({
+          await this.gcsService.deleteFile(storageKey)
+        } catch (err) {
+          throw new InternalServerErrorException({
             code: 'FILE_DELETE_FAILED',
             message: 'Failed to delete file from storage service',
+            stack: err instanceof Error ? err.stack : null,
           })
         }
       },

@@ -3,10 +3,8 @@ import { BullModule } from '@nestjs/bullmq'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 import { PassportModule } from '@nestjs/passport'
-import { JwtService } from '@nestjs/jwt'
-import { LoggerModule } from 'nestjs-pino'
+import { LoggerModule as PinoLoggerModule } from 'nestjs-pino'
 import { CacheModule } from '@nestjs/cache-manager'
-import KeyvRedis from '@keyv/redis'
 
 import {
   AuthController,
@@ -61,12 +59,20 @@ import {
   BullMQService,
   DONOR_SYNC_QUEUE,
   EMAIL_QUEUE,
-  FileStorageService,
+  GCSService,
   PrismaService,
   SmtpService,
   TAX_RECEIPT_QUEUE,
   TypedSqlService,
 } from '@/infrastructure'
+
+import {
+  useBullMqFactory,
+  useJwtRefreshServiceFactory,
+  useJwtServiceFactory,
+  usePinoLoggerFactory,
+  useRedisCacheFactory,
+} from '@/infrastructure/factories'
 
 import { DonorSyncConsumer, EmailConsumer, TaxReceiptConsumer } from '@/infrastructure/consumers'
 
@@ -82,63 +88,28 @@ import {
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    ScheduleModule.forRoot(),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get('REDIS_PORT', 6379),
-          retryDelayOnFailover: 1000,
-        },
-      }),
+      useFactory: useBullMqFactory,
     }),
     BullModule.registerQueue({ name: DONOR_SYNC_QUEUE }),
     BullModule.registerQueue({ name: TAX_RECEIPT_QUEUE }),
     BullModule.registerQueue({ name: EMAIL_QUEUE }),
-    PassportModule,
-    LoggerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        pinoHttp: {
-          transport:
-            configService.get<string>('NODE_ENV') === 'production'
-              ? {
-                  target: '@logtail/pino',
-                  options: {
-                    sourceToken: configService.get<string>('LOGTAIL_SOURCE_TOKEN'),
-                    options: {
-                      endpoint: `https://${configService.get<string>('LOGTAIL_INGESTING_HOST')}`,
-                    },
-                  },
-                }
-              : { target: 'pino-pretty' },
-          redact: {
-            paths: [
-              'req.headers.authorization',
-              'req.headers.cookie',
-              'req.body.password',
-              'res.headers["set-cookie"]',
-            ],
-            censor: '******',
-          },
-        },
-      }),
-    }),
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        stores: [
-          new KeyvRedis(
-            `redis://${configService.get<string>('REDIS_HOST', 'localhost')}:${configService.get<number>('REDIS_PORT', 6379)}`,
-          ),
-        ],
-      }),
+      useFactory: useRedisCacheFactory,
     }),
+    ConfigModule.forRoot(),
+    PassportModule,
+    PinoLoggerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService, GCSService],
+      providers: [GCSService],
+      useFactory: usePinoLoggerFactory,
+    }),
+    ScheduleModule.forRoot(),
   ],
   controllers: [
     AuthController,
@@ -180,26 +151,18 @@ import {
     FileCleanupTask,
     FileConverter,
     FileService,
-    FileStorageService,
+    GCSService,
     JwtStrategy,
     JwtRefreshStrategy,
     {
       provide: 'JWT_SERVICE',
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) =>
-        new JwtService({
-          secret: configService.get<string>('JWT_SECRET'),
-          signOptions: { expiresIn: configService.get<number>('JWT_TOKEN_LIFETIME_MS') },
-        }),
+      useFactory: useJwtServiceFactory,
     },
     {
       provide: 'JWT_REFRESH_SERVICE',
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) =>
-        new JwtService({
-          secret: configService.get<string>('JWT_REFRESH_SECRET'),
-          signOptions: { expiresIn: configService.get<number>('JWT_REFRESH_TOKEN_LIFETIME_MS') },
-        }),
+      useFactory: useJwtRefreshServiceFactory,
     },
     LocalStrategy,
     OrganisationCleanupTask,

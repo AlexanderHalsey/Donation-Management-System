@@ -207,7 +207,13 @@ const updatePagination = ({
 const viewFile = async (file: { id: string; name: string }) => {
   const fileBlob = await downloadFile(file.id)
   const url = URL.createObjectURL(fileBlob)
-  window.open(url, '_blank')
+  const a = document.createElement('a')
+  a.href = url
+  a.download = file.name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 </script>
 

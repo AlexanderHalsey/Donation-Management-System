@@ -76,7 +76,7 @@ export interface TaxReceiptTemplate {
     }
   }
   cancelledWatermark: {
-    imagePath: string
+    storageKey: string
     imageType: 'png' | 'jpg'
     sizeFactor: number
   }

@@ -5,13 +5,13 @@ import { Readable } from 'stream'
 import { mockDeep, mockReset } from 'jest-mock-extended'
 
 import { FileService } from '../services/file.service'
-import { FileStorageService, PrismaService } from '@/infrastructure'
+import { GCSService, PrismaService } from '@/infrastructure'
 
 import type { FileMetadata } from '@generated/prisma/client'
 
 describe('FileService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
-  const fileStorageServiceMock = mockDeep<FileStorageService>()
+  const gcsServiceMock = mockDeep<GCSService>()
   let fileService: FileService
 
   beforeEach(async () => {
@@ -27,8 +27,8 @@ describe('FileService', () => {
           useValue: prismaServiceMock,
         },
         {
-          provide: FileStorageService,
-          useValue: fileStorageServiceMock,
+          provide: GCSService,
+          useValue: gcsServiceMock,
         },
       ],
     }).compile()
@@ -57,13 +57,13 @@ describe('FileService', () => {
         return cb(prismaServiceMock)
       })
       prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce(null)
-      fileStorageServiceMock.uploadFile.mockResolvedValueOnce('storage-key-123')
+      gcsServiceMock.uploadFile.mockResolvedValueOnce('storage-key-123')
       prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
       const fileId = await fileService.uploadDraftFile(mockFile)
 
       expect(fileId).toBeDefined()
-      expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
+      expect(gcsServiceMock.uploadFile).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.expiresAt).toBeTruthy()
     })
@@ -81,7 +81,7 @@ describe('FileService', () => {
 
       expect(fileId).toBeDefined()
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
-      expect(fileStorageServiceMock.uploadFile).not.toHaveBeenCalled()
+      expect(gcsServiceMock.uploadFile).not.toHaveBeenCalled()
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
     })
   })
@@ -99,7 +99,7 @@ describe('FileService', () => {
         return cb(prismaServiceMock)
       })
       prismaServiceMock.fileMetadata.findFirst.mockResolvedValueOnce(null)
-      fileStorageServiceMock.uploadFile.mockResolvedValueOnce('storage-key-789')
+      gcsServiceMock.uploadFile.mockResolvedValueOnce('storage-key-789')
       prismaServiceMock.fileMetadata.create.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
       const fileId = await fileService.createFile({
@@ -109,7 +109,7 @@ describe('FileService', () => {
       })
 
       expect(fileId).toBeDefined()
-      expect(fileStorageServiceMock.uploadFile).toHaveBeenCalledTimes(1)
+      expect(gcsServiceMock.uploadFile).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
       expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.status).toBe('ACTIVE')
       expect(prismaServiceMock.fileMetadata.create.mock.calls[0][0].data.expiresAt).toBeNull()
@@ -132,7 +132,7 @@ describe('FileService', () => {
 
       expect(fileId).toBeDefined()
       expect(prismaServiceMock.fileMetadata.create).toHaveBeenCalledTimes(1)
-      expect(fileStorageServiceMock.uploadFile).not.toHaveBeenCalled()
+      expect(gcsServiceMock.uploadFile).not.toHaveBeenCalled()
     })
   })
 
@@ -150,14 +150,14 @@ describe('FileService', () => {
     }
     it('should download a file by its ID', async () => {
       prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce(fileMetadata)
-      fileStorageServiceMock.downloadFile.mockResolvedValueOnce(Buffer.from('This is a test file'))
+      gcsServiceMock.downloadFile.mockResolvedValueOnce(Buffer.from('This is a test file'))
       fileService.computeHash = jest.fn().mockReturnValue('valid-hash')
       const result = await fileService.downloadFile('file-id-123')
 
       expect(result).toBeDefined()
       expect(result.buffer).toBeInstanceOf(Buffer)
       expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
-      expect(fileStorageServiceMock.downloadFile).toHaveBeenCalledTimes(1)
+      expect(gcsServiceMock.downloadFile).toHaveBeenCalledTimes(1)
     })
     it('should throw an error if the file is not active', async () => {
       prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce({
@@ -171,9 +171,7 @@ describe('FileService', () => {
     })
     it('should throw an error if the file integrity check fails', async () => {
       prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce(fileMetadata)
-      fileStorageServiceMock.downloadFile.mockResolvedValueOnce(
-        Buffer.from('Corrupted file content'),
-      )
+      gcsServiceMock.downloadFile.mockResolvedValueOnce(Buffer.from('Corrupted file content'))
       fileService.computeHash = jest.fn().mockReturnValue('invalid-hash')
 
       await expect(fileService.downloadFile('file-id-123')).rejects.toThrow(
@@ -181,7 +179,7 @@ describe('FileService', () => {
       )
 
       expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
-      expect(fileStorageServiceMock.downloadFile).toHaveBeenCalledTimes(1)
+      expect(gcsServiceMock.downloadFile).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -191,13 +189,14 @@ describe('FileService', () => {
     })
     prismaServiceMock.fileMetadata.update.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
-    await fileService.updateFileContent(
-      'file-id-123',
-      'old-storage-key-123',
-      Buffer.from('Updated file content'),
-    )
+    await fileService.updateFileContent({
+      id: 'file-id-123',
+      storageKey: 'old-storage-key-123',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('Updated file content'),
+    })
 
-    expect(fileStorageServiceMock.updateFile).toHaveBeenCalledTimes(1)
+    expect(gcsServiceMock.updateFile).toHaveBeenCalledTimes(1)
     expect(prismaServiceMock.fileMetadata.update).toHaveBeenCalledTimes(1)
   })
 
@@ -208,13 +207,13 @@ describe('FileService', () => {
     prismaServiceMock.fileMetadata.findUniqueOrThrow.mockResolvedValueOnce({
       storageKey: 'storage-key-to-delete',
     } as FileMetadata)
-    fileStorageServiceMock.deleteFile.mockResolvedValueOnce()
+    gcsServiceMock.deleteFile.mockResolvedValueOnce()
     prismaServiceMock.fileMetadata.delete.mockResolvedValueOnce(mockDeep<FileMetadata>())
 
     await fileService.deleteFile('file-id-123')
 
     expect(prismaServiceMock.fileMetadata.findUniqueOrThrow).toHaveBeenCalledTimes(1)
-    expect(fileStorageServiceMock.deleteFile).toHaveBeenCalledTimes(1)
+    expect(gcsServiceMock.deleteFile).toHaveBeenCalledTimes(1)
     expect(prismaServiceMock.fileMetadata.delete).toHaveBeenCalledTimes(1)
   })
 

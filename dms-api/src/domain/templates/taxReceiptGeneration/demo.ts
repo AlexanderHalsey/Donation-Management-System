@@ -74,7 +74,7 @@ export const demoTaxReceiptTemplate = {
     },
   },
   cancelledWatermark: {
-    imagePath: 'src/assets/watermarks/cancelled_en.png',
+    storageKey: 'cancelled_watermark_en.png',
     imageType: 'png',
     sizeFactor: 0.25,
   },

@@ -1,7 +1,12 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common'
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common'
 import { Response } from 'express'
-
-import { ApiDonorSyncEventRequestException, ApiJobScheduleException } from '@/domain/exceptions'
 
 const logger = new Logger('HttpExceptionFilter')
 
@@ -13,12 +18,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus()
     const errorResponse = exception.getResponse()
 
-    const loggerMethod: 'error' | 'warn' = [
-      ApiDonorSyncEventRequestException,
-      ApiJobScheduleException,
-    ].some((errorClass) => exception instanceof errorClass)
-      ? 'error'
-      : 'warn'
+    const loggerMethod: 'error' | 'warn' =
+      exception instanceof InternalServerErrorException ? 'error' : 'warn'
 
     logger[loggerMethod](
       {

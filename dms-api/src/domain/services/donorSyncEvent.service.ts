@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
 
 import { chunk } from 'es-toolkit'
 import { subDays } from 'date-fns'
@@ -6,7 +6,6 @@ import { subDays } from 'date-fns'
 import { BullMQService, PrismaService } from '@/infrastructure'
 
 import { DonorSyncEventRequestSchema } from '../schemas'
-import { ApiDonorSyncEventRequestException, ApiJobScheduleException } from '../exceptions'
 
 import { DonorSyncEventCreateManyInput } from '@generated/prisma/models'
 
@@ -23,7 +22,7 @@ export class DonorSyncEventService {
     const request = DonorSyncEventRequestSchema.safeParse(body)
 
     if (!request.success) {
-      throw new ApiDonorSyncEventRequestException({
+      throw new InternalServerErrorException({
         code: 'INVALID_DONOR_SYNC_EVENT_REQUEST',
         message: `Invalid Donor Sync Event request: ${request.error.message}`,
       })
@@ -78,7 +77,7 @@ export class DonorSyncEventService {
           donorSyncEventIds,
           errorMessage: `Failed to schedule sync job: ${error.message}`,
         })
-        throw new ApiJobScheduleException({
+        throw new InternalServerErrorException({
           code: 'DONOR_SYNC_JOB_SCHEDULING_FAILED',
           message: `Failed to schedule donor sync job for ${donorSyncEventIds.length}`,
           stack: error.stack,

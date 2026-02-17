@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { omit } from 'es-toolkit'
@@ -92,28 +92,21 @@ export class DonorService {
   }
 
   async getById(donorId: string): Promise<Donor> {
-    try {
-      const donor = await this.prisma.donor.findUniqueOrThrow({
-        where: { id: donorId },
-        include: {
-          donations: {
-            select: {
-              amount: true,
-            },
+    const donor = await this.prisma.donor.findUniqueOrThrow({
+      where: { id: donorId },
+      include: {
+        donations: {
+          select: {
+            amount: true,
           },
         },
-      })
-      return nullsToUndefined({
-        ...omit(donor, ['donations']),
-        donationCount: donor.donations.length,
-        donationTotalAmount: donor.donations.reduce((sum, donation) => sum + donation.amount, 0),
-      })
-    } catch {
-      throw new BadRequestException({
-        code: 'DONOR_NOT_FOUND',
-        message: `Donor with ID ${donorId} not found`,
-      })
-    }
+      },
+    })
+    return nullsToUndefined({
+      ...omit(donor, ['donations']),
+      donationCount: donor.donations.length,
+      donationTotalAmount: donor.donations.reduce((sum, donation) => sum + donation.amount, 0),
+    })
   }
 
   async getExportList(

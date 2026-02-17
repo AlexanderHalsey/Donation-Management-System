@@ -53,6 +53,9 @@ lerna-debug.log*
 # dotenv environment variable files (commit base configs, ignore local overrides)
 .env*
 
+# service account keys
+dms-api/serviceAccount.json
+
 # temp directory
 .temp
 .tmp

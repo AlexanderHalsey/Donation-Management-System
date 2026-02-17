@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import * as path from 'path'
-import * as fs from 'fs'
+
+import { GCSService } from '@/infrastructure'
 
 import { PDFRendererService, PDF } from './pdfRenderer.service'
 
@@ -24,21 +24,17 @@ import { Donor, TaxReceiptType } from '@generated/prisma/client'
 import { TaxReceiptOrganisationInfo, TaxReceiptDonation } from '@/domain/types'
 
 @Injectable()
-export class TaxReceiptGeneratorService {
+export class TaxReceiptGeneratorService implements OnModuleInit {
   private template: TaxReceiptTemplate
   private cancelledWatermarkImageBuffer: Buffer
 
   constructor(
     private readonly pdfRenderer: PDFRendererService,
     private readonly configService: ConfigService,
-  ) {
-    this.template = this.selectTemplateForEnvironment()
-    this.cancelledWatermarkImageBuffer = fs.readFileSync(
-      path.join(process.cwd(), this.template.cancelledWatermark.imagePath),
-    )
-  }
+    private readonly gcsService: GCSService,
+  ) {}
 
-  private selectTemplateForEnvironment(): TaxReceiptTemplate {
+  async onModuleInit() {
     const templates = [
       { name: 'cerfa', template: cerfaTaxReceiptTemplate },
       { name: 'demo', template: demoTaxReceiptTemplate },
@@ -46,13 +42,15 @@ export class TaxReceiptGeneratorService {
     const templateName = this.configService.get<string>('TAX_RECEIPT_TEMPLATE')
     const template = templates.find((t) => t.name === templateName)?.template
     if (!template) {
-      throw new BadRequestException(
+      throw new Error(
         'Invalid TAX_RECEIPT_TEMPLATE environment variable. Must be "cerfa" or "demo".',
       )
     }
-    return template
+    this.template = template
+    this.cancelledWatermarkImageBuffer = await this.gcsService.downloadFile(
+      this.template.cancelledWatermark.storageKey,
+    )
   }
-
   private addDonationSummaryLabelValue({
     y,
     label,

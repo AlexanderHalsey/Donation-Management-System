@@ -1,4 +1,10 @@
-import { BadRequestException, Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger'
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager'
 
@@ -145,7 +151,10 @@ export class SummaryController {
     return distribution.map((item) => {
       const model = models.find((m) => m.id === item.id)
       if (!model) {
-        throw new BadRequestException(`Invalid ID found in distribution: ${item.id}`)
+        throw new InternalServerErrorException({
+          code: 'DASHBOARD_SUMMARY_DATA_INCONSISTENCY',
+          message: `Invalid ID found in distribution: ${item.id}`,
+        })
       }
       return {
         name: model.name,

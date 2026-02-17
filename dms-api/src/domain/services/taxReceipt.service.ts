@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common'
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
 import { uniqBy } from 'es-toolkit'
@@ -10,7 +16,7 @@ import { BullMQService, PrismaService } from '@/infrastructure'
 import { FileService } from './file.service'
 import { TaxReceiptGeneratorService } from './taxReceiptGenerator.service'
 
-import { ApiJobScheduleException, WorkerJobScheduleException } from '../exceptions'
+import { WorkerJobProcessException, WorkerJobScheduleException } from '../exceptions'
 
 import type {
   TaxReceiptListItem,
@@ -168,7 +174,7 @@ export class TaxReceiptService {
       })
     } catch (error) {
       await this.handleTaxReceiptGenerationFailure({ taxReceiptId })
-      throw new ApiJobScheduleException({
+      throw new InternalServerErrorException({
         code: 'TAX_RECEIPT_JOB_SCHEDULING_FAILED',
         message: `Failed to schedule tax receipt generation job for tax receipt ID ${taxReceiptId}`,
         stack: error.stack,
@@ -272,7 +278,7 @@ export class TaxReceiptService {
       for (const taxReceipt of taxReceipts) {
         await this.handleTaxReceiptGenerationFailure({ taxReceiptId: taxReceipt.id })
       }
-      throw new ApiJobScheduleException({
+      throw new InternalServerErrorException({
         code: 'TAX_RECEIPT_JOB_SCHEDULING_FAILED',
         message: `Failed to schedule tax receipt generation jobs for annual tax receipts for organisation ID ${organisationId} and year ${year}`,
         stack: error.stack,
@@ -322,11 +328,9 @@ export class TaxReceiptService {
     )
 
     if (organisations.length > 1) {
-      throw new BadRequestException({
+      throw new WorkerJobProcessException({
         code: 'MULTIPLE_ORGANISATIONS_FOUND',
-        message:
-          'Donations must belong to the same organisation. Current organisation IDs: ' +
-          organisations.map((org) => org.id).join(', '),
+        message: `Donations must belong to the same organisation. Current organisation IDs: ${organisations.map((org) => org.id).join(', ')}`,
       })
     }
 
@@ -346,14 +350,14 @@ export class TaxReceiptService {
         'signatureId',
       ].some((field) => !organisation?.[field as keyof typeof organisation])
     ) {
-      throw new BadRequestException({
+      throw new WorkerJobProcessException({
         code: 'INCOMPLETE_ORGANISATION_DETAILS',
         message: 'Organisation details are incomplete for tax receipt generation',
       })
     }
 
     if (donations.length < donationIds.length) {
-      throw new BadRequestException({
+      throw new WorkerJobProcessException({
         code: 'DONATIONS_NOT_FOUND',
         message: 'One or more donations not found during tax receipt processing',
       })
@@ -486,7 +490,12 @@ export class TaxReceiptService {
     const { buffer: existingPdfBuffer } = await this.fileService.downloadFile(fileId)
     const canceledPdfBuffer =
       await this.taxReceiptGeneratorService.cancelTaxReceipt(existingPdfBuffer)
-    await this.fileService.updateFileContent(fileId, storageKey, canceledPdfBuffer)
+    await this.fileService.updateFileContent({
+      id: fileId,
+      storageKey,
+      mimeType: 'application/pdf',
+      buffer: canceledPdfBuffer,
+    })
     this.logger.log(`Processed tax receipt cancellation for file ID ${fileId} in job ID ${jobId}`)
   }
 
@@ -512,7 +521,6 @@ export class TaxReceiptService {
       this.logger.log(
         `Cache miss for file ID ${fileId} with cache key ${cacheKey}. Downloading from storage.`,
       )
-      console.log('here')
       const { buffer } = await this.fileService.downloadFile(fileId)
       await this.cacheManager.set(cacheKey, buffer, 24 * 60 * 60 * 1000) // 24 hours
       return buffer
