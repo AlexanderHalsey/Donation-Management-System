@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { parse as parseContentDisposition } from 'content-disposition'
 import { saveAs } from 'file-saver'
 import { parseISO } from 'date-fns'
@@ -521,48 +520,74 @@ export const exportDonationListCsv = async (
   orderBy: DonationListSortOrder,
   filter?: DonationListFilter,
 ): Promise<void> => {
-  const client = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+  await withClient(async (client) => {
+    const response = await client.post<ArrayBuffer>(
+      '/exports/donations/csv',
+      { orderBy, filter },
+      { responseType: 'arraybuffer' },
+    )
+    const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+    saveAs(
+      new Blob([response.data], { type: response.headers['content-type'] }),
+      parameters.filename,
+    )
+    return response
   })
-  const response = await client.post<string>('/exports/donations/csv', { orderBy, filter })
-  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
-  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
 }
 
 export const exportDonationListXlsx = async (
   orderBy: DonationListSortOrder,
   filter?: DonationListFilter,
 ): Promise<void> => {
-  const client = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    responseType: 'arraybuffer',
+  await withClient(async (client) => {
+    const response = await client.post<ArrayBuffer>(
+      '/exports/donations/xlsx',
+      { orderBy, filter },
+      { responseType: 'arraybuffer' },
+    )
+    const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+    saveAs(
+      new Blob([response.data], { type: response.headers['content-type'] }),
+      parameters.filename,
+    )
+    return response
   })
-  const response = await client.post<ArrayBuffer>('/exports/donations/xlsx', { orderBy, filter })
-  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
-  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
 }
 
 export const exportDonorListCsv = async (
   orderBy: DonorListSortOrder,
   filter?: DonorListFilter,
 ): Promise<void> => {
-  const client = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+  await withClient(async (client) => {
+    const response = await client.post<ArrayBuffer>(
+      '/exports/donors/csv',
+      { orderBy, filter },
+      { responseType: 'arraybuffer' },
+    )
+    const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+    saveAs(
+      new Blob([response.data], { type: response.headers['content-type'] }),
+      parameters.filename,
+    )
+    return response
   })
-  const response = await client.post<string>('/exports/donors/csv', { orderBy, filter })
-  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
-  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
 }
 
 export const exportDonorListXlsx = async (
   orderBy: DonorListSortOrder,
   filter?: DonorListFilter,
 ): Promise<void> => {
-  const client = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    responseType: 'arraybuffer',
+  await withClient(async (client) => {
+    const response = await client.post<ArrayBuffer>(
+      '/exports/donors/xlsx',
+      { orderBy, filter },
+      { responseType: 'arraybuffer' },
+    )
+    const { parameters } = parseContentDisposition(response.headers['content-disposition'])
+    saveAs(
+      new Blob([response.data], { type: response.headers['content-type'] }),
+      parameters.filename,
+    )
+    return response
   })
-  const response = await client.post<ArrayBuffer>('/exports/donors/xlsx', { orderBy, filter })
-  const { parameters } = parseContentDisposition(response.headers['content-disposition'])
-  saveAs(new Blob([response.data], { type: response.headers['content-type'] }), parameters.filename)
 }
