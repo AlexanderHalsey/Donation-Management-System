@@ -33,6 +33,8 @@ export interface Donation extends DonationListItem {
 export interface DonationExport {
   lastName: string
   firstName?: string
+  email?: string
+  externalId: number
   donatedAt: Date
   amount: number
   paymentMode: string

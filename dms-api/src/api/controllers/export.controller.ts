@@ -29,29 +29,11 @@ export class ExportController {
     const result = await this.exportService.exportDonationListCsv(language, orderBy, filter)
 
     res.setHeader('Content-Type', 'text/csv')
-    res.setHeader('Content-Disposition', 'inline; filename="donations.csv"')
-    res.send(result)
-  }
-
-  @Post('donations/xlsx')
-  @ApiOperation({ summary: 'Export donation list as XLSX' })
-  @ApiResponse({ status: 200, description: 'File served successfully' })
-  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
-  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
-  async exportDonationListXlsx(
-    @Res() res: Response,
-    @Body() { orderBy, filter }: GetExportDonationListRequest,
-    @ParsedLanguage() language: Language,
-  ) {
-    const result = await this.exportService.exportDonationListXlsx(language, orderBy, filter)
-
     res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition',
+      `inline; filename="${language === 'en' ? 'donations' : 'dons'}.csv"`,
     )
-    res.setHeader('Content-Disposition', 'inline; filename="donations.xlsx"')
-    await result.xlsx.write(res)
-    res.end()
+    res.send(result)
   }
 
   @Post('donors/csv')
@@ -67,28 +49,10 @@ export class ExportController {
     const result = await this.exportService.exportDonorListCsv(language, orderBy, filter)
 
     res.setHeader('Content-Type', 'text/csv')
-    res.setHeader('Content-Disposition', 'inline; filename="donors.csv"')
-    res.send(result)
-  }
-
-  @Post('donors/xlsx')
-  @ApiOperation({ summary: 'Export donor list as XLSX' })
-  @ApiResponse({ status: 200, description: 'File served successfully' })
-  @ApiResponse({ status: 400, description: 'Failed due to a malformed request' })
-  @ApiResponse({ status: 500, description: 'Failed due to a technical error. Try again later' })
-  async exportDonorListXlsx(
-    @Res() res: Response,
-    @Body() { orderBy, filter }: GetExportDonorListRequest,
-    @ParsedLanguage() language: Language,
-  ) {
-    const result = await this.exportService.exportDonorListXlsx(language, orderBy, filter)
-
     res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition',
+      `inline; filename="${language === 'en' ? 'donors' : 'donateurs'}.csv"`,
     )
-    res.setHeader('Content-Disposition', 'inline; filename="donors.xlsx"')
-    await result.xlsx.write(res)
-    res.end()
+    res.send(result)
   }
 }

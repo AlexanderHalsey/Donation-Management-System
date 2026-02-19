@@ -84,8 +84,6 @@ type Labels = {
   donationsOfWeek: string
   donationsWithTaxReceipt: string
   donorFilters: string
-  downloadCsv: string
-  downloadXlsx: string
   eligibleForTaxReceipts: string
   email: string
   exportsRespectFilters: string

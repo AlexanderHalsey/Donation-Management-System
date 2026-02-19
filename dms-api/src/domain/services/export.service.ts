@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import * as Papa from 'papaparse'
-import { Workbook } from 'exceljs'
-import { capitalize } from 'es-toolkit'
+import { format, isDate } from 'date-fns'
 
 import { DonationService } from './donation.service'
 import { DonorService } from './donor.service'
@@ -16,7 +15,6 @@ import {
 
 import { Language } from '@/domain/types'
 import { DonationExport, DonorExport } from '@shared/models'
-import { isDate } from 'date-fns'
 
 interface ExportHeaderTranslation {
   donation: { [K in keyof DonationExport]: string }
@@ -32,6 +30,8 @@ export class ExportService {
       donation: {
         lastName: 'Nom',
         firstName: 'Prénom',
+        email: 'Email',
+        externalId: 'ID Externe',
         donatedAt: 'Date du don',
         amount: 'Montant',
         paymentMode: 'Mode de Paiement',
@@ -44,6 +44,7 @@ export class ExportService {
         taxReceiptStatus: 'Statut de reçu',
       },
       donor: {
+        externalId: 'ID Externe',
         lastName: 'Nom',
         firstName: 'Prénom',
         email: 'Email',
@@ -55,6 +56,8 @@ export class ExportService {
       donation: {
         lastName: 'Last Name',
         firstName: 'First Name',
+        email: 'Email',
+        externalId: 'External ID',
         donatedAt: 'Donation Date',
         amount: 'Amount',
         paymentMode: 'Payment Mode',
@@ -67,6 +70,7 @@ export class ExportService {
         taxReceiptStatus: 'Tax Receipt Status',
       },
       donor: {
+        externalId: 'External ID',
         lastName: 'Last Name',
         firstName: 'First Name',
         email: 'Email',
@@ -86,35 +90,18 @@ export class ExportService {
     return Object.entries(translations).map(([key, header]) => ({ key, header }))
   }
 
-  private exportXlsx(language: Language, exportType: ExportType, data: unknown[]): Workbook {
-    const headers = this.getLocalizedHeaders(exportType, language)
-
-    const workbook = new Workbook()
-    const worksheet = workbook.addWorksheet(capitalize(exportType))
-
-    worksheet.columns = headers
-    worksheet.addRows(data)
-    worksheet.columns.forEach((column) => {
-      let maxColumnLength = 0
-      column.eachCell?.({ includeEmpty: true }, (cell) => {
-        maxColumnLength = Math.max(
-          maxColumnLength,
-          8,
-          cell.value ? (isDate(cell.value) ? 10 : cell.value.toString().length) : 0,
-        )
-      })
-      column.width = maxColumnLength + 2
-    })
-
-    return workbook
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private exportCsv(language: Language, exportType: ExportType, data: any[]): string {
     const headers = this.getLocalizedHeaders(exportType, language)
     return Papa.unparse(
       data.map((item) =>
-        headers.reduce((acc, { key, header }) => ({ ...acc, [header]: item[key] }), {}),
+        headers.reduce(
+          (acc, { key, header }) => ({
+            ...acc,
+            [header]: isDate(item[key]) ? format(item[key], 'yyyy-MM-dd') : item[key],
+          }),
+          {},
+        ),
       ),
       { columns: headers.map((h) => h.header) },
     )
@@ -131,17 +118,6 @@ export class ExportService {
     return csv
   }
 
-  async exportDonationListXlsx(
-    language: Language,
-    orderBy: DonationListSortOrder,
-    filter?: DonationListFilter,
-  ) {
-    const donations = await this.donationService.getExportList(orderBy, language, filter)
-    const xlsx = this.exportXlsx(language, 'donation', donations)
-    this.logger.log(`Generated XLSX for donation list with ${donations.length} rows`)
-    return xlsx
-  }
-
   async exportDonorListCsv(
     language: Language,
     orderBy: DonorListSortOrder,
@@ -151,16 +127,5 @@ export class ExportService {
     const csv = this.exportCsv(language, 'donor', donors)
     this.logger.log(`Generated CSV for donor list with ${donors.length} rows`)
     return csv
-  }
-
-  async exportDonorListXlsx(
-    language: Language,
-    orderBy: DonorListSortOrder,
-    filter?: DonorListFilter,
-  ) {
-    const donors = await this.donorService.getExportList(orderBy, filter)
-    const xlsx = this.exportXlsx(language, 'donor', donors)
-    this.logger.log(`Generated XLSX for donor list with ${donors.length} rows`)
-    return xlsx
   }
 }

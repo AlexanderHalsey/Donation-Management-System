@@ -1,43 +1,19 @@
 <template>
-  <BtnDropdown outline icon="download" color="primary">
-    <QList style="width: 254px">
-      <QItem clickable v-close-popup @click="$emit('export-csv')">
-        <QItemSection avatar>
-          <QIcon name="file_download" />
-        </QItemSection>
-        <QItemSection>
-          <QItemLabel>{{ t('labels.downloadCsv') }}</QItemLabel>
-        </QItemSection>
-      </QItem>
-      <QItem clickable v-close-popup @click="$emit('export-xlsx')">
-        <QItemSection avatar>
-          <QIcon name="file_download" />
-        </QItemSection>
-        <QItemSection>
-          <QItemLabel>{{ t('labels.downloadXlsx') }}</QItemLabel>
-        </QItemSection>
-      </QItem>
-      <QItem>
-        <QItemSection>
-          <QItemLabel caption>
-            {{ t('labels.exportsRespectFilters') }}
-          </QItemLabel>
-        </QItemSection>
-      </QItem>
-    </QList>
-  </BtnDropdown>
+  <Btn outline icon="download" color="primary" @click="$emit('export-csv')" />
+  <QTooltip :delay="300" :offset="[0, 5]">
+    {{ t('labels.exportsRespectFilters') }}
+  </QTooltip>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from '@/composables'
 
-import BtnDropdown from './ui/BtnDropdown.vue'
+import Btn from './ui/Btn.vue'
 
 const { t } = useI18n()
 
 defineEmits<{
   'export-csv': []
-  'export-xlsx': []
 }>()
 </script>
 

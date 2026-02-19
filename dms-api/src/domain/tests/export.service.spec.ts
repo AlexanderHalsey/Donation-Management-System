@@ -1,9 +1,9 @@
 import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 import { mockDeep, mockReset } from 'jest-mock-extended'
+import { format } from 'date-fns'
 
 import * as Papa from 'papaparse'
-import { Workbook, Worksheet } from 'exceljs'
 
 import { ExportService } from '../services/export.service'
 import { DonationService } from '../services/donation.service'
@@ -19,13 +19,10 @@ import {
 } from '@shared/models'
 
 jest.mock('papaparse')
-jest.mock('exceljs')
 
 describe('ExportService', () => {
   const mockDonationService = mockDeep<DonationService>()
   const mockDonorService = mockDeep<DonorService>()
-  const mockWorkbook = mockDeep<Workbook>()
-  const mockWorksheet = mockDeep<Worksheet>()
 
   let exportService: ExportService
 
@@ -33,6 +30,8 @@ describe('ExportService', () => {
     {
       lastName: 'Doe',
       firstName: 'John',
+      email: 'john.doe@example.com',
+      externalId: 1,
       donatedAt: new Date('2023-01-01'),
       amount: 100,
       paymentMode: 'Credit Card',
@@ -47,6 +46,8 @@ describe('ExportService', () => {
     {
       lastName: 'Smith',
       firstName: 'Jane',
+      email: 'jane.smith@example.com',
+      externalId: 2,
       donatedAt: new Date('2023-01-02'),
       amount: 200,
       paymentMode: 'Bank Transfer',
@@ -62,6 +63,7 @@ describe('ExportService', () => {
 
   const mockDonorData: DonorExport[] = [
     {
+      externalId: 1,
       lastName: 'Doe',
       firstName: 'John',
       email: 'john.doe@example.com',
@@ -69,6 +71,7 @@ describe('ExportService', () => {
       donationTotalAmount: 500,
     },
     {
+      externalId: 2,
       lastName: 'Smith',
       firstName: 'Jane',
       email: 'jane.smith@example.com',
@@ -81,12 +84,6 @@ describe('ExportService', () => {
     jest.resetAllMocks()
     mockReset(mockDonationService)
     mockReset(mockDonorService)
-    mockReset(mockWorkbook)
-    mockReset(mockWorksheet)
-
-    // Mock Workbook constructor and methods
-    ;(Workbook as jest.MockedClass<typeof Workbook>).mockImplementation(() => mockWorkbook)
-    mockWorkbook.addWorksheet.mockReturnValue(mockWorksheet)
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
@@ -124,7 +121,9 @@ describe('ExportService', () => {
         mockDonationData.map((donation) => ({
           'Last Name': donation.lastName,
           'First Name': donation.firstName,
-          'Donation Date': donation.donatedAt,
+          Email: donation.email,
+          'External ID': donation.externalId,
+          'Donation Date': format(donation.donatedAt, 'yyyy-MM-dd'),
           Amount: donation.amount,
           'Payment Mode': donation.paymentMode,
           'Donation Type': donation.donationType,
@@ -139,6 +138,8 @@ describe('ExportService', () => {
           columns: [
             'Last Name',
             'First Name',
+            'Email',
+            'External ID',
             'Donation Date',
             'Amount',
             'Payment Mode',
@@ -169,7 +170,9 @@ describe('ExportService', () => {
         mockDonationData.map((donation) => ({
           Nom: donation.lastName,
           Prénom: donation.firstName,
-          'Date du don': donation.donatedAt,
+          Email: donation.email,
+          'ID Externe': donation.externalId,
+          'Date du don': format(donation.donatedAt, 'yyyy-MM-dd'),
           Montant: donation.amount,
           'Mode de Paiement': donation.paymentMode,
           'Type de don': donation.donationType,
@@ -184,6 +187,8 @@ describe('ExportService', () => {
           columns: [
             'Nom',
             'Prénom',
+            'Email',
+            'ID Externe',
             'Date du don',
             'Montant',
             'Mode de Paiement',
@@ -198,37 +203,6 @@ describe('ExportService', () => {
         },
       )
       expect(result).toBe(expectedCsv)
-    })
-  })
-
-  describe('exportDonationListXlsx', () => {
-    it('should export donation list as XLSX in English', async () => {
-      const orderBy: DonationListSortOrder = { donatedAt: 'desc' }
-      const filter: DonationListFilter = { amount: { gte: 100 } }
-
-      mockDonationService.getExportList.mockResolvedValue(mockDonationData)
-
-      const result = await exportService.exportDonationListXlsx('en', orderBy, filter)
-
-      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, 'en', filter)
-      expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Donation')
-      expect(mockWorksheet.columns).toBeDefined()
-      expect(mockWorksheet.addRows).toHaveBeenCalledWith(mockDonationData)
-      expect(result).toBe(mockWorkbook)
-    })
-
-    it('should export donation list as XLSX in French', async () => {
-      const orderBy: DonationListSortOrder = { donatedAt: 'desc' }
-
-      mockDonationService.getExportList.mockResolvedValue(mockDonationData)
-
-      const result = await exportService.exportDonationListXlsx('fr', orderBy)
-
-      expect(mockDonationService.getExportList).toHaveBeenCalledWith(orderBy, 'fr', undefined)
-      expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Donation')
-      expect(mockWorksheet.columns).toBeDefined()
-      expect(mockWorksheet.addRows).toHaveBeenCalledWith(mockDonationData)
-      expect(result).toBe(mockWorkbook)
     })
   })
 
@@ -247,6 +221,7 @@ describe('ExportService', () => {
       expect(mockDonorService.getExportList).toHaveBeenCalledWith(orderBy, filter)
       expect(Papa.unparse).toHaveBeenCalledWith(
         mockDonorData.map((donor) => ({
+          'External ID': donor.externalId,
           'Last Name': donor.lastName,
           'First Name': donor.firstName,
           Email: donor.email,
@@ -254,7 +229,14 @@ describe('ExportService', () => {
           'Total Donations': donor.donationCount,
         })),
         {
-          columns: ['Last Name', 'First Name', 'Email', 'Total Donated', 'Total Donations'],
+          columns: [
+            'External ID',
+            'Last Name',
+            'First Name',
+            'Email',
+            'Total Donated',
+            'Total Donations',
+          ],
         },
       )
       expect(result).toBe(expectedCsv)
@@ -273,6 +255,7 @@ describe('ExportService', () => {
       expect(mockDonorService.getExportList).toHaveBeenCalledWith(orderBy, undefined)
       expect(Papa.unparse).toHaveBeenCalledWith(
         mockDonorData.map((donor) => ({
+          'ID Externe': donor.externalId,
           Nom: donor.lastName,
           Prénom: donor.firstName,
           Email: donor.email,
@@ -280,41 +263,10 @@ describe('ExportService', () => {
           'Total de dons': donor.donationCount,
         })),
         {
-          columns: ['Nom', 'Prénom', 'Email', 'Montant total', 'Total de dons'],
+          columns: ['ID Externe', 'Nom', 'Prénom', 'Email', 'Montant total', 'Total de dons'],
         },
       )
       expect(result).toBe(expectedCsv)
-    })
-  })
-
-  describe('exportDonorListXlsx', () => {
-    it('should export donor list as XLSX in English', async () => {
-      const orderBy: DonorListSortOrder = { lastName: 'asc' }
-      const filter: DonorListFilter = { totalAmount: { gte: 100 } }
-
-      mockDonorService.getExportList.mockResolvedValue(mockDonorData)
-
-      const result = await exportService.exportDonorListXlsx('en', orderBy, filter)
-
-      expect(mockDonorService.getExportList).toHaveBeenCalledWith(orderBy, filter)
-      expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Donor')
-      expect(mockWorksheet.columns).toBeDefined()
-      expect(mockWorksheet.addRows).toHaveBeenCalledWith(mockDonorData)
-      expect(result).toBe(mockWorkbook)
-    })
-
-    it('should export donor list as XLSX in French', async () => {
-      const orderBy: DonorListSortOrder = { lastName: 'asc' }
-
-      mockDonorService.getExportList.mockResolvedValue(mockDonorData)
-
-      const result = await exportService.exportDonorListXlsx('fr', orderBy)
-
-      expect(mockDonorService.getExportList).toHaveBeenCalledWith(orderBy, undefined)
-      expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Donor')
-      expect(mockWorksheet.columns).toBeDefined()
-      expect(mockWorksheet.addRows).toHaveBeenCalledWith(mockDonorData)
-      expect(result).toBe(mockWorkbook)
     })
   })
 })

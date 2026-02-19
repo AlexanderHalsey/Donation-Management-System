@@ -274,7 +274,13 @@ export class DonationService {
     filter?: DonationListFilter,
   ): Promise<DonationExport[]> {
     const donations = await this.prisma.donation.findMany({
-      include: { ...FULL_INCLUDE_FIELDS, taxReceipt: true },
+      include: {
+        ...FULL_INCLUDE_FIELDS,
+        taxReceipt: true,
+        donor: {
+          select: { id: true, lastName: true, firstName: true, email: true, externalId: true },
+        },
+      },
       omit: BASIC_OMIT_FIELDS,
       where: filter,
       orderBy: isEmpty(orderBy) ? { updatedAt: 'desc' } : orderBy,
@@ -284,6 +290,8 @@ export class DonationService {
       amount: donation.amount,
       lastName: donation.donor.lastName,
       firstName: donation.donor.firstName || undefined,
+      email: donation.donor.email || undefined,
+      externalId: donation.donor.externalId,
       paymentMode: donation.paymentMode.name,
       donationType: donation.donationType.name,
       organisation: donation.organisation.name,

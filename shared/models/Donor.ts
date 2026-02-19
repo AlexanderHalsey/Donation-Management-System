@@ -38,6 +38,7 @@ export interface Donor extends DonorListItem {
 }
 
 export interface DonorExport {
+  externalId: number
   lastName: string
   firstName?: string
   email?: string

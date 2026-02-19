@@ -26,12 +26,7 @@ export const ParsedLanguage = createParamDecorator(
     try {
       const languages = acceptLanguage.parse(acceptLanguageHeader)
 
-      // Check if French is preferred, otherwise default to English
-      for (const lang of languages) {
-        if (lang.code === 'fr') {
-          return 'fr'
-        }
-      }
+      if (languages[0]?.code === 'fr') return 'fr'
     } catch (error) {
       // Fallback to English if parsing fails
       logger.warn(
