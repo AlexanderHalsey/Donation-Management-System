@@ -48,9 +48,12 @@ const working = ref(false)
 
 const deleteOrganisation = async (organisationId: string) => {
   working.value = true
-  await organisationStore.deleteOrganisation(organisationId)
-  await organisationListStore.fetchOrganisations()
-  working.value = false
+  try {
+    await organisationStore.deleteOrganisation(organisationId)
+    await organisationListStore.fetchOrganisations()
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.organisationDeleted') })
 }
 

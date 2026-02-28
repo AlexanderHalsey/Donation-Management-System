@@ -86,8 +86,11 @@ const donationForm = ref<InstanceType<typeof DonationForm> | null>(null)
 
 const createDonation = async (formData: DonationFormData) => {
   working.value = true
-  await donationStore.createDonation(formData)
-  working.value = false
+  try {
+    await donationStore.createDonation(formData)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.donationCreated') })
   await router.push({ name: 'donations' })
 }

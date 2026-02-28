@@ -94,8 +94,11 @@ const updateOrganisation = async (formData: OrganisationFormData) => {
 
 const deleteOrganisation = async () => {
   working.value = true
-  await organisationStore.deleteOrganisation(organisationId.value)
-  working.value = false
+  try {
+    await organisationStore.deleteOrganisation(organisationId.value)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.organisationDeleted') })
   await router.push({ name: 'organisations' })
 }

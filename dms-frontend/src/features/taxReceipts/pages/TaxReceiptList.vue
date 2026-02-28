@@ -62,7 +62,7 @@
       :taxReceiptList="taxReceiptList"
       :pagination="pagination"
       :loading="tableLoading"
-      :userRole="userRole"
+      :has-full-visual-access="hasFullVisualAccess"
       @update:pagination="fetchTaxReceipts"
       @cancel:taxReceipt="cancelTaxReceipt"
       @retry-failed:tax-receipt="retryFailedTaxReceipt"
@@ -118,7 +118,7 @@ const breadcrumbs: Breadcrumb[] = [
 const $q = useQuasar()
 
 const authStore = useAuthStore()
-const userRole = computed(() => authStore.userRole)
+const hasFullVisualAccess = computed(() => authStore.hasFullVisualAccess)
 
 const organisationListStore = useOrganisationListStore()
 const taxReceiptListStore = useTaxReceiptListStore()
@@ -150,8 +150,11 @@ const tableLoading = ref(false)
 
 const fetchTaxReceipts = async (paginationRequest: TaxReceiptListPaginationRequest) => {
   tableLoading.value = true
-  await taxReceiptListStore.fetchTaxReceipts(paginationRequest)
-  tableLoading.value = false
+  try {
+    await taxReceiptListStore.fetchTaxReceipts(paginationRequest)
+  } finally {
+    tableLoading.value = false
+  }
 }
 
 const onFilterUpdate = async (filter?: TaxReceiptListFilterRequest) => {
@@ -164,8 +167,11 @@ const onFilterUpdate = async (filter?: TaxReceiptListFilterRequest) => {
 
 const cancelTaxReceipt = async (formData: CancelTaxReceiptFormData) => {
   working.value = true
-  await taxReceiptListStore.cancel(formData)
-  working.value = false
+  try {
+    await taxReceiptListStore.cancel(formData)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: "Le reçu fiscal est en cours d'annulation." })
   // Refetch tax receipts to update the list
   await fetchTaxReceipts(paginationRequest.value)
@@ -173,8 +179,11 @@ const cancelTaxReceipt = async (formData: CancelTaxReceiptFormData) => {
 
 const retryFailedTaxReceipt = async (taxReceipt: TaxReceiptListItem) => {
   working.value = true
-  await taxReceiptListStore.retryFailedTaxReceiptGeneration(taxReceipt.id)
-  working.value = false
+  try {
+    await taxReceiptListStore.retryFailedTaxReceiptGeneration(taxReceipt.id)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: 'Le reçu fiscal est en cours de régénération.' })
   // Refetch tax receipts to update the list
   await fetchTaxReceipts(paginationRequest.value)
@@ -184,7 +193,7 @@ onMounted(async () => {
   await Promise.all([
     fetchTaxReceipts(paginationRequest.value),
     organisationListStore.fetchOrganisationRefs(),
-    userRole.value === 'admin'
+    hasFullVisualAccess.value
       ? annualTaxReceiptStore.fetchEligibleTaxReceiptYearOrganisations()
       : Promise.resolve(),
   ])

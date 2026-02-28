@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import { exportDonorListCsv, exportDonorListXlsx, getDonorRefs, getDonors } from '@/apis/dms-api'
+import { exportDonorListCsv, getDonorRefs, getDonors } from '@/apis/dms-api'
 
 import { getDonorFullName } from '@/features/donors'
 
@@ -54,16 +54,11 @@ export const useDonorListStore = defineStore('donorList', () => {
     return exportDonorListCsv(pagination.value.orderBy ?? {}, filter.value)
   }
 
-  const exportXlsx = () => {
-    return exportDonorListXlsx(pagination.value.orderBy ?? {}, filter.value)
-  }
-
   return {
     activeDonorRefList,
     donorList,
     donorRefList,
     exportCsv,
-    exportXlsx,
     fetchDonorRefs,
     fetchDonors,
     filter,

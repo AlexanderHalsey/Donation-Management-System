@@ -535,25 +535,6 @@ export const exportDonationListCsv = async (
   })
 }
 
-export const exportDonationListXlsx = async (
-  orderBy: DonationListSortOrder,
-  filter?: DonationListFilter,
-): Promise<void> => {
-  await withClient(async (client) => {
-    const response = await client.post<ArrayBuffer>(
-      '/exports/donations/xlsx',
-      { orderBy, filter },
-      { responseType: 'arraybuffer' },
-    )
-    const { parameters } = parseContentDisposition(response.headers['content-disposition'])
-    saveAs(
-      new Blob([response.data], { type: response.headers['content-type'] }),
-      parameters.filename,
-    )
-    return response
-  })
-}
-
 export const exportDonorListCsv = async (
   orderBy: DonorListSortOrder,
   filter?: DonorListFilter,
@@ -561,25 +542,6 @@ export const exportDonorListCsv = async (
   await withClient(async (client) => {
     const response = await client.post<ArrayBuffer>(
       '/exports/donors/csv',
-      { orderBy, filter },
-      { responseType: 'arraybuffer' },
-    )
-    const { parameters } = parseContentDisposition(response.headers['content-disposition'])
-    saveAs(
-      new Blob([response.data], { type: response.headers['content-type'] }),
-      parameters.filename,
-    )
-    return response
-  })
-}
-
-export const exportDonorListXlsx = async (
-  orderBy: DonorListSortOrder,
-  filter?: DonorListFilter,
-): Promise<void> => {
-  await withClient(async (client) => {
-    const response = await client.post<ArrayBuffer>(
-      '/exports/donors/xlsx',
       { orderBy, filter },
       { responseType: 'arraybuffer' },
     )

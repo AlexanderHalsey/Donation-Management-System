@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { APP_GUARD } from '@nestjs/core'
 import { BullModule } from '@nestjs/bullmq'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
@@ -35,7 +36,7 @@ import {
   TaxReceiptConverter,
 } from '@/api/converters'
 
-import { JwtRefreshStrategy, JwtStrategy, LocalStrategy } from '@/api/guards'
+import { DemoWriteLockGuard, JwtRefreshStrategy, JwtStrategy, LocalStrategy } from '@/api/guards'
 
 import {
   AuthService,
@@ -130,6 +131,10 @@ import {
   providers: [
     AuthService,
     BullMQService,
+    {
+      provide: APP_GUARD,
+      useClass: DemoWriteLockGuard,
+    },
     DonationAssetTypeCleanupTask,
     DonationAssetTypeConverter,
     DonationAssetTypeService,

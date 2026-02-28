@@ -25,10 +25,12 @@ export class EmailConsumer extends WorkerHost implements OnModuleInit {
   async onModuleInit() {
     if (this.htmlTemplate) return
 
-    const templateStorageKey = this.configService.getOrThrow<string>('EMAIL_TEMPLATE_STORAGE_KEY')
-    this.htmlTemplate = await this.gcsService
-      .downloadFile(templateStorageKey)
-      .then((buffer) => buffer.toString('utf-8'))
+    if (this.configService.getOrThrow<string>('EMAIL_ENABLED') === 'true') {
+      const templateStorageKey = this.configService.getOrThrow<string>('EMAIL_TEMPLATE_STORAGE_KEY')
+      this.htmlTemplate = await this.gcsService
+        .downloadFile(templateStorageKey)
+        .then((buffer) => buffer.toString('utf-8'))
+    }
   }
 
   async process({ id, name, data }: EmailQueueJob) {

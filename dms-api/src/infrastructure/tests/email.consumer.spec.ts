@@ -15,12 +15,7 @@ describe('EmailConsumer', () => {
   const fileServiceMock = mockDeep<FileService>()
   const gcsServiceMock = mockDeep<GCSService>()
   const smtpServiceMock = mockDeep<SmtpService>()
-  const configServiceMock = mockDeep<ConfigService>({
-    get: jest.fn((key: string) => {
-      if (key === 'EMAIL_TEMPLATE_STORAGE_KEY') return 'demo'
-      return undefined
-    }),
-  })
+  const configServiceMock = mockDeep<ConfigService>()
   let emailConsumer: EmailConsumer
 
   beforeEach(async () => {
@@ -46,7 +41,8 @@ describe('EmailConsumer', () => {
   })
 
   it('should send email with attachment when SEND_RECEIPT job is processed', async () => {
-    configServiceMock.get.mockReturnValueOnce('demo')
+    configServiceMock.getOrThrow.mockReturnValueOnce('true')
+    configServiceMock.getOrThrow.mockReturnValueOnce('demo')
     gcsServiceMock.downloadFile.mockResolvedValue(Buffer.from('<html>FromStorage</html>'))
     await emailConsumer.onModuleInit()
     fileServiceMock.downloadFile.mockResolvedValue({

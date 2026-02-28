@@ -92,8 +92,11 @@ const updatePaymentMode = async (formData: PaymentModeFormData) => {
 
 const deletePaymentMode = async () => {
   working.value = true
-  await paymentModeStore.deletePaymentMode(paymentModeId.value)
-  working.value = false
+  try {
+    await paymentModeStore.deletePaymentMode(paymentModeId.value)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.paymentModeDeleted') })
   await router.push({ name: 'payment-modes' })
 }

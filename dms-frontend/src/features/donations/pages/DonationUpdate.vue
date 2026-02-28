@@ -96,16 +96,22 @@ const deleteDonationDialog = ref<InstanceType<typeof DeleteDonationDialog> | nul
 
 const updateDonation = async (formData: DonationFormData) => {
   working.value = true
-  await donationStore.updateDonation(donationId.value, formData)
-  working.value = false
+  try {
+    await donationStore.updateDonation(donationId.value, formData)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.donationUpdated') })
   await router.push({ name: 'donations' })
 }
 
 const deleteDonation = async () => {
   working.value = true
-  await donationStore.deleteDonation(donationId.value)
-  working.value = false
+  try {
+    await donationStore.deleteDonation(donationId.value)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.donationDeleted') })
   await router.push({ name: 'donations' })
 }

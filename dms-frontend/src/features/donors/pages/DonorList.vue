@@ -1,5 +1,10 @@
 <template>
-  <Page :title="t('labels.listOfDonors')" :breadcrumbs="breadcrumbs" :loading="loading">
+  <Page
+    :title="t('labels.listOfDonors')"
+    :breadcrumbs="breadcrumbs"
+    :loading="loading"
+    :working="working"
+  >
     <template #actions>
       <BtnGroup outline>
         <DonorListFilter
@@ -8,7 +13,7 @@
           data-cy="donor-list-filter"
           @update:filter="onFilterUpdate"
         />
-        <ListExportButton @export-csv="exportCsv" @export-xlsx="exportXlsx" />
+        <ListExportButton @export-csv="exportCsv" />
       </BtnGroup>
     </template>
     <div class="row justify-center">
@@ -68,12 +73,16 @@ const donorRefs = computed<LazySelectOptions<DonorRefSelect>>(() => ({
 }))
 
 const loading = ref(true)
+const working = ref(false)
 const tableLoading = ref(false)
 
 const fetchDonors = async (paginationRequest: DonorListPaginationRequest) => {
   tableLoading.value = true
-  await donorListStore.fetchDonors(paginationRequest)
-  tableLoading.value = false
+  try {
+    await donorListStore.fetchDonors(paginationRequest)
+  } finally {
+    tableLoading.value = false
+  }
 }
 
 const onFilterUpdate = async (filter?: DonorListFilterRequest) => {
@@ -85,11 +94,12 @@ const onFilterUpdate = async (filter?: DonorListFilterRequest) => {
 }
 
 const exportCsv = async () => {
-  await donorListStore.exportCsv()
-}
-
-const exportXlsx = async () => {
-  await donorListStore.exportXlsx()
+  working.value = true
+  try {
+    await donorListStore.exportCsv()
+  } finally {
+    working.value = false
+  }
 }
 
 onMounted(async () => {

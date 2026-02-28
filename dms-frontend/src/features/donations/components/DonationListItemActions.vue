@@ -26,7 +26,7 @@
         <QItemSection> {{ t('actions.generateReceipt') }} </QItemSection>
       </QItem>
       <QItem
-        v-if="userRole === 'admin'"
+        v-if="hasFullVisualAccess"
         clickable
         v-close-popup
         class="text-red-8"
@@ -53,7 +53,7 @@ import { useI18n } from '@/composables'
 import Btn from '@/components/ui/Btn.vue'
 import DeleteDonationDialog from './DeleteDonationDialog.vue'
 
-import type { DonationListItem, UserRole } from '@shared/models'
+import type { DonationListItem } from '@shared/models'
 
 const { t } = useI18n()
 
@@ -62,9 +62,9 @@ const props = defineProps({
     type: Object as PropType<DonationListItem>,
     required: true,
   },
-  userRole: {
-    type: String as PropType<UserRole | null>,
-    default: undefined,
+  hasFullVisualAccess: {
+    type: Boolean,
+    default: false,
   },
 })
 defineEmits<{

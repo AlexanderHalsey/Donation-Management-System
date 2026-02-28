@@ -1,10 +1,10 @@
 <template>
   <div class="flex q-gutter-md">
     <DatePickerInput
-      v-for="[key, label] of [
+      v-for="[key, label] of ([
         ['gte', t('prepositions.from')],
         ['lte', t('prepositions.to')],
-      ] as const"
+      ] as const)"
       :key="key"
       :model-value="props.modelValue?.[key]"
       :label="label"

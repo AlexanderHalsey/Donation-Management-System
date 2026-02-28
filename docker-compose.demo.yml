@@ -1,0 +1,42 @@
+name: dms-demo
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+  dms-api:
+    build:
+      context: ./
+      dockerfile: dms-api/Dockerfile
+    container_name: dms-api
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./dms-api/.env.demo
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./dms-api/serviceAccount.demo.json:/app/dms-api/serviceAccount.demo.json
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  dms-frontend:
+    build:
+      context: ./
+      dockerfile: dms-frontend/Dockerfile
+      args:
+        VITE_MODE: demo
+    container_name: dms-frontend
+    ports:
+      - '5173:5173'
+    depends_on:
+      - dms-api
+    restart: unless-stopped
+
+volumes:
+  redis_data:

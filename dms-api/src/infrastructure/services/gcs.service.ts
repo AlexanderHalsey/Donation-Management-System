@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { Bucket, Storage } from '@google-cloud/storage'
 import { v4 } from 'uuid'
 
@@ -7,12 +8,8 @@ export class GCSService {
   private readonly logger = new Logger(GCSService.name)
   private bucket: Bucket
 
-  constructor() {
-    const storage = new Storage()
-    if (!process.env.GCS_BUCKET_NAME) {
-      throw new Error('GCS_BUCKET_NAME environment variable is not set.')
-    }
-    this.bucket = storage.bucket(process.env.GCS_BUCKET_NAME)
+  constructor(private readonly configService: ConfigService) {
+    this.bucket = new Storage().bucket(this.configService.getOrThrow<string>('GCS_BUCKET_NAME'))
   }
 
   async uploadFile({

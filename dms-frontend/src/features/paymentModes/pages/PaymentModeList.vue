@@ -48,8 +48,11 @@ const working = ref(false)
 
 const deletePaymentMode = async (paymentModeId: string) => {
   working.value = true
-  await paymentModeStore.deletePaymentMode(paymentModeId)
-  working.value = false
+  try {
+    await paymentModeStore.deletePaymentMode(paymentModeId)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.paymentModeDeleted') })
 }
 

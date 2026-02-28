@@ -70,12 +70,15 @@ export class AuthController {
     refreshToken: string
     expired?: boolean
   }) {
+    const isProduction = this.configService.get('NODE_ENV') === 'production'
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'strict',
-      path: '/auth',
-      maxAge: !expired ? this.configService.get<number>('JWT_REFRESH_TOKEN_LIFETIME_MS') : 0,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      path: this.configService.get('REFRESH_TOKEN_COOKIE_PATH', '/auth'),
+      maxAge: !expired
+        ? parseInt(this.configService.get<string>('JWT_REFRESH_TOKEN_LIFETIME_MS', '0'), 10)
+        : 0,
     })
     this.logger.log(`Setting refresh token cookie${expired ? ' (expired)' : ''}`)
   }

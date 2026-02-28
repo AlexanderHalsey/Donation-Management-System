@@ -504,7 +504,7 @@ describe('TaxReceiptService', () => {
         taxReceiptType: 'INDIVIDUAL',
       })
       expect(fileServiceMock.createFile).toHaveBeenCalledWith({
-        name: 'tax-receipt-tax-receipt-id-123.pdf',
+        name: `tax-receipt-${taxReceiptNumber}.pdf`,
         mimeType: 'application/pdf',
         buffer: Buffer.from('pdf-file-buffer'),
       })

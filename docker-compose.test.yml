@@ -1,4 +1,4 @@
-name: dms
+name: dms-test
 
 services:
   db:
@@ -27,12 +27,11 @@ services:
       - ./dms-api/.env
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
-      - TAX_RECEIPT_TEMPLATE=demo
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - REFRESH_TOKEN_COOKIE_PATH=/api/auth
     volumes:
-      - ./dms-api/serviceAccount.json:/app/dms-api/serviceAccount.json
+      - ./dms-api/serviceAccount.demo.json:/app/dms-api/serviceAccount.demo.json
     depends_on:
       - db
       - redis

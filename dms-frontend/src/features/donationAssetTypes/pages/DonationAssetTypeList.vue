@@ -48,8 +48,11 @@ const working = ref(false)
 
 const deleteDonationAssetType = async (donationAssetTypeId: string) => {
   working.value = true
-  await donationAssetTypeStore.deleteDonationAssetType(donationAssetTypeId)
-  working.value = false
+  try {
+    await donationAssetTypeStore.deleteDonationAssetType(donationAssetTypeId)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.donationAssetTypeDeleted') })
 }
 

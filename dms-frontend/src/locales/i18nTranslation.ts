@@ -55,6 +55,8 @@ type Errors = {
   lessThanFrom: string
   organisationAlreadyExists: string
   paymentModeAlreadyExists: string
+  writeOperationsDisabledInDemoMode: string
+  unexpectedError: string
 }
 
 type Labels = {

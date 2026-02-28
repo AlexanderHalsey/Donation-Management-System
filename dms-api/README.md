@@ -1,33 +1,33 @@
-## Project setup
+# Project setup
 
 ```bash
-$ npm install
+npm install
 ```
 
 ## Compile and run the project
 
 ```bash
 # development
-$ npm run start
+npm run start
 
 # watch mode
-$ npm run start:dev
+npm run start:dev
 
 # production mode
-$ npm run start:prod
+node dist/main
 ```
 
 ## Run tests
 
 ```bash
 # unit tests
-$ npm run test
+npm run test
 
 # e2e tests
-$ npm run test:e2e
+npm run test:e2e
 
 # test coverage
-$ npm run test:cov
+npm run test:cov
 ```
 
 ## prisma

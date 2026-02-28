@@ -53,7 +53,7 @@ export const usePinoLoggerFactory = (
               omit(logEntry, ['msg', 'level']),
             )
             if (logEntry.level >= 50) {
-              console.log('Error log detected, uploading to GCS...')
+              logtail.warn('Error log detected, uploading to GCS...')
               gcsService
                 .uploadFile({
                   buffer: Buffer.from(msg),

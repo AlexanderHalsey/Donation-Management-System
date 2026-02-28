@@ -100,8 +100,11 @@ const updateDonationAssetType = async (formData: DonationAssetTypeFormData) => {
 
 const deleteDonationAssetType = async () => {
   working.value = true
-  await donationAssetTypeStore.deleteDonationAssetType(donationAssetTypeId.value)
-  working.value = false
+  try {
+    await donationAssetTypeStore.deleteDonationAssetType(donationAssetTypeId.value)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.donationAssetTypeDeleted') })
   await router.push({ name: 'donation-asset-types' })
 }

@@ -86,12 +86,15 @@ const working = ref(false)
 
 const createAnnualTaxReceipts = async (formData: AnnualTaxReceiptsFormData) => {
   working.value = true
-  await annualTaxReceiptsStore.createAnnualTaxReceipts({
-    year: year.value,
-    organisationId: organisationId.value,
-    formData,
-  })
-  working.value = false
+  try {
+    await annualTaxReceiptsStore.createAnnualTaxReceipts({
+      year: year.value,
+      organisationId: organisationId.value,
+      formData,
+    })
+  } finally {
+    working.value = false
+  }
   $q.notify({
     type: 'positive',
     message: t('notifications.annualTaxReceiptsInCreationProcess'),

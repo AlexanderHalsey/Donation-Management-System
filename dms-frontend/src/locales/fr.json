@@ -53,7 +53,9 @@
     "invalidDate": "La date n'est pas valide",
     "lessThanFrom": "Inférieur à « de »",
     "organisationAlreadyExists": "Une organisation avec ce nom existe déjà.",
-    "paymentModeAlreadyExists": "Un mode de paiement avec ce nom existe déjà."
+    "paymentModeAlreadyExists": "Un mode de paiement avec ce nom existe déjà.",
+    "writeOperationsDisabledInDemoMode": "Les opérations d'écriture sont désactivées en mode démo.",
+    "unexpectedError": "Une erreur inattendue est survenue. Veuillez réessayer."
   },
   "labels": {
     "address": "Adresse",

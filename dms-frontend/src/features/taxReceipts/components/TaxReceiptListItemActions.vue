@@ -24,7 +24,7 @@
         <QItemSection>{{ t('actions.retry') }}</QItemSection>
       </QItem>
       <QItem
-        v-if="userRole === 'admin' && isCanceled"
+        v-if="hasFullVisualAccess && isCanceled"
         clickable
         v-close-popup
         class="text-black"
@@ -37,7 +37,7 @@
         <QItemSection>{{ t('actions.showCancellation') }}</QItemSection>
       </QItem>
       <QItem
-        v-else-if="userRole === 'admin' && canCancel"
+        v-else-if="hasFullVisualAccess && canCancel"
         clickable
         v-close-popup
         class="text-red-8"
@@ -52,7 +52,7 @@
     </QList>
   </QMenu>
   <CancelTaxReceipt
-    v-if="userRole === 'admin'"
+    v-if="hasFullVisualAccess"
     ref="cancelTaxReceipt"
     :taxReceipt="taxReceipt"
     @cancel:taxReceipt="$emit('cancel:taxReceipt', $event)"
@@ -66,7 +66,7 @@ import { useI18n } from '@/composables'
 import Btn from '@/components/ui/Btn.vue'
 import CancelTaxReceipt from './CancelTaxReceipt.vue'
 
-import type { TaxReceiptListItem, UserRole } from '@shared/models'
+import type { TaxReceiptListItem } from '@shared/models'
 import type { CancelTaxReceiptFormData } from '../types'
 
 const { t } = useI18n()
@@ -76,9 +76,9 @@ const props = defineProps({
     type: Object as PropType<TaxReceiptListItem>,
     required: true,
   },
-  userRole: {
-    type: String as PropType<UserRole | null>,
-    default: undefined,
+  hasFullVisualAccess: {
+    type: Boolean,
+    default: false,
   },
 })
 defineEmits<{
@@ -103,7 +103,7 @@ const canCancel = computed(() => {
 const showActions = computed(() => {
   return (
     props.taxReceipt.status === 'FAILED' ||
-    (props.userRole === 'admin' && (props.taxReceipt.status === 'COMPLETED' || isCanceled.value))
+    (props.hasFullVisualAccess && (props.taxReceipt.status === 'COMPLETED' || isCanceled.value))
   )
 })
 </script>

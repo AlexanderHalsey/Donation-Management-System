@@ -1,17 +1,14 @@
 <template>
   <div class="dms-title">
-    <QImg
-      src="src/assets/img/logo.png"
-      alt="DMS Logo"
-      fit="contain"
-      style="max-width: 56px; height: 24px"
-    />
+    <QImg :src="logo" alt="DMS Logo" fit="contain" style="max-width: 56px; height: 24px" />
 
     <template v-if="showText">DMS</template>
   </div>
 </template>
 
 <script setup lang="ts">
+import logo from '@/assets/img/logo.png'
+
 defineProps({
   showText: {
     type: Boolean,

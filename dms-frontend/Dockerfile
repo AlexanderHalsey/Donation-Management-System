@@ -17,7 +17,9 @@ COPY dms-frontend/env.d.ts ./
 COPY dms-frontend/index.html ./
 COPY shared/ ../shared/
 
-RUN npm run build
+ARG VITE_MODE=production
+
+RUN npm run build -- --mode $VITE_MODE
 
 FROM builder AS testrunner
 

@@ -1,3 +1,4 @@
+export * from './demoWriteLock.guard'
 export * from './donorSyncEventAuth.guard'
 export * from './jwtAuth.guard'
 export * from './jwtRefreshAuth.guard'

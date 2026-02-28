@@ -92,8 +92,11 @@ const updateDonationMethod = async (formData: DonationMethodFormData) => {
 
 const deleteDonationMethod = async () => {
   working.value = true
-  await donationMethodStore.deleteDonationMethod(donationMethodId.value)
-  working.value = false
+  try {
+    await donationMethodStore.deleteDonationMethod(donationMethodId.value)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.donationMethodDeleted') })
   await router.push({ name: 'donation-methods' })
 }

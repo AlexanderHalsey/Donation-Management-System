@@ -9,8 +9,19 @@ import { WorkerJobProcessException } from '@/domain/exceptions'
 @Injectable()
 export class SmtpService {
   private readonly logger = new Logger(SmtpService.name)
+  private readonly transport: ReturnType<typeof createTransport> | null = null
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+    if (this.configService.get('EMAIL_ENABLED') === 'true') {
+      this.transport = createTransport({
+        service: 'gmail',
+        auth: {
+          user: this.configService.getOrThrow<string>('SMTP_USER'),
+          pass: this.configService.getOrThrow<string>('SMTP_PASS'),
+        },
+      })
+    }
+  }
 
   async sendMessage(
     jobId: string,
@@ -18,28 +29,22 @@ export class SmtpService {
   ): Promise<{
     messageId: string
   }> {
-    const transport = createTransport({
-      service: 'gmail',
-      auth: {
-        user: this.configService.get<string>('SMTP_USER'),
-        pass: this.configService.get<string>('SMTP_PASS'),
-      },
-    })
-
+    if (!this.transport) {
+      throw new WorkerJobProcessException({
+        code: 'EMAIL_SENDING_DISABLED',
+        message: `Failed to send email for job ${jobId} because email sending is disabled`,
+      })
+    }
+    const [sender, user, replyTo] = [
+      this.configService.getOrThrow<string>('SMTP_SENDER'),
+      this.configService.getOrThrow<string>('SMTP_USER'),
+      this.configService.getOrThrow<string>('SMTP_REPLY_TO'),
+    ]
     try {
-      const smtpSender = this.configService.get<string>('SMTP_SENDER')
-      const smtpUser = this.configService.get<string>('SMTP_USER')
-
-      if (!smtpSender || !smtpUser) {
-        throw new WorkerJobProcessException({
-          code: 'SMTP_CONFIG_MISSING',
-          message: 'SMTP_SENDER or SMTP_USER environment variable is not set',
-        })
-      }
-
-      const result = await transport.sendMail({
-        from: `${smtpSender} <${smtpUser}>`,
+      const result = await this.transport.sendMail({
+        from: `${sender} <${user}>`,
         to,
+        replyTo,
         subject,
         html,
         attachments,

@@ -5,8 +5,10 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 
+import { format } from 'date-fns'
 import { uniqBy } from 'es-toolkit'
 import { isEmpty } from 'es-toolkit/compat'
 import { nullsToUndefined } from '@shared/utils'
@@ -29,8 +31,7 @@ import { CancelTaxReceiptRequest } from '@/api/dtos'
 
 export const getTaxReceiptYearStart = (year: number) => `${year}-01-01T00:00:00.000Z`
 export const getTaxReceiptYearEnd = (year: number) => `${year}-12-31T23:59:59.999Z`
-export const TAX_RECEIPT_RELEASE_MONTH_INDEX = 0
-export const TAX_RECEIPT_RELEASE_DAY = 15
+
 export const ELIGIBLE_TAX_RECEIPT_DONATION_FILTER = {
   taxReceiptId: null,
   donor: { isDisabled: false },
@@ -47,6 +48,7 @@ export class TaxReceiptService {
     private readonly fileService: FileService,
     private readonly taxReceiptGeneratorService: TaxReceiptGeneratorService,
     private readonly bullMQService: BullMQService,
+    private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -113,8 +115,8 @@ export class TaxReceiptService {
   taxReceiptReleaseDate(): Date {
     return new Date(
       new Date().getFullYear(),
-      TAX_RECEIPT_RELEASE_MONTH_INDEX,
-      TAX_RECEIPT_RELEASE_DAY,
+      parseInt(this.configService.get<string>('TAX_RECEIPT_RELEASE_MONTH_INDEX', '0'), 10),
+      parseInt(this.configService.get<string>('TAX_RECEIPT_RELEASE_DAY', '0'), 10),
     )
   }
 
@@ -198,7 +200,7 @@ export class TaxReceiptService {
     if (!this.isTaxReceiptYearReleased(year)) {
       throw new BadRequestException({
         code: 'TAX_RECEIPT_YEAR_NOT_RELEASED',
-        message: `Annual tax receipts for year ${year} cannot be generated before ${TAX_RECEIPT_RELEASE_MONTH_INDEX + 1}/${TAX_RECEIPT_RELEASE_DAY}/${new Date().getFullYear()}`,
+        message: `Annual tax receipts for year ${year} cannot be generated before ${format(this.taxReceiptReleaseDate(), 'dd/MM/yyyy')}`,
       })
     }
     const donors = await this.prisma.donor.findMany({
@@ -398,7 +400,7 @@ export class TaxReceiptService {
     )
 
     const fileId = await this.fileService.createFile({
-      name: `tax-receipt-${taxReceiptId}.pdf`,
+      name: `tax-receipt-${taxReceiptNumber}.pdf`,
       mimeType: 'application/pdf',
       buffer: pdfBuffer,
     })
@@ -413,7 +415,11 @@ export class TaxReceiptService {
 
     this.logger.log(`Updated tax receipt ID ${taxReceiptId} with file ID ${fileId}`)
 
-    if (donations[0].donor.email && taxReceiptType === 'ANNUAL') {
+    if (
+      donations[0].donor.email &&
+      taxReceiptType === 'ANNUAL' &&
+      this.configService.get<string>('EMAIL_ENABLED') === 'true'
+    ) {
       this.logger.log(
         `Scheduling email job for tax receipt ID ${taxReceiptId} to be sent to ${donations[0].donor.email}`,
       )

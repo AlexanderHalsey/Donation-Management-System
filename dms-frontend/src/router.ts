@@ -176,22 +176,29 @@ const router = createRouter({
 
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
-
-  if (!authStore.token) {
-    await refreshToken()
-  }
-
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
-  const requiresAdmin = to.matched.some((record) => record.meta.admin)
-
-  if (!!authStore.token && to.name === 'login') {
-    next({ name: 'dashboard' })
-  } else if (requiresAdmin && authStore.userRole !== 'admin') {
-    next({ name: 'forbidden' })
-  } else if (!requiresAuth || !!authStore.token) {
-    next()
+  if (!authStore.isAuthEnabled) {
+    if (to.name === 'login') {
+      next({ name: 'dashboard' })
+    } else {
+      next()
+    }
   } else {
-    next({ name: 'login' })
+    if (!authStore.token) {
+      await refreshToken()
+    }
+
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+    const requiresAdmin = to.matched.some((record) => record.meta.admin)
+
+    if (!!authStore.token && to.name === 'login') {
+      next({ name: 'dashboard' })
+    } else if (requiresAdmin && authStore.userRole !== 'admin') {
+      next({ name: 'forbidden' })
+    } else if (!requiresAuth || !!authStore.token) {
+      next()
+    } else {
+      next({ name: 'login' })
+    }
   }
 })
 

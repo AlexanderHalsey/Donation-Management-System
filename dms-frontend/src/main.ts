@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
 
+import { AxiosError } from 'axios'
+
 import { createPinia } from 'pinia'
 import { useLocaleStore } from '@/stores'
 
@@ -62,6 +64,25 @@ async function main() {
       },
     },
   })
+
+  app.config.errorHandler = (error) => {
+    if (
+      error instanceof AxiosError &&
+      error.response?.status === 403 &&
+      import.meta.env.VITE_AUTH_ENABLED !== 'true'
+    ) {
+      Notify.create({
+        type: 'warning',
+        message: i18n.global.t('errors.writeOperationsDisabledInDemoMode'),
+      })
+    } else {
+      Notify.create({
+        type: 'negative',
+        message: i18n.global.t('errors.unexpectedError'),
+      })
+    }
+    throw error
+  }
 
   const localeStore = useLocaleStore()
   localeStore.setLocale(locale)

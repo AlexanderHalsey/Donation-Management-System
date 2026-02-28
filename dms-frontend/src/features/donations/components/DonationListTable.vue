@@ -34,7 +34,7 @@
         <DonationListItemActions
           v-if="!row.taxReceiptId"
           :donation="row"
-          :user-role="userRole"
+          :has-full-visual-access="hasFullVisualAccess"
           @delete:donation="$emit('delete:donation', $event)"
           @create:tax-receipt="$emit('create:tax-receipt', $event)"
         />
@@ -64,7 +64,6 @@ import type {
   DonationListPaginationRequest,
   DonationListSortOrder,
   OrganisationRef,
-  UserRole,
 } from '@shared/models'
 
 const { t } = useI18n()
@@ -82,9 +81,9 @@ const props = defineProps({
     type: Array as PropType<OrganisationRef[]>,
     required: true,
   },
-  userRole: {
-    type: String as PropType<UserRole | null>,
-    default: undefined,
+  hasFullVisualAccess: {
+    type: Boolean,
+    default: false,
   },
   loading: {
     type: Boolean,

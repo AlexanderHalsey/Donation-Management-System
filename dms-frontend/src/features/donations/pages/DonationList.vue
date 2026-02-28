@@ -19,14 +19,14 @@
           data-cy="donation-list-filter"
           @update:filter="onFilterUpdate"
         />
-        <ListExportButton @export-csv="exportCsv" @export-xlsx="exportXlsx" />
+        <ListExportButton @export-csv="exportCsv" />
       </BtnGroup>
     </template>
     <DonationListTable
       :donationList="donationList"
       :pagination="pagination"
       :organisations="organisations"
-      :user-role="userRole"
+      :has-full-visual-access="hasFullVisualAccess"
       :loading="tableLoading"
       @update:pagination="fetchDonations"
       @delete:donation="deleteDonation"
@@ -86,7 +86,7 @@ const $q = useQuasar()
 const router = useRouter()
 
 const authStore = useAuthStore()
-const userRole = computed(() => authStore.userRole)
+const hasFullVisualAccess = computed(() => authStore.hasFullVisualAccess)
 
 const donationListStore = useDonationListStore()
 const donationStore = useDonationStore()
@@ -126,8 +126,11 @@ const tableLoading = ref(false)
 
 const fetchDonations = async (paginationRequest: DonationListPaginationRequest) => {
   tableLoading.value = true
-  await donationListStore.fetchDonations(paginationRequest)
-  tableLoading.value = false
+  try {
+    await donationListStore.fetchDonations(paginationRequest)
+  } finally {
+    tableLoading.value = false
+  }
 }
 
 const onFilterUpdate = async (filter?: DonationListFilterRequest) => {
@@ -140,8 +143,11 @@ const onFilterUpdate = async (filter?: DonationListFilterRequest) => {
 
 const deleteDonation = async (donationId: string) => {
   working.value = true
-  await donationStore.deleteDonation(donationId)
-  working.value = false
+  try {
+    await donationStore.deleteDonation(donationId)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.donationDeleted') })
   // Refetch donations to update the list
   await fetchDonations(paginationRequest.value)
@@ -149,22 +155,22 @@ const deleteDonation = async (donationId: string) => {
 
 const createTaxReceipt = async (donationId: string) => {
   working.value = true
-  await taxReceiptListStore.createIndividualTaxReceipt(donationId)
-  working.value = false
+  try {
+    await taxReceiptListStore.createIndividualTaxReceipt(donationId)
+  } finally {
+    working.value = false
+  }
   $q.notify({ type: 'positive', message: t('notifications.taxReceiptIsBeingGenerated') })
   await router.push('/tax-receipts')
 }
 
 const exportCsv = async () => {
   working.value = true
-  await donationListStore.exportCsv()
-  working.value = false
-}
-
-const exportXlsx = async () => {
-  working.value = true
-  await donationListStore.exportXlsx()
-  working.value = false
+  try {
+    await donationListStore.exportCsv()
+  } finally {
+    working.value = false
+  }
 }
 
 onMounted(async () => {

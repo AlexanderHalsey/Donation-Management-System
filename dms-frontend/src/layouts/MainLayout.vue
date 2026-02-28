@@ -100,7 +100,7 @@ const authStore = useAuthStore()
 
 const refresh = ref(0)
 
-const userRole = computed(() => authStore.userRole)
+const hasFullVisualAccess = computed(() => authStore.hasFullVisualAccess)
 
 const menuItems = computed<
   {
@@ -133,7 +133,7 @@ const menuItems = computed<
       },
     ],
   }
-  if (userRole.value === 'admin') {
+  if (hasFullVisualAccess.value) {
     return [mainGroup, adminGroup]
   } else {
     return [mainGroup]

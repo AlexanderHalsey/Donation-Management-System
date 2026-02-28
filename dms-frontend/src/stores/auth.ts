@@ -9,10 +9,15 @@ import type { UserRole } from '@shared/models'
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(null)
+  const isAuthEnabled = import.meta.env.VITE_AUTH_ENABLED === 'true'
 
-  const userRole = computed<UserRole | null>(
-    () => jwtDecode.jwtDecode<{ role: UserRole }>(accessToken.value ?? '').role ?? null,
-  )
+  const userRole = computed<UserRole | null>(() => {
+    return isAuthEnabled && accessToken.value
+      ? jwtDecode.jwtDecode<{ role: UserRole }>(accessToken.value).role
+      : null
+  })
+
+  const hasFullVisualAccess = computed(() => userRole.value === 'admin' || !isAuthEnabled)
 
   function setToken(newToken: string) {
     accessToken.value = newToken
@@ -29,6 +34,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     clearToken,
+    hasFullVisualAccess,
+    isAuthEnabled,
     logout,
     setToken,
     token: accessToken,

@@ -9,15 +9,11 @@ import { JwtPayload } from '@/domain/types'
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
-    const jwtSecret = configService.get<string>('JWT_SECRET')
-    if (!jwtSecret) {
-      throw new Error('JWT_SECRET_MISSING: JWT_SECRET environment variable is not set')
-    }
-
+    const authEnabled = configService.getOrThrow('AUTH_ENABLED') !== 'false'
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: jwtSecret,
+      ignoreExpiration: !authEnabled,
+      secretOrKey: authEnabled ? configService.getOrThrow<string>('JWT_SECRET') : 'demo-secret',
     })
   }
 

@@ -54,7 +54,7 @@ lerna-debug.log*
 .env*
 
 # service account keys
-dms-api/serviceAccount.json
+dms-api/serviceAccount*.json
 
 # temp directory
 .temp
