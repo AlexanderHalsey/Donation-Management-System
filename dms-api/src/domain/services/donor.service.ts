@@ -7,7 +7,6 @@ import { nullsToUndefined } from '@shared/utils'
 
 import { PrismaService, TypedSqlService } from '@/infrastructure'
 
-import { DonorCreateInput } from '@generated/prisma/models'
 import {
   Donor,
   DonorExport,
@@ -17,6 +16,7 @@ import {
   DonorListSortOrder,
   DonorRef,
 } from '@shared/models'
+import type { DonorSyncProfile } from '../types'
 
 @Injectable()
 export class DonorService {
@@ -127,15 +127,36 @@ export class DonorService {
     return donors
   }
 
-  async synchronizeDonors({ toUpsert }: { toUpsert: DonorCreateInput[] }): Promise<void> {
-    for (const donor of toUpsert) {
-      await this.prisma.donor.upsert({
-        where: { externalId: donor.externalId },
-        create: donor,
-        update: donor,
-        select: { id: true, externalId: true },
-      })
-    }
+  async synchronizeDonors({
+    toUpsert,
+    donationsToUpdate,
+  }: {
+    toUpsert: DonorSyncProfile[]
+    donationsToUpdate: { oldDonorExternalId: number; newDonorExternalId: number }[]
+  }): Promise<void> {
+    await this.prisma.$transaction(
+      async (tx) => {
+        for (const donor of toUpsert) {
+          await tx.donor.upsert({
+            where: { externalId: donor.externalId },
+            create: donor,
+            update: donor,
+          })
+        }
+        for (const { oldDonorExternalId, newDonorExternalId } of donationsToUpdate) {
+          const { id: newDonorId } = await tx.donor.findUniqueOrThrow({
+            where: { externalId: newDonorExternalId },
+            select: { id: true },
+          })
+
+          await tx.donation.updateMany({
+            where: { donor: { externalId: oldDonorExternalId } },
+            data: { donorId: newDonorId },
+          })
+        }
+      },
+      { timeout: 60 * 1000 },
+    )
 
     this.logger.log(
       `Synchronized ${toUpsert.length} donors with external ids : [${toUpsert.map((d) => d.externalId).join(', ')}]`,

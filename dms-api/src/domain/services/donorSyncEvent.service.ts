@@ -84,6 +84,24 @@ export class DonorSyncEventService {
         })
       }
     }
+
+    // a send all event can also indicate donors in our system that need disabling
+    if (request.data.notifications.length > 1) {
+      this.prisma.donor.updateMany({
+        where: {
+          externalId: {
+            notIn: request.data.notifications.map((notification) => {
+              if (notification.action === 'MERGE') {
+                return notification.payload.find((p) => p.mergeStatus === 'MERGED')!.externalId
+              } else {
+                return notification.payload.externalId
+              }
+            }),
+          },
+        },
+        data: { isDisabled: true },
+      })
+    }
   }
 
   async markAsProcessingJob({

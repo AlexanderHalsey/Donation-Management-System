@@ -12,7 +12,9 @@ export const DonorSyncEventNotificationSchema = z.discriminatedUnion('action', [
       payload: ProfileSchema,
     })
     .transform((data) => ({
-      action: data.action.split('.')[1].toUpperCase() as 'CREATE' | 'UPDATE' | 'DELETE',
+      action: ['profile.create', 'profile.update'].includes(data.action)
+        ? ('UPSERT' as const)
+        : ('DELETE' as const),
       payload: data.payload,
     })),
   z

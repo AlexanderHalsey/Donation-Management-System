@@ -23,8 +23,7 @@ enum DonorSyncEventStatus {
 }
 
 enum DonorEventType {
-  CREATE
-  UPDATE
+  UPSERT
   DELETE
   MERGE
 }

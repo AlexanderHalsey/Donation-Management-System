@@ -48,7 +48,7 @@ const transformAbstractProfile = (
 })
 
 const OrganisationProfileSchema = AbstractProfileSchema.extend({
-  objectType: z.literal('ORGANISATION'),
+  objectType: z.literal('ORGANIZATION'),
 }).transform(transformAbstractProfile)
 
 const PersonProfileSchema = AbstractProfileSchema.extend({
@@ -95,6 +95,12 @@ export const MergedProfileSchema = z
       ctx.addIssue({
         code: 'custom',
         message: 'One of the profiles must have mergeStatus "MERGED"',
+      })
+    }
+    if (!data.some((p) => p.mergeStatus === 'DELETED')) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'One of the profiles must have mergeStatus "DELETED"',
       })
     }
   })

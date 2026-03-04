@@ -8,6 +8,7 @@ import { DonorService } from '../services/donor.service'
 import { GetDonorListItemResult, PrismaService, TypedSqlService } from '@/infrastructure'
 import { TypedSql } from '@prisma/client/runtime/client'
 import { Donor } from '@generated/prisma/client'
+import { DonorSyncProfile } from '../types'
 
 describe('DonorService', () => {
   const prismaServiceMock = mockDeep<PrismaService>()
@@ -20,6 +21,10 @@ describe('DonorService', () => {
     mockReset(prismaServiceMock)
     mockReset(typedSqlServiceMock)
     mockReset(cacheManagerMock)
+
+    prismaServiceMock.$transaction.mockImplementation(async (cb) => {
+      return await cb(prismaServiceMock)
+    })
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
@@ -104,40 +109,55 @@ describe('DonorService', () => {
 
   it('should synchronize donors', async () => {
     const mockDonors = [
-      {
+      mockDeep<DonorSyncProfile>({
         externalId: 123,
         civility: 'Mr',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
         isDisabled: false,
-      },
-      {
+      }),
+      mockDeep<DonorSyncProfile>({
         externalId: 456,
         civility: 'Ms',
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane.smith@example.com',
         isDisabled: false,
+      }),
+    ]
+    const mockDonationsToUpdate = [
+      {
+        oldDonorExternalId: 123,
+        newDonorExternalId: 456,
       },
     ]
 
     prismaServiceMock.donor.upsert.mockResolvedValue(mockDeep())
+    prismaServiceMock.donor.findUniqueOrThrow.mockResolvedValue(
+      mockDeep<Donor>({ id: 'donor-id-456' }),
+    )
 
-    await donorService.synchronizeDonors({ toUpsert: mockDonors })
+    await donorService.synchronizeDonors({
+      toUpsert: mockDonors,
+      donationsToUpdate: mockDonationsToUpdate,
+    })
 
+    expect(prismaServiceMock.$transaction).toHaveBeenCalledTimes(1)
     expect(prismaServiceMock.donor.upsert).toHaveBeenCalledTimes(2)
     expect(prismaServiceMock.donor.upsert).toHaveBeenNthCalledWith(1, {
       where: { externalId: 123 },
       create: mockDonors[0],
       update: mockDonors[0],
-      select: { id: true, externalId: true },
     })
     expect(prismaServiceMock.donor.upsert).toHaveBeenNthCalledWith(2, {
       where: { externalId: 456 },
       create: mockDonors[1],
       update: mockDonors[1],
-      select: { id: true, externalId: true },
+    })
+    expect(prismaServiceMock.donation.updateMany).toHaveBeenCalledWith({
+      where: { donor: { externalId: 123 } },
+      data: { donorId: 'donor-id-456' },
     })
   })
 })

@@ -48,7 +48,7 @@ describe('DonorSyncConsumer', () => {
   })
 
   describe('process', () => {
-    it('should process CREATE event successfully', async () => {
+    it('should process UPSERT event successfully', async () => {
       const donorSyncEventIds = ['event-1', 'event-2']
       const mockJob = {
         data: { donorSyncEventIds },
@@ -58,7 +58,7 @@ describe('DonorSyncConsumer', () => {
         {
           ...mockDeep<DonorSyncEvent>(),
           id: 'event-1',
-          eventType: 'CREATE' as const,
+          eventType: 'UPSERT' as const,
           externalId: 123,
           payload: {
             externalId: 123,
@@ -72,7 +72,7 @@ describe('DonorSyncConsumer', () => {
         {
           ...mockDeep<DonorSyncEvent>(),
           id: 'event-2',
-          eventType: 'CREATE' as const,
+          eventType: 'UPSERT' as const,
           externalId: 456,
           payload: {
             externalId: 456,
@@ -119,6 +119,7 @@ describe('DonorSyncConsumer', () => {
             isFacilitator: false,
           },
         ],
+        donationsToUpdate: [],
       })
       expect(donorSyncEventServiceMock.markAsCompletedJob).toHaveBeenCalledWith({
         donorSyncEventIds,
@@ -168,6 +169,7 @@ describe('DonorSyncConsumer', () => {
             isFacilitator: false,
           },
         ],
+        donationsToUpdate: [],
       })
     })
 
@@ -223,7 +225,6 @@ describe('DonorSyncConsumer', () => {
             lastName: 'Doe',
             firstName: 'John',
             email: 'john.doe@example.com',
-            isDisabled: false, // merged
             isFacilitator: false,
           },
           {
@@ -234,6 +235,12 @@ describe('DonorSyncConsumer', () => {
             email: 'john.doe.old@example.com',
             isDisabled: true, // deleted
             isFacilitator: false,
+          },
+        ],
+        donationsToUpdate: [
+          {
+            oldDonorExternalId: 456,
+            newDonorExternalId: 123,
           },
         ],
       })

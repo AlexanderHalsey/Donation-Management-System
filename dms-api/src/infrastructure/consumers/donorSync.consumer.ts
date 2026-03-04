@@ -10,7 +10,7 @@ import { DonorService, DonorSyncEventService } from '@/domain'
 import { TransformedMergedProfileSchema, TransformedProfileSchema } from '@/domain/schemas'
 
 import type { DonorSyncQueueJob } from '@/infrastructure/types'
-import type { DonorCreateManyInput } from '@generated/prisma/models'
+import type { DonorSyncProfile } from '@/domain/types'
 
 @Processor(DONOR_SYNC_QUEUE)
 export class DonorSyncConsumer extends WorkerHost {
@@ -37,16 +37,22 @@ export class DonorSyncConsumer extends WorkerHost {
       )
     }
 
-    const toUpsert: DonorCreateManyInput[] = []
+    const toUpsert: DonorSyncProfile[] = []
+    const donationsToUpdate: { oldDonorExternalId: number; newDonorExternalId: number }[] = []
     for (const donorSyncEvent of donorSyncEvents) {
       if (donorSyncEvent.eventType === 'MERGE') {
         const payload = TransformedMergedProfileSchema.parse(donorSyncEvent.payload)
-        for (const profile of payload) {
-          toUpsert.push({
-            ...omit(profile, ['mergeStatus']),
-            isDisabled: profile.mergeStatus !== 'MERGED',
-          })
-        }
+
+        const mergedProfile = payload.find((p) => p.mergeStatus === 'MERGED')!
+        const deletedProfile = payload.find((p) => p.mergeStatus === 'DELETED')!
+
+        toUpsert.push({ ...omit(mergedProfile, ['mergeStatus']) })
+        toUpsert.push({ ...omit(deletedProfile, ['mergeStatus']), isDisabled: true })
+
+        donationsToUpdate.push({
+          oldDonorExternalId: deletedProfile.externalId,
+          newDonorExternalId: mergedProfile.externalId,
+        })
       } else {
         toUpsert.push({
           ...TransformedProfileSchema.parse(donorSyncEvent.payload),
@@ -55,7 +61,7 @@ export class DonorSyncConsumer extends WorkerHost {
       }
     }
 
-    await this.donorService.synchronizeDonors({ toUpsert })
+    await this.donorService.synchronizeDonors({ toUpsert, donationsToUpdate })
     await this.donorSyncEventService.markAsCompletedJob({ jobId: id!, donorSyncEventIds })
   }
 

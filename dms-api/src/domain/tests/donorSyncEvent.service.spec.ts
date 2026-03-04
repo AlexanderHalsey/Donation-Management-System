@@ -79,7 +79,7 @@ describe('DonorSyncEventService', () => {
       }
 
       const mockCreatedEvents = [
-        mockDeep<DonorSyncEvent>({ id: 'event-1', eventType: 'CREATE' }),
+        mockDeep<DonorSyncEvent>({ id: 'event-1', eventType: 'UPSERT' }),
         mockDeep<DonorSyncEvent>({ id: 'event-2', eventType: 'DELETE' }),
       ]
 
@@ -94,7 +94,7 @@ describe('DonorSyncEventService', () => {
           {
             requestId: 'request-123',
             attempt: 1,
-            eventType: 'CREATE',
+            eventType: 'UPSERT',
             externalId: 123,
             payload: {
               externalId: 123,
@@ -251,6 +251,20 @@ describe('DonorSyncEventService', () => {
       const mockRequest = {
         id: 'request-789',
         attempt: 1,
+        notifications: [],
+      }
+
+      prismaServiceMock.donorSyncEvent.createManyAndReturn.mockResolvedValueOnce([])
+
+      await donorSyncEventService.addDonorSyncEvents(mockRequest)
+
+      expect(bullMQServiceMock.addDonorSyncJob).not.toHaveBeenCalled()
+    })
+
+    it('should disable donors not part of a send all event', async () => {
+      const mockRequest = {
+        id: 'request-789',
+        attempt: 1,
         notifications: [
           {
             action: 'profile.create',
@@ -268,14 +282,42 @@ describe('DonorSyncEventService', () => {
               alternativePhoneNumber: '',
             },
           },
+          {
+            action: 'profile.create',
+            payload: {
+              objectType: 'PERSON',
+              id: 456,
+              salutation: 'Ms',
+              name: 'Smith',
+              firstName: 'Jane',
+              lastName: 'Smith',
+              email: 'jane.smith@example.com',
+              preferredEmail: 'PRIVATE',
+              preferredPhoneNumber: 'PRIVATE',
+              privatePhoneNumber: '',
+              alternativePhoneNumber: '',
+            },
+          },
         ],
       }
 
-      prismaServiceMock.donorSyncEvent.createManyAndReturn.mockResolvedValueOnce([])
+      prismaServiceMock.donorSyncEvent.createManyAndReturn.mockResolvedValueOnce([
+        mockDeep<DonorSyncEvent>({ id: 'event-1', eventType: 'UPSERT' }),
+        mockDeep<DonorSyncEvent>({ id: 'event-2', eventType: 'UPSERT' }),
+      ])
 
       await donorSyncEventService.addDonorSyncEvents(mockRequest)
 
-      expect(bullMQServiceMock.addDonorSyncJob).not.toHaveBeenCalled()
+      expect(prismaServiceMock.donor.updateMany).toHaveBeenCalledWith({
+        where: {
+          externalId: {
+            notIn: [123, 456],
+          },
+        },
+        data: {
+          isDisabled: true,
+        },
+      })
     })
   })
 
