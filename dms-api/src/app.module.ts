@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
 import { BullModule } from '@nestjs/bullmq'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { ScheduleModule } from '@nestjs/schedule'
 import { PassportModule } from '@nestjs/passport'
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino'
 import { CacheModule } from '@nestjs/cache-manager'
@@ -62,7 +61,6 @@ import {
   EMAIL_QUEUE,
   GCSService,
   PrismaService,
-  SmtpService,
   TAX_RECEIPT_QUEUE,
   TypedSqlService,
 } from '@/infrastructure'
@@ -74,18 +72,6 @@ import {
   usePinoLoggerFactory,
   useRedisCacheFactory,
 } from '@/infrastructure/factories'
-
-import { DonorSyncConsumer, EmailConsumer, TaxReceiptConsumer } from '@/infrastructure/consumers'
-
-import {
-  DonationAssetTypeCleanupTask,
-  DonationMethodCleanupTask,
-  DonationTypeCleanupTask,
-  DonorSyncCleanupTask,
-  FileCleanupTask,
-  OrganisationCleanupTask,
-  PaymentModeCleanupTask,
-} from '@/infrastructure/tasks'
 
 @Module({
   imports: [
@@ -110,7 +96,6 @@ import {
       providers: [GCSService],
       useFactory: usePinoLoggerFactory,
     }),
-    ScheduleModule.forRoot(),
   ],
   controllers: [
     AuthController,
@@ -135,25 +120,18 @@ import {
       provide: APP_GUARD,
       useClass: DemoWriteLockGuard,
     },
-    DonationAssetTypeCleanupTask,
     DonationAssetTypeConverter,
     DonationAssetTypeService,
     DonationConverter,
-    DonationMethodCleanupTask,
     DonationMethodConverter,
     DonationMethodService,
     DonationService,
-    DonationTypeCleanupTask,
     DonationTypeConverter,
     DonationTypeService,
     DonorConverter,
     DonorService,
-    DonorSyncCleanupTask,
-    DonorSyncConsumer,
     DonorSyncEventService,
-    EmailConsumer,
     ExportService,
-    FileCleanupTask,
     FileConverter,
     FileService,
     GCSService,
@@ -170,16 +148,12 @@ import {
       useFactory: useJwtRefreshServiceFactory,
     },
     LocalStrategy,
-    OrganisationCleanupTask,
     OrganisationConverter,
     OrganisationService,
-    PaymentModeCleanupTask,
     PaymentModeConverter,
     PaymentModeService,
     PDFRendererService,
     PrismaService,
-    SmtpService,
-    TaxReceiptConsumer,
     TaxReceiptConverter,
     TaxReceiptGeneratorService,
     TaxReceiptService,

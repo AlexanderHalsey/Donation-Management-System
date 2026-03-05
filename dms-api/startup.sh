@@ -26,4 +26,10 @@ rm -rf prisma
 rm -f tsconfig.json prisma.config.ts
 
 echo "Starting application..."
-exec node dist/dms-api/src/main
+if [ "$1" = "worker" ]; then
+  # Run worker-specific logic
+  exec node dist/dms-api/src/worker
+else
+  # Default logic
+  exec node dist/dms-api/src/main
+fi

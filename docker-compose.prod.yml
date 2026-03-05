@@ -24,6 +24,22 @@ services:
     depends_on:
       - redis
     restart: unless-stopped
+  dms-worker:
+    build:
+      context: ./
+      dockerfile: dms-api/Dockerfile
+    container_name: dms-worker
+    command: ["/bin/sh", "./startup.sh", "worker"]
+    env_file:
+      - ./dms-api/.env.prod
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./dms-api/serviceAccount.json:/app/dms-api/serviceAccount.json
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
 
   dms-frontend:
     build:

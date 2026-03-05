@@ -36,6 +36,25 @@ services:
       - db
       - redis
     restart: unless-stopped
+  dms-worker:
+    build:
+      context: ./
+      dockerfile: dms-api/Dockerfile
+    container_name: dms-worker
+    command: ["/bin/sh", "./startup.sh", "worker"]
+    env_file:
+      - ./dms-api/.env
+    environment:
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - REFRESH_TOKEN_COOKIE_PATH=/api/auth
+    volumes:
+      - ./dms-api/serviceAccount.demo.json:/app/dms-api/serviceAccount.demo.json
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
 
   dms-frontend:
     build:
