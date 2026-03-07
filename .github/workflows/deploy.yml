@@ -23,6 +23,8 @@ jobs:
         run: npx prisma generate --sql
         shell: bash
         working-directory: ${{ github.workspace }}/dms-api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run tests
         run: npm run test
