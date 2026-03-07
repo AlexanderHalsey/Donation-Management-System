@@ -310,9 +310,12 @@ export class DonationService {
     return donationExportList
   }
 
-  async getDonationStats(minDate?: Date): Promise<{ count: number; amount: number }> {
+  async getDonationStats(
+    minDate?: Date,
+    maxDate?: Date,
+  ): Promise<{ count: number; amount: number }> {
     const result = await this.prisma.donation.aggregate({
-      where: minDate ? { donatedAt: { gte: minDate } } : undefined,
+      where: minDate ? { donatedAt: { gte: minDate, lte: maxDate } } : undefined,
       _sum: { amount: true },
       _count: { id: true },
     })

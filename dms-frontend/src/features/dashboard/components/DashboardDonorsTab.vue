@@ -16,7 +16,14 @@
         </template>
         <div>
           <Bar
-            :data="getChartData({ items: chartItems, value: chartValueOption.id })"
+            :data="
+              getChartData({
+                items: chartItems,
+                value: chartValueOption.id,
+                amountLabel: t('labels.amount'),
+                countLabel: t('labels.numberOfDonations'),
+              })
+            "
             :options="
               getChartOptions({
                 value: chartValueOption.id,

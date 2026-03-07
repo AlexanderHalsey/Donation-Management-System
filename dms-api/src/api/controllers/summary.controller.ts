@@ -10,6 +10,9 @@ import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager'
 
 import { pick } from 'es-toolkit'
 import {
+  endOfMonth as endOfMonthFns,
+  endOfWeek as endOfWeekFns,
+  endOfYear as endOfYearFns,
   startOfMonth as startOfMonthFns,
   startOfWeek as startOfWeekFns,
   startOfYear as startOfYearFns,
@@ -57,8 +60,11 @@ export class SummaryController {
     const today = new Date()
 
     const startOfWeek = startOfWeekFns(today, { weekStartsOn: 1 })
+    const endOfWeek = endOfWeekFns(today, { weekStartsOn: 1 })
     const startOfMonth = startOfMonthFns(today)
+    const endOfMonth = endOfMonthFns(today)
     const startOfYear = startOfYearFns(today)
+    const endOfYear = endOfYearFns(today)
 
     const [
       totalDonationsAllTime,
@@ -77,11 +83,11 @@ export class SummaryController {
       topDonorsByCount,
     ] = await Promise.all([
       this.donationService.getDonationStats(),
-      this.donationService.getDonationStats(startOfYear),
-      this.donationService.getDonationStats(startOfMonth),
+      this.donationService.getDonationStats(startOfYear, endOfYear),
+      this.donationService.getDonationStats(startOfMonth, endOfMonth),
       this.donationService.getFilteredList(
         { page: 1, pageSize: Number.MAX_SAFE_INTEGER, orderBy: { donatedAt: 'desc' } },
-        { donatedAt: { gte: startOfWeek } },
+        { donatedAt: { gte: startOfWeek, lte: endOfWeek } },
       ),
       this.donationService.getDonationDistribution('paymentModeId'),
       this.donationService.getDonationDistribution('organisationId'),

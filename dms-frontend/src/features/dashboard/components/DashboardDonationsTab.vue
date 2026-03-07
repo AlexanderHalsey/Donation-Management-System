@@ -121,6 +121,8 @@
               getChartData({
                 items: charts![chartModeOption.id],
                 value: chartValueOption.id,
+                amountLabel: t('labels.amount'),
+                countLabel: t('labels.numberOfDonations'),
               })
             "
             :options="
