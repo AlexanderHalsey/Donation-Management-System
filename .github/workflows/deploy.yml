@@ -19,6 +19,11 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
 
+      - name: Generate Prisma client
+        run: npx prisma generate --sql
+        shell: bash
+        working-directory: ${{ github.workspace }}/dms-api
+
       - name: Run tests
         run: npm run test
         shell: bash
