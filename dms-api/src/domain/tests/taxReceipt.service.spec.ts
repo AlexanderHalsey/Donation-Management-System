@@ -1,4 +1,4 @@
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 
@@ -29,6 +29,7 @@ describe('TaxReceiptService', () => {
   const taxReceiptGeneratorServiceMock = mockDeep<TaxReceiptGeneratorService>()
   const bullMqServiceMock = mockDeep<BullMQService>()
   const cacheManagerMock = mockDeep<Cache>()
+  const configServiceMock = mockDeep<ConfigService>()
 
   let taxReceiptService: TaxReceiptService
 
@@ -39,6 +40,7 @@ describe('TaxReceiptService', () => {
     mockReset(taxReceiptGeneratorServiceMock)
     mockReset(bullMqServiceMock)
     mockReset(cacheManagerMock)
+    mockReset(configServiceMock)
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
@@ -63,6 +65,10 @@ describe('TaxReceiptService', () => {
         {
           provide: CACHE_MANAGER,
           useValue: cacheManagerMock,
+        },
+        {
+          provide: ConfigService,
+          useValue: configServiceMock,
         },
       ],
     }).compile()
@@ -678,6 +684,10 @@ describe('TaxReceiptService', () => {
       })
 
       it('queues email job if donor has email and receipt is annual', async () => {
+        configServiceMock.get.mockImplementation((key: string) => {
+          if (key === 'EMAIL_ENABLED') return 'true'
+          return null
+        })
         prismaServiceMock.$transaction.mockResolvedValueOnce(
           mockDeep<[(Donation & { donor: Donor; organisation: Organisation })[]]>([
             [
