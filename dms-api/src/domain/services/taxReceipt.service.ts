@@ -400,7 +400,7 @@ export class TaxReceiptService {
     )
 
     const fileId = await this.fileService.createFile({
-      name: `tax-receipt-${taxReceiptNumber}.pdf`,
+      name: `${taxReceiptNumber}.pdf`,
       mimeType: 'application/pdf',
       buffer: pdfBuffer,
     })
