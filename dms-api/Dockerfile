@@ -38,12 +38,6 @@ ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 RUN npx prisma generate
 RUN npm run build
 
-FROM builder AS testrunner
-
-WORKDIR /app/dms-api
-
-CMD ["npm", "run", "test"]
-
 FROM base AS runtime
 
 WORKDIR /app/dms-api

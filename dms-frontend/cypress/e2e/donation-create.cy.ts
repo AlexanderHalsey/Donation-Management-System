@@ -57,15 +57,23 @@ describe('Donation Create', () => {
     ])
 
     cy.get(formField).eq(0).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').find('.q-item').eq(0).click() // Select first donor
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(0).click()) // Select first donor
     cy.get(formField).eq(1).find('.q-field').type('15122024') // Donation date
     cy.get(formField).eq(2).find('.q-field').type('100') // Amount
     cy.get(formField).eq(3).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').find('.q-item').eq(0).click() // Select first organisation
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(0).click()) // Select first organisation
     cy.get(formField).eq(4).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').find('.q-item').eq(1).click() // Select second donation type (incompatible)
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(1).click()) // Select second donation type (incompatible)
     cy.get(formField).eq(5).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click() // Select first payment mode
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(0).click()) // Select first payment mode
 
     cy.get(createDonationBtn).click()
 
@@ -90,15 +98,23 @@ describe('Donation Create', () => {
     ])
 
     cy.get(formField).eq(0).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').find('.q-item').eq(0).click() // Select first donor
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(0).click()) // Select first donor
     cy.get(formField).eq(1).find('.q-field').type('15122024') // Donation date
     cy.get(formField).eq(2).find('.q-field').type('100') // Amount
     cy.get(formField).eq(3).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').find('.q-item').eq(0).click() // Select first organisation
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(0).click()) // Select first organisation
     cy.get(formField).eq(4).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').find('.q-item').eq(0).click() // Select first donation type (compatible)
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(0).click()) // Select first donation type (compatible)
     cy.get(formField).eq(5).find('.q-field').click()
-    cy.get('[id^=q-portal--menu--]').eq(1).find('.q-item').eq(0).click() // Select first payment mode
+    cy.get('[id^=q-portal--menu--]')
+      .should('be.visible')
+      .then(($menus) => cy.wrap($menus).last().find('.q-item').eq(0).click()) // Select first payment mode
 
     cy.mockDonationList()
     cy.mockCreateDonation({

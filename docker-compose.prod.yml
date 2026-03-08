@@ -1,4 +1,4 @@
-name: dms
+version: '3.8'
 
 services:
   redis:
@@ -37,7 +37,6 @@ services:
     volumes:
       - ./dms-api/serviceAccount.json:/app/dms-api/serviceAccount.json
     depends_on:
-      - db
       - redis
     restart: unless-stopped
 
@@ -47,7 +46,7 @@ services:
       dockerfile: dms-frontend/Dockerfile
     container_name: dms-frontend
     ports:
-      - '5173:5173'
+      - '80:5173'
     depends_on:
       - dms-api
     restart: unless-stopped

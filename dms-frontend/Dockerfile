@@ -21,12 +21,6 @@ ARG VITE_MODE=production
 
 RUN npm run build -- --mode $VITE_MODE
 
-FROM builder AS testrunner
-
-WORKDIR /app/dms-frontend
-
-CMD ["npm", "run", "test"]
-
 FROM nginxinc/nginx-unprivileged:alpine AS production
 
 WORKDIR /app/dms-frontend

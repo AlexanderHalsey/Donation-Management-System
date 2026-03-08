@@ -13,7 +13,8 @@
     "dev": "concurrently \"npm run -w dms-api start:dev\" \"npm run -w dms-api start:worker\" \"wait-on http://localhost:3000/api && npm run -w dms-frontend dev\"",
     "build": "npm run -w dms-api build && npm run -w dms-frontend build",
     "lint": "npm run -w dms-api lint && npm run -w dms-frontend lint",
-    "test": "npm run -w dms-api test && npm run -w dms-frontend test:e2e"
+    "test": "npm run -w dms-api test && npm run -w dms-frontend test:e2e",
+    "test:prod": "npm run -w dms-api test:prod && npm run -w dms-frontend test:e2e:prod"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

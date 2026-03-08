@@ -1,4 +1,4 @@
-name: dms-demo
+version: '3.8'
 
 services:
   redis:
@@ -37,7 +37,6 @@ services:
     volumes:
       - ./dms-api/serviceAccount.demo.json:/app/dms-api/serviceAccount.demo.json
     depends_on:
-      - db
       - redis
     restart: unless-stopped
 

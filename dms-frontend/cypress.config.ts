@@ -1,4 +1,8 @@
 import { defineConfig } from 'cypress'
+import dotenv from 'dotenv'
+
+const envPath = process.env.CYPRESS_ENV_PATH || '.env'
+dotenv.config({ path: envPath })
 
 export default defineConfig({
   e2e: {
@@ -11,5 +15,8 @@ export default defineConfig({
       framework: 'vue',
       bundler: 'vite',
     },
+  },
+  env: {
+    VITE_MOCK_API_HOST: process.env.VITE_MOCK_API_HOST,
   },
 })
