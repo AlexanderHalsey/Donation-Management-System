@@ -46,7 +46,7 @@ services:
       dockerfile: dms-frontend/Dockerfile
     container_name: dms-frontend
     ports:
-      - '80:5173'
+      - '5173:5173'
     depends_on:
       - dms-api
     restart: unless-stopped
