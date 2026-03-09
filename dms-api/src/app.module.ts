@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { PassportModule } from '@nestjs/passport'
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino'
 import { CacheModule } from '@nestjs/cache-manager'
+import { TerminusModule } from '@nestjs/terminus'
+import { HttpModule } from '@nestjs/axios'
 
 import {
   AuthController,
@@ -16,6 +18,7 @@ import {
   DonorSyncEventController,
   ExportController,
   FileController,
+  HealthController,
   OrganisationController,
   PaymentModeController,
   TaxReceiptController,
@@ -96,6 +99,8 @@ import {
       providers: [GCSService],
       useFactory: usePinoLoggerFactory,
     }),
+    TerminusModule.forRoot(),
+    HttpModule,
   ],
   controllers: [
     AuthController,
@@ -107,6 +112,7 @@ import {
     DonorSyncEventController,
     ExportController,
     FileController,
+    HealthController,
     OrganisationController,
     PaymentModeController,
     TaxReceiptController,

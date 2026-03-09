@@ -3,6 +3,8 @@ FROM node:25-alpine AS base
 ENV CI=1
 WORKDIR /app
 
+RUN apk add --no-cache curl
+
 RUN addgroup -g 1001 -S dms && \
   adduser -S dms -u 1001 -G dms && \
   mkdir -p /home/dms && \
