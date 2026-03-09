@@ -39,6 +39,7 @@ import {
 import { DonorSyncConsumer, EmailConsumer, TaxReceiptConsumer } from '@/infrastructure/consumers'
 
 import {
+  DbBackupTask,
   DonationAssetTypeCleanupTask,
   DonationMethodCleanupTask,
   DonationTypeCleanupTask,
@@ -75,6 +76,7 @@ import {
   ],
   providers: [
     BullMQService,
+    DbBackupTask,
     DonationAssetTypeCleanupTask,
     DonationAssetTypeService,
     DonationMethodCleanupTask,

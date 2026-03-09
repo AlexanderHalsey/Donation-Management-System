@@ -1,3 +1,4 @@
+export * from './dbBackup.task'
 export * from './donationAssetTypeCleanup.task'
 export * from './donationMethodCleanup.task'
 export * from './donationTypeCleanup.task'

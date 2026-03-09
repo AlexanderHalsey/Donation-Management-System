@@ -46,6 +46,7 @@ jobs:
           echo 'LOGTAIL_INGESTING_HOST=${{ secrets.LOGTAIL_INGESTING_HOST }}' >> ${{ github.workspace }}/dms-api/.env.prod
           echo 'GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}' >> ${{ github.workspace }}/dms-api/.env.prod
           echo 'GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}' >> ${{ github.workspace }}/dms-api/.env.prod
+          echo 'GCS_BACKUP_BUCKET_NAME=${{ secrets.GCS_BACKUP_BUCKET_NAME }}' >> ${{ github.workspace }}/dms-api/.env.prod
         shell: bash
         
       - name: Build frontend .env.prod file
