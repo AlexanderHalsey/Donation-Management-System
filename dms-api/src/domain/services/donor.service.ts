@@ -163,4 +163,15 @@ export class DonorService {
     )
     await this.cacheManager.del('donor-refs')
   }
+
+  async cleanupNonAttachedDisabled(): Promise<void> {
+    const deletedDonors = await this.prisma.donor.deleteMany({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+
+    this.logger.log(`Cleaned up ${deletedDonors.count} non-attached disabled donors`)
+  }
 }

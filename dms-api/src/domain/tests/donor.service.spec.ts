@@ -160,4 +160,17 @@ describe('DonorService', () => {
       data: { donorId: 'donor-id-456' },
     })
   })
+
+  it('should cleanup non-attached disabled donors', async () => {
+    prismaServiceMock.donor.deleteMany.mockResolvedValue({ count: 5 })
+
+    await donorService.cleanupNonAttachedDisabled()
+
+    expect(prismaServiceMock.donor.deleteMany).toHaveBeenCalledWith({
+      where: {
+        isDisabled: true,
+        donations: { none: {} },
+      },
+    })
+  })
 })
