@@ -31,6 +31,7 @@ jobs:
           echo 'DONOR_SYNC_USERNAME=${{ secrets.DONOR_SYNC_USERNAME }}' >> ${{ github.workspace }}/dms-api/.env.prod
           echo 'DONOR_SYNC_PASSWORD=${{ secrets.DONOR_SYNC_PASSWORD }}' >> ${{ github.workspace }}/dms-api/.env.prod
           echo 'EMAIL_ENABLED=${{ secrets.EMAIL_ENABLED }}' >> ${{ github.workspace }}/dms-api/.env.prod
+          echo 'EMAIL_TEST_MODE=${{ secrets.EMAIL_TEST_MODE }}' >> ${{ github.workspace }}/dms-api/.env.prod
           echo 'EMAIL_TEMPLATE_STORAGE_KEY=${{ secrets.EMAIL_TEMPLATE_STORAGE_KEY }}' >> ${{ github.workspace }}/dms-api/.env.prod
           echo 'SMTP_USER=${{ secrets.SMTP_USER }}' >> ${{ github.workspace }}/dms-api/.env.prod
           echo 'SMTP_SENDER=${{ secrets.SMTP_SENDER }}' >> ${{ github.workspace }}/dms-api/.env.prod

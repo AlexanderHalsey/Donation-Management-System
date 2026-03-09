@@ -43,7 +43,7 @@ export class SmtpService {
     try {
       const result = await this.transport.sendMail({
         from: `${sender} <${user}>`,
-        to,
+        to: this.configService.getOrThrow<string>('EMAIL_TEST_MODE') === 'true' ? user : to,
         replyTo,
         subject,
         html,
