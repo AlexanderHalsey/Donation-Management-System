@@ -303,139 +303,154 @@ export class TaxReceiptService {
     donationIds: string[]
     taxReceiptType: TaxReceiptType
   }): Promise<void> {
-    const [donations] = await this.prisma.$transaction([
-      this.prisma.donation.findMany({
-        where: { id: { in: donationIds } },
-        include: {
-          donor: true,
-          organisation: true,
-          donationMethod: true,
-          paymentMode: true,
-          donationAssetType: true,
-        },
-      }),
-      this.prisma.taxReceipt.update({
-        where: { id: taxReceiptId },
-        data: { status: 'PROCESSING' },
-      }),
-    ])
+    try {
+      const [donations] = await this.prisma.$transaction([
+        this.prisma.donation.findMany({
+          where: { id: { in: donationIds } },
+          include: {
+            donor: true,
+            organisation: true,
+            donationMethod: true,
+            paymentMode: true,
+            donationAssetType: true,
+          },
+        }),
+        this.prisma.taxReceipt.update({
+          where: { id: taxReceiptId },
+          data: { status: 'PROCESSING' },
+        }),
+      ])
 
-    this.logger.log(
-      `Processing tax receipt generation for tax receipt ID ${taxReceiptId} and job ID ${jobId}`,
-    )
-
-    const organisations = uniqBy(
-      donations.map((donation) => donation.organisation),
-      (org) => org.id,
-    )
-
-    if (organisations.length > 1) {
-      throw new WorkerJobProcessException({
-        code: 'MULTIPLE_ORGANISATIONS_FOUND',
-        message: `Donations must belong to the same organisation. Current organisation IDs: ${organisations.map((org) => org.id).join(', ')}`,
-      })
-    }
-
-    const organisation = organisations[0]
-
-    if (
-      [
-        'title',
-        'streetAddress',
-        'postalCode',
-        'city',
-        'object',
-        'objectDescription',
-        'signatoryName',
-        'signatoryPosition',
-        'logoId',
-        'signatureId',
-      ].some((field) => !organisation?.[field as keyof typeof organisation])
-    ) {
-      throw new WorkerJobProcessException({
-        code: 'INCOMPLETE_ORGANISATION_DETAILS',
-        message: 'Organisation details are incomplete for tax receipt generation',
-      })
-    }
-
-    if (donations.length < donationIds.length) {
-      throw new WorkerJobProcessException({
-        code: 'DONATIONS_NOT_FOUND',
-        message: 'One or more donations not found during tax receipt processing',
-      })
-    }
-
-    const [logo, signature] = await Promise.all([
-      this.getCachedFileBuffer(
-        organisation.logoId!,
-        `organisation_${organisation.id}_${organisation.updatedAt.toISOString().replace(/:/g, '-')}_logo`,
-      ),
-      this.getCachedFileBuffer(
-        organisation.signatureId!,
-        `organisation_${organisation.id}_${organisation.updatedAt.toISOString().replace(/:/g, '-')}_signature`,
-      ),
-    ])
-
-    const pdfBuffer = await this.taxReceiptGeneratorService.generateTaxReceipt({
-      taxReceiptNumber,
-      organisation: {
-        title: organisation.title!,
-        streetAddress: organisation.streetAddress!,
-        postalCode: organisation.postalCode!,
-        city: organisation.city!,
-        object: organisation.object!,
-        objectDescription: organisation.objectDescription!,
-        signatoryName: organisation.signatoryName!,
-        signatoryPosition: organisation.signatoryPosition!,
-        logo,
-        signature,
-      },
-      donor: donations[0].donor,
-      donations,
-      taxReceiptType,
-    })
-
-    this.logger.log(
-      `Generated PDF buffer for tax receipt ID ${taxReceiptId}, size: ${pdfBuffer.length} bytes`,
-    )
-
-    const fileId = await this.fileService.createFile({
-      name: `${taxReceiptNumber}.pdf`,
-      mimeType: 'application/pdf',
-      buffer: pdfBuffer,
-    })
-
-    await this.prisma.taxReceipt.update({
-      where: { id: taxReceiptId },
-      data: {
-        status: 'COMPLETED',
-        fileId,
-      },
-    })
-
-    this.logger.log(`Updated tax receipt ID ${taxReceiptId} with file ID ${fileId}`)
-
-    if (
-      donations[0].donor.email &&
-      taxReceiptType === 'ANNUAL' &&
-      this.configService.get<string>('EMAIL_ENABLED') === 'true'
-    ) {
       this.logger.log(
-        `Scheduling email job for tax receipt ID ${taxReceiptId} to be sent to ${donations[0].donor.email}`,
+        `Processing tax receipt generation for tax receipt ID ${taxReceiptId} and job ID ${jobId}`,
       )
-      try {
-        await this.bullMQService.addEmailJob({
-          to: donations[0].donor.email,
-          taxReceiptNumber,
-          fileId,
-        })
-      } catch (err) {
-        throw new WorkerJobScheduleException({
-          code: 'EMAIL_JOB_SCHEDULING_FAILED',
-          message: `Failed to schedule email job for tax receipt ID ${taxReceiptId} and donor email ${donations[0].donor.email}`,
-          stack: err instanceof Error ? err.stack : undefined,
+
+      const organisations = uniqBy(
+        donations.map((donation) => donation.organisation),
+        (org) => org.id,
+      )
+
+      if (organisations.length > 1) {
+        throw new WorkerJobProcessException({
+          code: 'MULTIPLE_ORGANISATIONS_FOUND',
+          message: `Donations must belong to the same organisation. Current organisation IDs: ${organisations.map((org) => org.id).join(', ')}`,
         })
       }
+
+      const organisation = organisations[0]
+
+      if (
+        [
+          'title',
+          'streetAddress',
+          'postalCode',
+          'city',
+          'object',
+          'objectDescription',
+          'signatoryName',
+          'signatoryPosition',
+          'logoId',
+          'signatureId',
+        ].some((field) => !organisation?.[field as keyof typeof organisation])
+      ) {
+        throw new WorkerJobProcessException({
+          code: 'INCOMPLETE_ORGANISATION_DETAILS',
+          message: 'Organisation details are incomplete for tax receipt generation',
+        })
+      }
+
+      if (donations.length < donationIds.length) {
+        throw new WorkerJobProcessException({
+          code: 'DONATIONS_NOT_FOUND',
+          message: 'One or more donations not found during tax receipt processing',
+        })
+      }
+
+      const [logo, signature] = await Promise.all([
+        this.getCachedFileBuffer(
+          organisation.logoId!,
+          `organisation_${organisation.id}_${organisation.updatedAt.toISOString().replace(/:/g, '-')}_logo`,
+        ),
+        this.getCachedFileBuffer(
+          organisation.signatureId!,
+          `organisation_${organisation.id}_${organisation.updatedAt.toISOString().replace(/:/g, '-')}_signature`,
+        ),
+      ])
+
+      const pdfBuffer = await this.taxReceiptGeneratorService.generateTaxReceipt({
+        taxReceiptNumber,
+        organisation: {
+          title: organisation.title!,
+          streetAddress: organisation.streetAddress!,
+          postalCode: organisation.postalCode!,
+          city: organisation.city!,
+          object: organisation.object!,
+          objectDescription: organisation.objectDescription!,
+          signatoryName: organisation.signatoryName!,
+          signatoryPosition: organisation.signatoryPosition!,
+          logo,
+          signature,
+        },
+        donor: donations[0].donor,
+        donations,
+        taxReceiptType,
+      })
+
+      this.logger.log(
+        `Generated PDF buffer for tax receipt ID ${taxReceiptId}, size: ${pdfBuffer.length} bytes`,
+      )
+
+      const fileId = await this.fileService.createFile({
+        name: `${taxReceiptNumber}.pdf`,
+        mimeType: 'application/pdf',
+        buffer: pdfBuffer,
+      })
+
+      await this.prisma.taxReceipt.update({
+        where: { id: taxReceiptId },
+        data: {
+          status: 'COMPLETED',
+          fileId,
+        },
+      })
+
+      this.logger.log(`Updated tax receipt ID ${taxReceiptId} with file ID ${fileId}`)
+
+      if (
+        donations[0].donor.email &&
+        taxReceiptType === 'ANNUAL' &&
+        this.configService.get<string>('EMAIL_ENABLED') === 'true'
+      ) {
+        this.logger.log(
+          `Scheduling email job for tax receipt ID ${taxReceiptId} to be sent to ${donations[0].donor.email}`,
+        )
+        try {
+          await this.bullMQService.addEmailJob({
+            to: donations[0].donor.email,
+            taxReceiptNumber,
+            fileId,
+          })
+        } catch (err) {
+          throw new WorkerJobScheduleException({
+            code: 'EMAIL_JOB_SCHEDULING_FAILED',
+            message: `Failed to schedule email job for tax receipt ID ${taxReceiptId} and donor email ${donations[0].donor.email}`,
+            stack: err instanceof Error ? err.stack : undefined,
+          })
+        }
+      }
+    } catch (error) {
+      this.logger.error('Error processing tax receipt generation job', {
+        message: error.message,
+        stack: error.stack,
+        chunk: { taxReceiptId, jobId },
+      })
+      this.logger.error('Memory usage at error time', {
+        rss: process.memoryUsage().rss,
+        heapTotal: process.memoryUsage().heapTotal,
+        heapUsed: process.memoryUsage().heapUsed,
+        external: process.memoryUsage().external,
+      })
+      throw error
     }
   }
 
