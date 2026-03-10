@@ -92,6 +92,7 @@ const createAnnualTaxReceipts = async (formData: AnnualTaxReceiptsFormData) => {
       organisationId: organisationId.value,
       formData,
     })
+    await annualTaxReceiptsStore.fetchEligibleTaxReceiptYearOrganisations()
   } finally {
     working.value = false
   }
