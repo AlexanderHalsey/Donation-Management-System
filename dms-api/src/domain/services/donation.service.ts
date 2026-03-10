@@ -369,12 +369,15 @@ export class DonationService {
 
   transformToDonationModel<
     T extends {
+      donor: { isDisabled: boolean }
       organisation: { isTaxReceiptEnabled: boolean }
       donationType: { isTaxReceiptEnabled: boolean }
     },
   >(donation: T): RecursivelyReplaceNullWithUndefined<T> & { isTaxReceiptEnabled: boolean } {
     const isTaxReceiptEnabled =
-      donation.organisation.isTaxReceiptEnabled && donation.donationType.isTaxReceiptEnabled
+      donation.organisation.isTaxReceiptEnabled &&
+      donation.donationType.isTaxReceiptEnabled &&
+      !donation.donor.isDisabled
     return {
       ...nullsToUndefined(donation),
       isTaxReceiptEnabled,

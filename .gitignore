@@ -55,8 +55,9 @@ lerna-debug.log*
 # service account keys
 dms-api/serviceAccount*.json
 
-# migrate-v1-data script
+# db scripts
 dms-api/prisma/migrateV1DataProd.ts
+dms-api/prisma/cleanDisabledDonors.ts
 
 # temp directory
 .temp
