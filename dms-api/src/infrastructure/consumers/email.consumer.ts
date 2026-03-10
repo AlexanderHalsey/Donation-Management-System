@@ -8,7 +8,7 @@ import { FileService } from '@/domain'
 import type { EmailQueueJob } from '@/infrastructure/types'
 import type { Job } from 'bullmq'
 
-@Processor(EMAIL_QUEUE)
+@Processor(EMAIL_QUEUE, { limiter: { max: 10, duration: 60 * 1000 } })
 export class EmailConsumer extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(EmailConsumer.name)
   private htmlTemplate: string | null = null

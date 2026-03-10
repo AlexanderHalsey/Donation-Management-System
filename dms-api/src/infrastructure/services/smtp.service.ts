@@ -1,15 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { createTransport } from 'nodemailer'
+import { createTransport, Transporter } from 'nodemailer'
 import type { Options as MailOptions } from 'nodemailer/lib/mailer'
 
 import { WorkerJobProcessException } from '@/domain/exceptions'
+import SMTPPool from 'nodemailer/lib/smtp-pool'
 
 @Injectable()
 export class SmtpService {
   private readonly logger = new Logger(SmtpService.name)
-  private readonly transport: ReturnType<typeof createTransport> | null = null
+  private readonly transport: Transporter<SMTPPool.SentMessageInfo> | null = null
 
   constructor(private readonly configService: ConfigService) {
     if (this.configService.get('EMAIL_ENABLED') === 'true') {
@@ -19,6 +20,10 @@ export class SmtpService {
           user: this.configService.getOrThrow<string>('SMTP_USER'),
           pass: this.configService.getOrThrow<string>('SMTP_PASS'),
         },
+        pool: true,
+        maxConnections: 1,
+        maxMessages: 5,
+        rateLimit: 5,
       })
     }
   }
