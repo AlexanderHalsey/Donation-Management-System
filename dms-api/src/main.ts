@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useLogger(app.get(Logger))
   app.flushLogs()
 
-  app.use('/donor-sync-events', json({ limit: '500mb' /* For send all function */ }))
+  app.use(/^\/(api\/)?donor-sync-events/, json({ limit: '500mb' /* For send all function */ }))
   app.use(json({ limit: '100kb' }))
 
   app.useGlobalPipes(
