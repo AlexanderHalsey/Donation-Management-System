@@ -17,11 +17,14 @@ describe('Annual Tax Receipt Create', () => {
       .should('contain.text', 'Organisation : Organisation 1')
     cy.get('[data-cy=eligible-donor-row]').should('have.length', 15)
     cy.get('[data-cy=expand-collapse-all-button]').click()
-    const rowsToCheck = [0, 7, 14]
-    rowsToCheck.forEach((rowIndex) => {
-      const donorNumber = (rowIndex + 1) * 2 - 1
+    const rowsToCheck = [
+      { index: 0, number: 1 },
+      { index: 7, number: 23 },
+      { index: 14, number: 9 },
+    ]
+    rowsToCheck.forEach(({ index, number: donorNumber }) => {
       cy.get('[data-cy=eligible-donor-row]')
-        .eq(rowIndex)
+        .eq(index)
         .within(() => {
           cy.get('td')
             .eq(1)
@@ -29,16 +32,16 @@ describe('Annual Tax Receipt Create', () => {
           cy.get('td').eq(2).should('contain.text', `donor${donorNumber}@example.com`)
           cy.get('td')
             .eq(3)
-            .should('contain.text', donorNumber === 1 ? 4 : 3)
+            .should('contain.text', donorNumber === 1 ? 4 : donorNumber === 23 ? 3 : 4)
           cy.get('td')
             .eq(4)
             .should(
               'contain.text',
-              `${donorNumber === 1 ? '4' : donorNumber === 15 ? '15' : '27'}0,00 €`,
+              `${donorNumber === 1 ? '4' : donorNumber === 23 ? '9' : '36'}0,00 €`,
             )
         })
       cy.get('[data-cy=donor-address-card]')
-        .eq(rowIndex)
+        .eq(index)
         .within(() => {
           cy.get('.titled-component').eq(0).should('contain.text', `123 Main St Apt ${donorNumber}`)
           cy.get('.titled-component').eq(1).should('contain.text', `Suite ${donorNumber}`)
@@ -48,9 +51,9 @@ describe('Annual Tax Receipt Create', () => {
           cy.get('.titled-component').eq(5).should('contain.text', `Country ${donorNumber}`)
         })
       cy.get('[data-cy=donation-table]')
-        .eq(rowIndex)
+        .eq(index)
         .within(() => {
-          cy.get('tbody tr').should('have.length', donorNumber === 1 ? 4 : 3)
+          cy.get('tbody tr').should('have.length', donorNumber === 23 ? 3 : 4)
         })
     })
   })

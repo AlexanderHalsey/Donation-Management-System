@@ -1,7 +1,7 @@
 <template>
   <div>
     <Table
-      :rows="eligibleDonors"
+      :rows="sortedDonors"
       row-key="id"
       :loading="loading"
       :rows-per-page-options="[0]"
@@ -174,6 +174,10 @@ const props = defineProps({
     default: undefined,
   },
 })
+
+const sortedDonors = computed(() =>
+  props.eligibleDonors.slice().sort((a, b) => a.lastName.localeCompare(b.lastName)),
+)
 
 const { t } = useI18n()
 
