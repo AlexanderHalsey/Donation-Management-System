@@ -173,6 +173,10 @@ const props = defineProps({
     type: Boolean,
     default: undefined,
   },
+  atLeastOneDonorInListIsDisabled: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const sortedDonors = computed(() =>
@@ -245,7 +249,11 @@ const selectedEligibleDonors = computed(() =>
   props.eligibleDonors.filter((eligibleDonor) => donorIds.value.includes(eligibleDonor.id)),
 )
 
-const errorMessage = computed(() => errors.value.donorIds)
+const errorMessage = computed(() =>
+  props.atLeastOneDonorInListIsDisabled
+    ? t('errors.atLeastOneDonorInListIsDisabled')
+    : errors.value.donorIds,
+)
 
 const validate = handleSubmit(() => {
   annualTaxReceiptsDialog.value?.open()

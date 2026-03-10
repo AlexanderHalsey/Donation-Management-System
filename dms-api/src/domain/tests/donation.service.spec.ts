@@ -94,7 +94,6 @@ describe('DonationService', () => {
         select: { donatedAt: true, organisation: { select: { id: true } } },
         where: expect.objectContaining({
           taxReceiptId: null,
-          donor: { isDisabled: false },
           organisation: { isTaxReceiptEnabled: true },
           donationType: { isTaxReceiptEnabled: true },
           donatedAt: expect.any(Object),
@@ -155,7 +154,6 @@ describe('DonationService', () => {
         omit: expect.any(Object),
         where: expect.objectContaining({
           taxReceiptId: null,
-          donor: { isDisabled: false },
           organisation: { isTaxReceiptEnabled: true },
           donationType: { isTaxReceiptEnabled: true },
           organisationId,

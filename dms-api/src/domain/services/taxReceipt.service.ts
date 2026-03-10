@@ -34,7 +34,6 @@ export const getTaxReceiptYearEnd = (year: number) => `${year}-12-31T23:59:59.99
 
 export const ELIGIBLE_TAX_RECEIPT_DONATION_FILTER = {
   taxReceiptId: null,
-  donor: { isDisabled: false },
   organisation: { isTaxReceiptEnabled: true },
   donationType: { isTaxReceiptEnabled: true },
 } as const
@@ -136,8 +135,15 @@ export class TaxReceiptService {
         ...ELIGIBLE_TAX_RECEIPT_DONATION_FILTER,
         id: donationId,
       },
-      select: { donor: { select: { id: true } } },
+      select: { donor: { select: { id: true, isDisabled: true } } },
     })
+
+    if (donation.donor.isDisabled) {
+      throw new BadRequestException({
+        code: 'DONOR_DISABLED',
+        message: `Tax receipt cannot be generated for donation ID ${donationId} because the donor is disabled`,
+      })
+    }
 
     const { id: taxReceiptId, receiptNumber: taxReceiptNumber } = await this.prisma.$transaction(
       async (tx) => {
@@ -221,6 +227,14 @@ export class TaxReceiptService {
         },
       },
     })
+
+    if (donors.some((donor) => donor.isDisabled)) {
+      const disabledDonorIds = donors.filter((donor) => donor.isDisabled).map((donor) => donor.id)
+      throw new BadRequestException({
+        code: 'DONOR_DISABLED',
+        message: `Tax receipts cannot be generated for donor IDs ${disabledDonorIds.join(', ')} because they are disabled`,
+      })
+    }
 
     const taxReceipts = await this.prisma.$transaction(async (tx) => {
       donors.forEach((donor) => {

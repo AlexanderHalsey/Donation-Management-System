@@ -44,6 +44,7 @@ type Common = {
 
 type Errors = {
   atLeastOneDonorMustBeSelected: string
+  atLeastOneDonorInListIsDisabled: string
   donationAssetTypeAlreadyExists: string
   donationMethodAlreadyExists: string
   donationTypeAlreadyExists: string

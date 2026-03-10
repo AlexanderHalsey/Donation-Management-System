@@ -43,6 +43,7 @@
   },
   "errors": {
     "atLeastOneDonorMustBeSelected": "Sélectionnez au moins un donateur",
+    "atLeastOneDonorInListIsDisabled": "Au moins un des donateurs de la liste est désactivé. Veuillez prendre les mesures appropriées pour continuer.",
     "donationAssetTypeAlreadyExists": "Une nature du don avec ce nom existe déjà.",
     "donationMethodAlreadyExists": "Une forme de don avec ce nom existe déjà.",
     "donationTypeAlreadyExists": "Un type de don avec ce nom existe déjà.",

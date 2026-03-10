@@ -128,6 +128,31 @@ describe('TaxReceiptService', () => {
         return cb(prismaServiceMock)
       })
     })
+
+    it('should throw error if donation donor is disabled', async () => {
+      const donationId = 'donation-1'
+      const donorId = 'donor-1'
+
+      const mockDonation = mockDeep<
+        Donation & {
+          organisation: { isTaxReceiptEnabled: boolean }
+          donationType: { isTaxReceiptEnabled: boolean }
+          donor: Donor
+        }
+      >({
+        id: donationId,
+        organisation: { isTaxReceiptEnabled: true },
+        donationType: { isTaxReceiptEnabled: true },
+        donor: { id: donorId, isDisabled: true },
+        taxReceiptId: null,
+      })
+      prismaServiceMock.donation.findUniqueOrThrow.mockResolvedValueOnce(mockDonation)
+
+      await expect(taxReceiptService.createIndividualTaxReceipt({ donationId })).rejects.toThrow(
+        'Tax receipt cannot be generated for donation ID donation-1 because the donor is disabled',
+      )
+    })
+
     it('creates individual tax receipt successfully', async () => {
       const donationId = 'donation-1'
       const donorId = 'donor-1'
@@ -235,6 +260,26 @@ describe('TaxReceiptService', () => {
       })
     })
 
+    it('throws error if donor is disabled', async () => {
+      const organisationId = 'org-1'
+      const donorIds = ['donor-1']
+      const year = 2024
+
+      const mockDonor = mockDeep<Donor & { donations: Array<Donation> }>({
+        id: 'donor-1',
+        isDisabled: true,
+        donations: [{ id: 'donation-1' }],
+      })
+
+      prismaServiceMock.donor.findMany.mockResolvedValueOnce([mockDonor])
+
+      await expect(
+        taxReceiptService.createAnnualTaxReceipts({ organisationId, donorIds, year }),
+      ).rejects.toThrow(
+        `Tax receipts cannot be generated for donor IDs donor-1 because they are disabled`,
+      )
+    })
+
     it('throws error if no donations found for donor', async () => {
       const organisationId = 'org-1'
       const donorIds = ['donor-1']
@@ -306,7 +351,6 @@ describe('TaxReceiptService', () => {
               taxReceiptId: null,
               organisation: { isTaxReceiptEnabled: true },
               donationType: { isTaxReceiptEnabled: true },
-              donor: { isDisabled: false },
               organisationId,
               donatedAt: {
                 gte: `${year}-01-01T00:00:00.000Z`,

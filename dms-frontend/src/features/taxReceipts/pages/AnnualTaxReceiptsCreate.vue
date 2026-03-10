@@ -10,6 +10,7 @@
         color="primary"
         icon="add"
         @click="annualTaxReceiptsForm?.validate()"
+        :disabled="atLeastOneDonorInListIsDisabled"
         data-cy="create-annual-tax-receipts-button"
       >
         {{ t('actions.create') }}
@@ -26,6 +27,7 @@
       ref="annualTaxReceiptsForm"
       :eligibleDonors="eligibleDonors"
       :organisations="organisationRefs"
+      :at-least-one-donor-in-list-is-disabled="atLeastOneDonorInListIsDisabled"
       :loading="working"
       data-cy="annual-tax-receipts-form"
       @submit="createAnnualTaxReceipts"
@@ -79,6 +81,9 @@ const organisation = computed(() =>
   organisationRefs.value.find((org) => org.id === organisationId.value),
 )
 const eligibleDonors = computed(() => annualTaxReceiptsStore.eligibleTaxReceiptDonors)
+const atLeastOneDonorInListIsDisabled = computed(() =>
+  eligibleDonors.value.some((donor) => donor.isDisabled),
+)
 const annualTaxReceiptsForm = ref<InstanceType<typeof AnnualTaxReceiptsForm> | null>(null)
 const formErrorMessage = computed(() => annualTaxReceiptsForm.value?.errorMessage)
 const loading = ref(true)

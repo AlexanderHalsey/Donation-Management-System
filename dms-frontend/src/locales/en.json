@@ -43,6 +43,7 @@
   },
   "errors": {
     "atLeastOneDonorMustBeSelected": "Select at least one donor",
+    "atLeastOneDonorInListIsDisabled": "At least one of the donors in the list is disabled. Please take appropriate action to continue.",
     "donationAssetTypeAlreadyExists": "A donation asset type with this name already exists.",
     "donationMethodAlreadyExists": "A donation method with this name already exists.",
     "donationTypeAlreadyExists": "A donation type with this name already exists.",
