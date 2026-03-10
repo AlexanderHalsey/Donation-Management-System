@@ -287,6 +287,8 @@ export class TaxReceiptService {
       })
     }
 
+    this.cacheManager.del('eligible-year-organisations')
+
     return { taxReceiptIds: taxReceipts.map((tr) => tr.id) }
   }
 
