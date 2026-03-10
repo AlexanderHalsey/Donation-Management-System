@@ -126,7 +126,7 @@ describe('DonorService', () => {
         isDisabled: false,
       }),
     ]
-    const mockDonationsToUpdate = [
+    const mockForeignTablesToUpdate = [
       {
         oldDonorExternalId: 123,
         newDonorExternalId: 456,
@@ -140,7 +140,7 @@ describe('DonorService', () => {
 
     await donorService.synchronizeDonors({
       toUpsert: mockDonors,
-      donationsToUpdate: mockDonationsToUpdate,
+      foreignTablesToUpdate: mockForeignTablesToUpdate,
     })
 
     expect(prismaServiceMock.$transaction).toHaveBeenCalledTimes(1)
@@ -156,6 +156,10 @@ describe('DonorService', () => {
       update: mockDonors[1],
     })
     expect(prismaServiceMock.donation.updateMany).toHaveBeenCalledWith({
+      where: { donor: { externalId: 123 } },
+      data: { donorId: 'donor-id-456' },
+    })
+    expect(prismaServiceMock.taxReceipt.updateMany).toHaveBeenCalledWith({
       where: { donor: { externalId: 123 } },
       data: { donorId: 'donor-id-456' },
     })

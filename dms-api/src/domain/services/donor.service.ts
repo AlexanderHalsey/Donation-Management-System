@@ -129,10 +129,10 @@ export class DonorService {
 
   async synchronizeDonors({
     toUpsert,
-    donationsToUpdate,
+    foreignTablesToUpdate,
   }: {
     toUpsert: DonorSyncProfile[]
-    donationsToUpdate: { oldDonorExternalId: number; newDonorExternalId: number }[]
+    foreignTablesToUpdate: { oldDonorExternalId: number; newDonorExternalId: number }[]
   }): Promise<void> {
     await this.prisma.$transaction(
       async (tx) => {
@@ -143,13 +143,17 @@ export class DonorService {
             update: donor,
           })
         }
-        for (const { oldDonorExternalId, newDonorExternalId } of donationsToUpdate) {
+        for (const { oldDonorExternalId, newDonorExternalId } of foreignTablesToUpdate) {
           const { id: newDonorId } = await tx.donor.findUniqueOrThrow({
             where: { externalId: newDonorExternalId },
             select: { id: true },
           })
 
           await tx.donation.updateMany({
+            where: { donor: { externalId: oldDonorExternalId } },
+            data: { donorId: newDonorId },
+          })
+          await tx.taxReceipt.updateMany({
             where: { donor: { externalId: oldDonorExternalId } },
             data: { donorId: newDonorId },
           })

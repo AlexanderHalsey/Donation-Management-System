@@ -119,7 +119,7 @@ describe('DonorSyncConsumer', () => {
             isFacilitator: false,
           },
         ],
-        donationsToUpdate: [],
+        foreignTablesToUpdate: [],
       })
       expect(donorSyncEventServiceMock.markAsCompletedJob).toHaveBeenCalledWith({
         donorSyncEventIds,
@@ -169,7 +169,7 @@ describe('DonorSyncConsumer', () => {
             isFacilitator: false,
           },
         ],
-        donationsToUpdate: [],
+        foreignTablesToUpdate: [],
       })
     })
 
@@ -237,7 +237,7 @@ describe('DonorSyncConsumer', () => {
             isFacilitator: false,
           },
         ],
-        donationsToUpdate: [
+        foreignTablesToUpdate: [
           {
             oldDonorExternalId: 456,
             newDonorExternalId: 123,

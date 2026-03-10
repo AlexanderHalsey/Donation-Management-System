@@ -38,7 +38,7 @@ export class DonorSyncConsumer extends WorkerHost {
     }
 
     const toUpsert: DonorSyncProfile[] = []
-    const donationsToUpdate: { oldDonorExternalId: number; newDonorExternalId: number }[] = []
+    const foreignTablesToUpdate: { oldDonorExternalId: number; newDonorExternalId: number }[] = []
     for (const donorSyncEvent of donorSyncEvents) {
       if (donorSyncEvent.eventType === 'MERGE') {
         const payload = TransformedMergedProfileSchema.parse(donorSyncEvent.payload)
@@ -49,7 +49,7 @@ export class DonorSyncConsumer extends WorkerHost {
         toUpsert.push({ ...omit(mergedProfile, ['mergeStatus']) })
         toUpsert.push({ ...omit(deletedProfile, ['mergeStatus']), isDisabled: true })
 
-        donationsToUpdate.push({
+        foreignTablesToUpdate.push({
           oldDonorExternalId: deletedProfile.externalId,
           newDonorExternalId: mergedProfile.externalId,
         })
@@ -61,7 +61,7 @@ export class DonorSyncConsumer extends WorkerHost {
       }
     }
 
-    await this.donorService.synchronizeDonors({ toUpsert, donationsToUpdate })
+    await this.donorService.synchronizeDonors({ toUpsert, foreignTablesToUpdate })
     await this.donorSyncEventService.markAsCompletedJob({ jobId: id!, donorSyncEventIds })
   }
 
