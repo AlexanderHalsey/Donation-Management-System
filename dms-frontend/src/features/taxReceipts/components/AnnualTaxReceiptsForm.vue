@@ -64,7 +64,7 @@
               :model-value="donorIds.includes(props.row.id)"
               @update:model-value="setFieldValue('donorIds', xor(donorIds, [props.row.id]))"
           /></QTd>
-          <QTd>{{ getDonorFullName(props.row) }}</QTd>
+          <QTd><DonorLink :donor="props.row" /></QTd>
           <QTd :class="props.row.email ? '' : 'text-red-6'">{{
             props.row.email ?? t('placeholders.thisDonatorHasNoEmail')
           }}</QTd>
@@ -150,7 +150,7 @@ import FormattedDate from '@/components/FormattedDate.vue'
 
 import AnnualTaxReceiptsDialog from './AnnualTaxReceiptsDialog.vue'
 import { OrganisationTag } from '@/features/organisations'
-import { DonorAddressCard, getDonorFullName } from '@/features/donors'
+import { DonorAddressCard, DonorLink } from '@/features/donors'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
