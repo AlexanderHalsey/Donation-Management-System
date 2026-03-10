@@ -22,9 +22,9 @@ export class TaxReceiptConsumer extends WorkerHost {
         await this.taxReceiptService.processTaxReceiptGenerationJob({ ...job.data, jobId: job.id! })
         break
       case 'GENERATE_BATCH':
-        job.data.forEach(async (data) => {
+        for (const data of job.data) {
           await this.taxReceiptService.processTaxReceiptGenerationJob({ ...data, jobId: job.id! })
-        })
+        }
         break
       case 'RETRY':
         await this.taxReceiptService.processTaxReceiptGenerationJob({ ...job.data, jobId: job.id! })
