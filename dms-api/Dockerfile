@@ -4,6 +4,7 @@ ENV CI=1
 WORKDIR /app
 
 RUN apk add --no-cache curl
+RUN apk add --no-cache postgresql-client
 
 RUN addgroup -g 1001 -S dms && \
   adduser -S dms -u 1001 -G dms && \
