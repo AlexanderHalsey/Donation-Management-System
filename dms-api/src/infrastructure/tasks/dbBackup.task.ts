@@ -23,17 +23,8 @@ export class DbBackupTask {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const backupName = `db-backup-${timestamp}.dump`
     try {
-      const dbUrl = this.configService.getOrThrow<string>('DATABASE_URL')
-
-      const match = dbUrl.match(/^postgres:\/\/(.*?):(.*?)@(.*?):(.*?)\/(.*?)$/)
-      if (!match) throw new Error('DATABASE_URL format invalid')
-
-      const [_, user, password, host, port, dbname] = match
-
-      execSync(
-        `PGPASSWORD="${password}" pg_dump -h ${host} -p ${port} -U ${user} -d ${dbname} -F c -f "${backupName}"`,
-      )
-
+      const dbUrl = new URL(this.configService.getOrThrow<string>('DATABASE_URL'))
+      execSync(`pg_dump -d "${dbUrl}" -F c -f "${backupName}"`)
       await this.bucket.file(backupName).save(fs.readFileSync(backupName), {
         validation: 'md5',
         contentType: 'application/octet-stream',
