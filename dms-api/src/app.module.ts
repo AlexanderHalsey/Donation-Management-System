@@ -6,7 +6,6 @@ import { PassportModule } from '@nestjs/passport'
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino'
 import { CacheModule } from '@nestjs/cache-manager'
 import { TerminusModule } from '@nestjs/terminus'
-import { HttpModule } from '@nestjs/axios'
 
 import {
   AuthController,
@@ -100,7 +99,6 @@ import {
       useFactory: usePinoLoggerFactory,
     }),
     TerminusModule.forRoot(),
-    HttpModule,
   ],
   controllers: [
     AuthController,

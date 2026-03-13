@@ -1,29 +1,26 @@
 import { Controller, Get, Inject, InternalServerErrorException } from '@nestjs/common'
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import { HealthCheckService, HealthCheck, HealthIndicatorResult } from '@nestjs/terminus'
-import { PrismaHealthIndicator, HttpHealthIndicator } from '@nestjs/terminus'
+import { PrismaHealthIndicator } from '@nestjs/terminus'
 import { PrismaService } from '@/infrastructure'
 
 const DB_TIMEOUT_MS = 5000
 const REDIS_TIMEOUT_MS = 3000
-const HTTP_TIMEOUT_MS = 5000
 const FAILURE_THRESHOLD = 3
 
-type ServiceHealthKey = 'redis' | 'database' | 'http'
+type ServiceHealthKey = 'redis' | 'database'
 
 @Controller('health')
 export class HealthController {
   private readonly failures: Record<ServiceHealthKey, number> = {
     redis: 0,
     database: 0,
-    http: 0,
   }
 
   constructor(
     private readonly health: HealthCheckService,
     private readonly prismaHealthIndicator: PrismaHealthIndicator,
     private readonly prisma: PrismaService,
-    private readonly httpHealthIndicator: HttpHealthIndicator,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -68,11 +65,6 @@ export class HealthController {
       this.withThreshold('database', () =>
         this.prismaHealthIndicator.pingCheck('database', this.prisma, {
           timeout: DB_TIMEOUT_MS,
-        }),
-      ),
-      this.withThreshold('http', () =>
-        this.httpHealthIndicator.pingCheck('http', 'https://1.1.1.1', {
-          timeout: HTTP_TIMEOUT_MS,
         }),
       ),
     ])
