@@ -5,6 +5,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { groupBy } from 'es-toolkit'
 
 import {
+  buildMockAdminCreateInput,
   buildMockDonationAssetTypeCreateManyInput,
   buildMockDonationCreateManyInput,
   buildMockDonationMethodCreateManyInput,
@@ -22,6 +23,9 @@ const prisma = new PrismaClient({
 })
 
 async function main() {
+  // username: admin, password: admin
+  await prisma.user.create({ data: buildMockAdminCreateInput() })
+
   const organisations: Organisation[] = []
   for (let i = 0; i < 3; i++) {
     organisations.push(
