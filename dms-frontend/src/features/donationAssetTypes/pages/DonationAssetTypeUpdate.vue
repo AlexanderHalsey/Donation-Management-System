@@ -59,11 +59,11 @@ const { t } = useI18n()
 const breadcrumbs: Breadcrumb[] = [
   {
     id: 'donation-asset-type-list',
-    label: 'Liste des natures de don',
+    label: t('labels.listOfDonationAssetTypes'),
     to: '/donation-asset-types',
     icon: 'payments',
   },
-  { id: 'donation-asset-type-update', label: 'Modifier la nature du don', icon: 'edit' },
+  { id: 'donation-asset-type-update', label: t('labels.updateDonationAssetType'), icon: 'edit' },
 ]
 
 const donationAssetTypeStore = useDonationAssetTypeStore()

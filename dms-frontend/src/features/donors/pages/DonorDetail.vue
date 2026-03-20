@@ -147,10 +147,10 @@ import type { Breadcrumb } from '@/types'
 const { t } = useI18n()
 
 const breadcrumbs = ref<Breadcrumb[]>([
-  { id: 'donor-list', label: 'Liste des donateurs', to: '/donors', icon: 'group' },
+  { id: 'donor-list', label: t('labels.listOfDonors'), to: '/donors', icon: 'group' },
 ])
 const title = computed(() => {
-  return donor.value ? getDonorFullName(donor.value) : 'Détails du donateur'
+  return donor.value ? getDonorFullName(donor.value) : t('labels.donorDetails')
 })
 const donorStore = useDonorStore()
 const route = useRoute()

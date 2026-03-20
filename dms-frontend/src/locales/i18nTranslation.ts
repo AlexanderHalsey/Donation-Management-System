@@ -142,6 +142,7 @@ type Labels = {
   updateDonor: string
   updateOrganisation: string
   updatePaymentMode: string
+  donorDetails: string
   username: string
   value: string
 }
