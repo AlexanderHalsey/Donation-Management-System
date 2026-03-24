@@ -6,7 +6,7 @@ import { PrismaService } from '@/infrastructure'
 
 const DB_TIMEOUT_MS = 5000
 const REDIS_TIMEOUT_MS = 3000
-const FAILURE_THRESHOLD = 3
+const FAILURE_THRESHOLD = 10
 
 type ServiceHealthKey = 'redis' | 'database'
 
