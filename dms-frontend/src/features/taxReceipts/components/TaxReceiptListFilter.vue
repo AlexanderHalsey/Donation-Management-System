@@ -82,7 +82,7 @@
             <template #option="scope">
               <QItem v-bind="scope.itemProps">
                 <QItemSection>
-                  <QItemLabel>{{ scope.opt.name }}</QItemLabel>
+                  <QItemLabel>{{ scope.opt.label }}</QItemLabel>
                 </QItemSection>
                 <QItemSection avatar>
                   <TaxReceiptStatusIcon :tax-receipt-status="scope.opt.value" />
