@@ -31,9 +31,6 @@ export const usePinoLoggerFactory = (
           options: { colorize: true },
         },
         redact: redactOptions,
-        autoLogging: {
-          ignore: (req) => req.url === '/health',
-        },
       },
     }
   }
@@ -44,9 +41,6 @@ export const usePinoLoggerFactory = (
     pinoHttp: [
       {
         redact: redactOptions,
-        autoLogging: {
-          ignore: (req) => req.url === '/health',
-        },
       },
       {
         write: (msg: string) => {
